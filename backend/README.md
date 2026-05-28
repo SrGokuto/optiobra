@@ -13,11 +13,14 @@
 | PUT    | /api/proyectos/{id}  | Modificar proyectos            | Proyectos               |
 | DELETE | /api/proyectos/{id}  | Eliminar proyectos             | Proyectos               |
 | GET    | /api/materiales      | Consultar materiales           | Materiales              |
-| POST   | /api/materiales      | Registrar materiales           | Materiales              |
-| PUT    | /api/materiales/{id} | Actualizar materiales          | Materiales              |
+| POST   | /api/materiales      | Añadir materiales              | Materiales              |
+| PUT    | /api/materiales/{id} | Editar materiales              | Materiales              |
+| DELETE | /api/materiales/{id} | Eliminar materiales            | Materiales              |
 | GET    | /api/trabajadores    | Consultar trabajadores         | Trabajadores            |
 | POST   | /api/trabajadores    | Asociar trabajadores a obra    | Trabajadores            |
 | GET    | /api/reportes        | Generar reportes               | Reportes                |
 | GET    | /api/presupuestos    | Consultar presupuestos         | Presupuestos            |
 | POST   | /api/estimaciones    | Generar estimaciones IA        | Inteligencia Artificial |
-| PUT    | /api/avance/{id}     | Actualizar avance de obra      | Avance de obra          |
+| POST   | /api/avance          | Crear avance de obra           | Avance de obra          |
+| PUT    | /api/avance/{id}     | Editar avance de obra          | Avance de obra          |
+| DELETE | /api/avance/{id}     | Borrar avance de obra          | Avance de obra          |
