@@ -1,0 +1,541 @@
+// materiales.component.scss
+
+$primary: #4caf50;
+$primary-dark: #388e3c;
+$text-dark: #1a1a2e;
+$text-muted: #6b7280;
+$border: #e5e7eb;
+$error: #ef4444;
+$white: #ffffff;
+$bg: #f3f4f6;
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin input-base {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid $border;
+  border-radius: 8px;
+  font-size: 14px;
+  color: $text-dark;
+  background: $white;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.12);
+  }
+
+  &.is-invalid {
+    border-color: $error;
+    box-shadow: 0 0 0 3px rgba($error, 0.1);
+  }
+}
+
+// ── Contenedor principal ────────────────────────────────────
+.materiales-container {
+  padding: 28px 32px;
+  background: $bg;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// ── Encabezado ──────────────────────────────────────────────
+.page-header {
+  @include flex-between;
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0 0 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .notification-btn {
+      position: relative;
+      cursor: pointer;
+      color: $text-muted;
+
+      .badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: $primary;
+        color: $white;
+        font-size: 10px;
+        font-weight: 700;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid $border;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+}
+
+// ── Barra de filtros ────────────────────────────────────────
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .search-wrapper {
+    flex: 1;
+    position: relative;
+    max-width: 380px;
+
+    svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-muted;
+    }
+
+    input {
+      @include input-base;
+      padding-left: 38px;
+    }
+  }
+
+  .select-wrapper {
+    position: relative;
+
+    select {
+      @include input-base;
+      appearance: none;
+      padding-right: 36px;
+      cursor: pointer;
+      min-width: 180px;
+    }
+
+    svg {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: $text-muted;
+    }
+  }
+
+  .btn-nuevo {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: $primary;
+    color: $white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: $primary-dark;
+    }
+  }
+}
+
+// ── Tabla ───────────────────────────────────────────────────
+.table-wrapper {
+  background: $white;
+  border-radius: 12px;
+  border: 1px solid $border;
+  overflow: hidden;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+      tr {
+        background: $bg;
+        border-bottom: 1px solid $border;
+
+        th {
+          padding: 14px 16px;
+          text-align: left;
+          font-size: 13px;
+          font-weight: 600;
+          color: $text-dark;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid $border;
+        transition: background 0.15s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f9fafb;
+        }
+
+        td {
+          padding: 14px 16px;
+          font-size: 14px;
+          color: $text-dark;
+        }
+
+        .acciones {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          .btn-editar,
+          .btn-eliminar {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+
+            &:hover {
+              opacity: 0.8;
+            }
+          }
+
+          .btn-editar {
+            background: #ecfdf5;
+            color: $primary;
+          }
+
+          .btn-eliminar {
+            background: #fef2f2;
+            color: $error;
+          }
+        }
+
+        .empty-state {
+          text-align: center;
+          color: $text-muted;
+          padding: 40px;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// ── Paginación ──────────────────────────────────────────────
+.pagination {
+  @include flex-between;
+
+  .pagination-info {
+    font-size: 13px;
+    color: $text-muted;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid $border;
+      border-radius: 6px;
+      background: $white;
+      color: $text-dark;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        border-color: $primary;
+        color: $primary;
+      }
+
+      &.active {
+        background: $primary;
+        border-color: $primary;
+        color: $white;
+        font-weight: 600;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// ── Modal overlay ───────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+// ── Modal ───────────────────────────────────────────────────
+.modal {
+  background: $white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &.modal-confirm {
+    max-width: 420px;
+  }
+
+  .modal-header {
+    @include flex-between;
+
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .btn-cerrar {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: $text-muted;
+      display: flex;
+      align-items: center;
+      padding: 0;
+
+      &:hover {
+        color: $text-dark;
+      }
+    }
+  }
+
+  .confirm-msg {
+    font-size: 14px;
+    color: $text-muted;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .btn-cancelar {
+      padding: 10px 20px;
+      border: 1px solid $border;
+      border-radius: 8px;
+      background: $white;
+      color: $text-dark;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: $bg;
+      }
+    }
+
+    .btn-guardar {
+      padding: 10px 20px;
+      background: $primary;
+      color: $white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+
+      &:hover:not(:disabled) {
+        background: $primary-dark;
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-eliminar-confirm {
+      padding: 10px 20px;
+      background: $error;
+      color: $white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+// ── Formulario dentro del modal ─────────────────────────────
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: $text-dark;
+  }
+
+  input[type='text'],
+  input[type='number'] {
+    @include input-base;
+  }
+
+  .select-wrapper {
+    position: relative;
+
+    select {
+      @include input-base;
+      appearance: none;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    svg {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: $text-muted;
+    }
+  }
+}
+
+.error-msg {
+  font-size: 12px;
+  color: $error;
+}
+
+// ── Spinner ─────────────────────────────────────────────────
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($white, 0.4);
+  border-top-color: $white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Responsive ──────────────────────────────────────────────
+@media (max-width: 768px) {
+  .materiales-container {
+    padding: 16px;
+  }
+
+  .filters-bar {
+    flex-wrap: wrap;
+
+    .search-wrapper {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .btn-nuevo {
+      margin-left: 0;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
