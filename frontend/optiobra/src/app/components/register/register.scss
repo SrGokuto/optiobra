@@ -1,10 +1,9 @@
-$primary: #4caf50;
-$primary-dark: #388e3c;
+$primary: #f4a300;
+$primary-dark: #dd9200;
 $dark-bg: #0d1b2a;
 $text-dark: #1a1a2e;
 $text-muted: #6b7280;
 $border: #d1d5db;
-$border-focus: #4caf50;
 $error: #ef4444;
 $white: #ffffff;
 $input-bg: #ffffff;
@@ -17,153 +16,174 @@ $input-bg: #ffffff;
 
 @mixin input-base {
   width: 100%;
-  padding: 10px 14px;
+  height: 52px;
+  padding: 0 16px;
   border: 1px solid $border;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   color: $text-dark;
   background: $input-bg;
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s ease;
 
   &::placeholder {
     color: #9ca3af;
   }
 
   &:focus {
-    border-color: $border-focus;
-    box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(244, 163, 0, 0.15);
   }
 
   &.is-invalid {
     border-color: $error;
-    box-shadow: 0 0 0 3px rgba($error, 0.1);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
   }
 }
 
 .register-container {
   display: flex;
   min-height: 100vh;
-  background: #f3f4f6;
+  background: #ffffff;
+}
 
-  .left-panel {
-    width: 280px;
-    min-width: 280px;
-    background: $dark-bg url('/assets/images/construction-bg.jpg') center/cover no-repeat;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding: 36px 28px;
+/* PANEL IZQUIERDO */
 
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba($dark-bg, 0.72) 0%,
-        rgba($dark-bg, 0.45) 100%
-      );
-      z-index: 0;
-    }
+.left-panel {
+  flex: 0 0 45%;
+  position: relative;
+  background: url("/optiobra.jpeg") center center/cover no-repeat;
 
-    .brand {
-      position: relative;
-      z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 
-      .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .brand-name {
-          font-size: 22px;
-          font-weight: 700;
-          color: $white;
-          letter-spacing: 0.3px;
-        }
-      }
-
-      .divider {
-        width: 36px;
-        height: 3px;
-        background: $primary;
-        border-radius: 2px;
-        margin: 16px 0 20px;
-      }
-
-      .brand-tagline {
-        color: rgba($white, 0.85);
-        font-size: 15px;
-        line-height: 1.65;
-        margin: 0;
-      }
-    }
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 16, 35, 0.75);
   }
 
-  .right-panel {
-    flex: 1;
-    @include flex-center;
-    padding: 32px 24px;
-    overflow-y: auto;
+  .brand {
+    position: relative;
+    z-index: 2;
+    color: $white;
 
-    .form-wrapper {
-      width: 100%;
-      max-width: 560px;
+    .logo {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
 
-      .form-header {
-        text-align: center;
-        margin-bottom: 28px;
-
-        h1 {
-          font-size: 24px;
-          font-weight: 700;
-          color: $text-dark;
-          margin: 0 0 6px;
-        }
-
-        p {
-          font-size: 14px;
-          color: $text-muted;
-          margin: 0;
-        }
+      .brand {
+        
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        display: block;
       }
     }
+
+    .brand-name {
+      font-size: 64px;
+      font-weight: 700;
+      color: $white;
+      margin-bottom: 15px;
+
+      span {
+        color: $primary;
+      }
+    }
+
+    .divider {
+      width: 70px;
+      height: 4px;
+      background: $primary;
+      border-radius: 3px;
+      margin: 20px auto;
+    }
+
+    .brand-tagline {
+      font-size: 24px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 350px;
+      margin: auto;
+    }
+  }
+}
+
+/* PANEL DERECHO */
+
+.right-panel {
+  flex: 1;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 700px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 35px;
+
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 18px;
+    color: $text-muted;
+    margin: 0;
   }
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 
   &.full-width {
     grid-column: 1 / -1;
   }
 
   label {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: $text-dark;
   }
 
-  input[type='text'],
-  input[type='email'],
-  input[type='tel'],
-  input[type='password'] {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"] {
     @include input-base;
   }
 
@@ -172,46 +192,22 @@ form {
 
     input {
       @include input-base;
-      padding-right: 42px;
+      padding-right: 45px;
     }
 
     .eye-btn {
       position: absolute;
-      right: 12px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      background: none;
+      background: transparent;
       border: none;
       cursor: pointer;
       color: $text-muted;
-      padding: 0;
-      display: flex;
-      align-items: center;
 
       &:hover {
         color: $primary;
       }
-    }
-  }
-
-  .select-wrapper {
-    position: relative;
-
-    select {
-      @include input-base;
-      appearance: none;
-      padding-right: 38px;
-      cursor: pointer;
-      background: $input-bg;
-    }
-
-    .select-arrow {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: $text-muted;
     }
   }
 }
@@ -219,101 +215,67 @@ form {
 .error-msg {
   font-size: 12px;
   color: $error;
-  margin-top: 2px;
 }
+
+/* CHECKBOX */
 
 .terms-row {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+}
 
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    user-select: none;
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
 
-    input[type='checkbox'] {
-      display: none;
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: $primary;
+  }
 
-      &:checked + .checkmark {
-        background: $primary;
-        border-color: $primary;
-
-        &::after {
-          opacity: 1;
-          transform: rotate(45deg) scale(1);
-        }
-      }
-    }
-
-    .checkmark {
-      width: 17px;
-      height: 17px;
-      min-width: 17px;
-      border: 2px solid $border;
-      border-radius: 4px;
-      background: $white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, border-color 0.2s;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        width: 5px;
-        height: 9px;
-        border: 2px solid $white;
-        border-top: none;
-        border-left: none;
-        top: 1px;
-        opacity: 0;
-        transform: rotate(45deg) scale(0.5);
-        transition: opacity 0.15s, transform 0.15s;
-      }
-    }
-
-    .terms-text {
-      font-size: 13px;
-      color: $text-dark;
-    }
+  .terms-text {
+    font-size: 14px;
+    color: $text-dark;
   }
 }
+
+/* LINKS */
 
 .link {
   color: $primary;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 
   &:hover {
     text-decoration: underline;
   }
 }
 
+/* BOTON */
+
 .btn-register {
   width: 100%;
-  padding: 13px;
-  background: $primary;
-  color: $white;
-  font-size: 15px;
-  font-weight: 600;
+  height: 55px;
   border: none;
   border-radius: 8px;
+  background: $primary;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
-  @include flex-center;
-  gap: 8px;
-  margin-top: 4px;
+  transition: 0.3s ease;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 
   &:hover:not(:disabled) {
     background: $primary-dark;
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.99);
   }
 
   &:disabled {
@@ -324,51 +286,87 @@ form {
   .loading-spinner {
     width: 18px;
     height: 18px;
-    border: 2px solid rgba($white, 0.4);
-    border-top-color: $white;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: white;
     border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+    animation: spin 0.8s linear infinite;
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+/* MENSAJES */
 
 .alert-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
   border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 13px;
+  padding: 12px;
   color: $error;
   text-align: center;
+  font-size: 14px;
 }
 
 .login-link {
   text-align: center;
-  font-size: 13px;
   color: $text-muted;
-  margin: 0;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
-@media (max-width: 768px) {
+/* SPINNER */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 992px) {
   .register-container {
     flex-direction: column;
+  }
 
-    .left-panel {
-      width: 100%;
-      min-width: unset;
-      padding: 28px 24px;
-      min-height: 160px;
+  .left-panel {
+    flex: none;
+    min-height: 280px;
+
+    .brand-name {
+      font-size: 42px;
     }
 
-    .right-panel {
-      padding: 28px 16px;
+    .brand-tagline {
+      font-size: 18px;
+    }
+  }
+
+  .right-panel {
+    padding: 30px 20px;
+  }
+
+  .form-header {
+    h1 {
+      font-size: 34px;
     }
   }
 
   .form-row {
     grid-template-columns: 1fr;
   }
+}
+.nombre-logo {
+  font-size: 64px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  text-align: center;
+  gap: 14px;
+}
+
+.blanco {
+  color: #ffffff;
+}
+
+.amarillo {
+  color: #f4a300;
 }

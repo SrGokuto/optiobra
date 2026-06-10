@@ -7,7 +7,7 @@ import {
   Material,
   MaterialPaginado,
   FiltroMaterial,
-} from '../models/material.model';
+} from '../Models/material';
 
 @Injectable({
   providedIn: 'root',
