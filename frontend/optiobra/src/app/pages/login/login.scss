@@ -1,0 +1,209 @@
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+
+.left-panel {
+  flex: 1;
+  position: relative;
+
+  background-image: url('/assets/fondo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 15, 35, 0.80);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+  color: white;
+}
+
+.icono-logo {
+  width: 130px;
+  margin-bottom: 10px;
+}
+
+.nombre-logo {
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.blanco {
+  color: white;
+}
+
+.amarillo {
+  color: #F29F05;
+}
+
+.slogan {
+  margin-top: 12px;
+  color: #e5e7eb;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.linea {
+  width: 70px;
+  height: 4px;
+  border-radius: 20px;
+  background: #F29F05;
+  margin-top: 20px;
+}
+
+
+.right-panel {
+  flex: 1;
+  background: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 40px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+}
+
+.login-card h2 {
+  text-align: center;
+  font-size: 34px;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.subtitulo {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.input-group input {
+  width: 100%;
+  height: 50px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  padding: 0 15px;
+  font-size: 15px;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #F29F05;
+}
+
+.forgot {
+  display: block;
+  text-align: center;
+  margin-bottom: 20px;
+
+  color: #F29F05;
+  text-decoration: none;
+}
+
+button {
+  width: 100%;
+  height: 50px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #F29F05;
+  color: white;
+
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #d88e04;
+}
+
+.register {
+  text-align: center;
+  margin-top: 20px;
+  color: #6b7280;
+}
+
+.register a {
+  color: #F29F05;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+
+@media (max-width: 768px) {
+
+  .login-container {
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .left-panel {
+    min-height: 300px;
+  }
+
+  .nombre-logo {
+    font-size: 42px;
+  }
+
+  .icono-logo {
+    width: 100px;
+  }
+
+  .right-panel {
+    padding: 20px;
+  }
+
+}
