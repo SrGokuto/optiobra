@@ -42,11 +42,11 @@ las ramas usaran nombres cortos y relacionados con la función desarrollada.
 
 ****
 ## Responsables del equipo
-| Integrante | Rol |
-| -------- | ------- |
-| Jeonardo Perche  | Backend |
-| Sara Martinez | Base de datos |
-| Mariana Valderrama | Documentación y pruebas |
-| Angelica Garcia | Frontend |
+| Integrante         | Rol                     | Descripción                                                                  |
+| ------------------ | ----------------------- | ---------------------------------------------------------------------------------------------
+| Jeonardo Perche    | Backend                 | Encargado del desarrollo de la lógica del sistema, creación de la API REST con Django y                                                       conexión con la base de datos.                               |
+| Sara Martinez      | Base de datos           | Responsable del diseño, creación y administración de la base de datos MariaDB y Supabase,                                                     garantizando el almacenamiento correcto de la información. |
+| Mariana Valderrama | Documentación y pruebas | Encargada de elaborar la documentación del proyecto, realizar pruebas funcionales y                                                           verificar el correcto funcionamiento del sistema.                |
+| Angelica Garcia    | Frontend                | Responsable del diseño y desarrollo de la interfaz gráfica del sistema utilizando Angular,                                                    TypeScript y TailwindCSS.                                 |
 
 ****

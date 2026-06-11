@@ -1,0 +1,153 @@
+<div class="dashboard">
+
+    <aside
+        class="sidebar"
+        [class.oculto]="!menuAbierto">
+
+        <div class="logo">
+
+            <img src="assets/Logo.png" alt="logo">
+
+            <span>OPTIOBRA</span>
+
+            <button
+                class="menu-btn"
+                (click)="toggleMenu()">
+                ☰
+            </button>
+
+        </div>
+
+        <ul>
+
+            <li>🏠 Dashboard</li>
+
+            <li>📁 Proyectos</li>
+
+            <li class="activo">
+                📦 Materiales
+            </li>
+
+            <li>📈 Avance de obra</li>
+
+            <li>👷 Trabajadores</li>
+
+            <li>📊 Reportes</li>
+
+            <li>👤 Usuarios</li>
+
+            <li>⚙️ Configuración</li>
+
+        </ul>
+
+        <div class="usuario">
+
+            <img
+                src="https://i.pravatar.cc/150"
+                alt="usuario">
+
+            <div>
+
+                <h4>Administrador</h4>
+
+                <small>admin@optiobra.com</small>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <button
+        *ngIf="!menuAbierto"
+        class="menu-fijo"
+        (click)="toggleMenu()">
+        ☰
+    </button>
+
+    <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+        <div class="header">
+
+            <div>
+
+                <h2>Materiales</h2>
+
+                <p>
+                    Gestiona los materiales de tus proyectos
+                </p>
+
+            </div>
+
+            <button class="btn-nuevo">
+                + Nuevo material
+            </button>
+
+        </div>
+
+        <div class="filtros">
+
+            <input
+                type="text"
+                placeholder="Buscar materiales...">
+
+            <select>
+                <option>Todos los proyectos</option>
+            </select>
+
+        </div>
+
+        <div class="tabla-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Proyecto</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr *ngFor="let material of materiales">
+
+                        <td>{{ material.id }}</td>
+                        <td>{{ material.nombre }}</td>
+                        <td>{{ material.categoria }}</td>
+                        <td>{{ material.unidad }}</td>
+                        <td>{{ material.cantidad }}</td>
+                        <td>{{ material.precio }}</td>
+                        <td>{{ material.proyecto }}</td>
+
+                        <td class="acciones">
+
+                            <button class="editar">
+                                Editar
+                            </button>
+
+                            <button class="eliminar">
+                                Eliminar
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+
+</div>
