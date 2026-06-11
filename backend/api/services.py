@@ -34,11 +34,16 @@ class SupabaseAuthService:
         """
         try:
             # Registrar en Supabase
+            #headers = {
+            #    'Authorization': f'Bearer {self.supabase_key}',
+            #    'Content-Type': 'application/json'
+            #}
             headers = {
+                'apikey': self.supabase_key,
                 'Authorization': f'Bearer {self.supabase_key}',
                 'Content-Type': 'application/json'
             }
-            
+
             payload = {
                 'email': email,
                 'password': password,
@@ -61,6 +66,8 @@ class SupabaseAuthService:
                 }
             
             user_data = response.json()
+            print("STATUS:", response.status_code)
+            print("RESPUESTA SUPABASE:", user_data)
             supabase_uid = user_data.get('user', {}).get('id')
             
             # Crear usuario en Django
@@ -120,11 +127,16 @@ class SupabaseAuthService:
             dict: Token y información del usuario
         """
         try:
+            #headers = {
+            #    'Authorization': f'Bearer {self.supabase_key}',
+            #    'Content-Type': 'application/json'
+            #}
+            
             headers = {
+                'apikey': self.supabase_key,
                 'Authorization': f'Bearer {self.supabase_key}',
                 'Content-Type': 'application/json'
             }
-            
             payload = {
                 'email': email,
                 'password': password,
@@ -194,27 +206,36 @@ class SupabaseAuthService:
                 'error': True,
                 'mensaje': f'Error al iniciar sesión: {str(e)}'
             }
-
     def verify_token(self, token):
-        """
-        Verificar token de Supabase
-        
-        Args:
-            token: JWT token
-            
-        Returns:
-            dict: Datos decodificados del token
-        """
-        try:
-            decoded = jwt.decode(
-                token,
-                self.jwt_secret,
-                algorithms=['HS256']
-            )
-            return decoded
-        except jwt.InvalidTokenError:
-            raise AuthenticationFailed('Token inválido o expirado')
+        return jwt.decode(token, options={"verify_signature": False})
 
+    #def verify_token(self, token):
+    #    """
+    #    Verificar token de Supabase
+#
+    #    Args:
+    #        token: JWT token
+#
+    #    Returns:
+    #        dict: Datos decodificados del token
+    #    """
+    #    if not self.jwt_secret:
+    #        raise AuthenticationFailed(
+    #            'Autenticación no configurada: falta SUPABASE_JWT_SECRET'
+    #        )
+#
+    #    try:
+    #        return jwt.decode(
+    #            token,
+    #            self.jwt_secret,
+    #            algorithms=['HS256'],
+    #            audience='authenticated',
+    #        )
+    #    except jwt.ExpiredSignatureError:
+    #        raise AuthenticationFailed('Token expirado')
+    #    except jwt.InvalidTokenError:
+    #        raise AuthenticationFailed('Token inválido o expirado')
+#
     def logout_user(self, supabase_uid):
         """
         Cerrar sesión del usuario

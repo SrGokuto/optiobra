@@ -147,6 +147,19 @@
   border-radius: 50%;
 }
 
+.usuario-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.usuario-info h4,
+.usuario-info small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* CONTENIDO */
 
 .contenido {
@@ -350,4 +363,122 @@ tr:hover {
   table {
     min-width: 650px;
   }
+}
+
+.alert-success,
+.alert-error {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.alert-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-filtrar,
+.btn-limpiar,
+.btn-guardar,
+.btn-cancelar,
+.btn-logout {
+  border: none;
+  border-radius: 6px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.btn-filtrar,
+.btn-guardar {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-limpiar,
+.btn-cancelar {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-logout {
+  margin-top: 10px;
+  width: 100%;
+  background: transparent;
+  color: #fca5a5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.form-panel input,
+.form-panel select,
+.form-panel textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.full-width {
+  display: block;
+  margin-top: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.estado-tabla {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.paginacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  color: #4b5563;
+}
+
+.paginacion button {
+  border: none;
+  background: #e5e7eb;
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.paginacion button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
