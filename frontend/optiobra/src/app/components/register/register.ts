@@ -84,17 +84,106 @@ export class RegisterComponent implements OnInit {
   isInvalid(controlName: string): boolean {
     const control = this.registerForm.get(controlName);
 
-    return !!(
-      control &&
-      control.invalid &&
-      (control.touched || control.dirty)
+    if (!control || !control.invalid) {
+      return false;
+    }
+
+    // Mostrar error si el campo está siendo escrito (dirty)
+    if (control.dirty) {
+      return true;
+    }
+
+    // O si algún campo del formulario está siendo escrito, mostrar todos los errores
+    const isFormBeingEdited = Object.keys(this.registerForm.controls).some(
+      key => this.registerForm.get(key)?.dirty
     );
+
+    return isFormBeingEdited || control.touched;
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.registerForm.get(controlName);
+
+    if (!control || !this.isInvalid(controlName)) {
+      return '';
+    }
+
+    const errors = control.errors;
+
+    if (!errors) {
+      return '';
+    }
+
+    switch (controlName) {
+      case 'firstName':
+        if (errors['required']) {
+          return 'El nombre es obligatorio.';
+        }
+        if (errors['minlength']) {
+          return 'El nombre debe tener al menos 2 caracteres.';
+        }
+        break;
+
+      case 'lastName':
+        if (errors['required']) {
+          return 'El apellido es obligatorio.';
+        }
+        if (errors['minlength']) {
+          return 'El apellido debe tener al menos 2 caracteres.';
+        }
+        break;
+
+      case 'email':
+        if (errors['required']) {
+          return 'El correo electrónico es obligatorio.';
+        }
+        if (errors['email']) {
+          return 'Ingresa un correo electrónico válido.';
+        }
+        break;
+
+      case 'password':
+        if (errors['required']) {
+          return 'La contraseña es obligatoria.';
+        }
+        if (errors['minlength']) {
+          return 'La contraseña debe tener mínimo 6 caracteres.';
+        }
+        break;
+
+      case 'confirmPassword':
+        if (errors['required']) {
+          return 'Debes confirmar tu contraseña.';
+        }
+        break;
+
+      case 'phone':
+        if (errors['required']) {
+          return 'El teléfono es obligatorio.';
+        }
+        if (errors['pattern']) {
+          return 'El teléfono solo puede contener números (7-15 dígitos).';
+        }
+        break;
+
+      case 'acceptTerms':
+        if (errors['required']) {
+          return 'Debes aceptar los términos y condiciones.';
+        }
+        break;
+
+      default:
+        return 'Este campo es inválido.';
+    }
+
+    return 'Este campo es inválido.';
   }
 
   get passwordMismatch(): boolean {
     return (
       this.registerForm.hasError('passwordsMismatch') &&
-      this.registerForm.get('confirmPassword')?.touched === true
+      (this.registerForm.get('confirmPassword')?.touched === true ||
+        this.registerForm.get('confirmPassword')?.dirty === true)
     );
   }
 
