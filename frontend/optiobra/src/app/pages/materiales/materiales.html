@@ -1,8 +1,6 @@
 <div class="dashboard">
 
-    <aside
-        class="sidebar"
-        [class.oculto]="!menuAbierto">
+    <aside class="sidebar" [class.oculto]="!menuAbierto">
 
         <div class="logo">
 
@@ -10,9 +8,7 @@
 
             <span>OPTIOBRA</span>
 
-            <button
-                class="menu-btn"
-                (click)="toggleMenu()">
+            <button class="menu-btn" (click)="toggleMenu()">
                 ☰
             </button>
 
@@ -42,9 +38,7 @@
 
         <div class="usuario">
 
-            <img
-                src="https://i.pravatar.cc/150"
-                alt="usuario">
+            <img src="https://i.pravatar.cc/150" alt="usuario">
 
             <div>
 
@@ -58,10 +52,7 @@
 
     </aside>
 
-    <button
-        *ngIf="!menuAbierto"
-        class="menu-fijo"
-        (click)="toggleMenu()">
+    <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
         ☰
     </button>
 
@@ -79,17 +70,17 @@
 
             </div>
 
-            <button class="btn-nuevo">
+            <button class="btn-nuevo" (click)="crearMaterial()">
+
                 + Nuevo material
+
             </button>
 
         </div>
 
         <div class="filtros">
 
-            <input
-                type="text"
-                placeholder="Buscar materiales...">
+            <input type="text" placeholder="Buscar materiales...">
 
             <select>
                 <option>Todos los proyectos</option>
@@ -130,12 +121,16 @@
 
                         <td class="acciones">
 
-                            <button class="editar">
+                            <button class="editar" (click)="editarMaterial(material)">
+
                                 Editar
+
                             </button>
 
-                            <button class="eliminar">
+                            <button class="eliminar" (click)="eliminarMaterial(material)">
+
                                 Eliminar
+
                             </button>
 
                         </td>

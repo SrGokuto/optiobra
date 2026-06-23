@@ -19,7 +19,7 @@
 
   </div>
 
-  
+
   <div class="right-panel">
     <div class="login-card">
       <h2>Bienvenido de nuevo</h2>
@@ -27,16 +27,18 @@
         Inicia sesión para continuar
       </p>
 
-      <form>
+      <form (ngSubmit)="iniciarSesion()">
 
         <div class="input-group">
           <label>Correo electrónico</label>
-          <input type="email" placeholder="ejemplo@correo.com">
+
+          <input type="email" placeholder="ejemplo@correo.com" [(ngModel)]="correo" name="correo">
         </div>
 
         <div class="input-group">
           <label>Contraseña</label>
-          <input type="password" placeholder="********">
+
+          <input type="password" placeholder="********" [(ngModel)]="password" name="password">
         </div>
 
         <a href="#" class="forgot">
