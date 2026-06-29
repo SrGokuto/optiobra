@@ -121,6 +121,19 @@
   border-radius:50%;
 }
 
+.usuario-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.usuario-info h4,
+.usuario-info small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* CONTENIDO */
 
 .contenido{

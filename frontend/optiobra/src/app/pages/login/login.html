@@ -16,7 +16,6 @@
     </div>
 
     <div class="line"></div>
-
   </div>
 
 
@@ -41,23 +40,23 @@
           <input type="password" placeholder="********" [(ngModel)]="password" name="password">
         </div>
 
-        <a href="#" class="forgot">
-          ¿Olvidaste tu contraseña?
-        </a>
+        @if (error) {
+          <p class="error-message">{{ error }}</p>
+        }
 
-        <button type="submit">
-          Iniciar sesión
+        <button type="submit" [disabled]="cargando">
+          @if (!cargando) {
+            <span>Iniciar sesión</span>
+          } @else {
+            <span>Iniciando...</span>
+          }
         </button>
 
         <p class="register">
           ¿No tienes cuenta?
-          <a href="#">Regístrate aquí</a>
+          <a routerLink="/register">Regístrate aquí</a>
         </p>
-
       </form>
-
     </div>
-
   </div>
-
 </div>

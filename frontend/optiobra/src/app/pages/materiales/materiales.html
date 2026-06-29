@@ -85,7 +85,21 @@
             <select>
                 <option>Todos los proyectos</option>
             </select>
+          </label>
 
+          <label>
+            Estado
+            <select [(ngModel)]="formulario.estado">
+              @for (estado of estados; track estado) {
+                <option [value]="estado">{{ estado }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Proveedor
+            <input type="text" [(ngModel)]="formulario.proveedor">
+          </label>
         </div>
 
         <div class="tabla-container">
@@ -141,8 +155,64 @@
 
             </table>
 
+        <div class="form-actions">
+          <button class="btn-guardar" [disabled]="guardando" (click)="guardarMaterial()">
+            {{ guardando ? 'Guardando...' : 'Guardar' }}
+          </button>
+          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
         </div>
+      </section>
+    }
 
-    </main>
+    <div class="tabla-container">
+      @if (cargando) {
+        <p class="estado-tabla">Cargando materiales...</p>
+      } @else if (materiales.length === 0) {
+        <p class="estado-tabla">No hay materiales para mostrar.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Código</th>
+              <th>Categoría</th>
+              <th>Unidad</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (material of materiales; track material.id) {
+              <tr>
+                <td>{{ material.id }}</td>
+                <td>{{ material.nombre }}</td>
+                <td>{{ material.codigo }}</td>
+                <td>{{ material.categoria_nombre }}</td>
+                <td>{{ material.unidad_medida }}</td>
+                <td>{{ material.cantidad }}</td>
+                <td>{{ formatearPrecio(material.precio) }}</td>
+                <td>{{ material.estado }}</td>
+                <td class="acciones">
+                  <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
+                  <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
 
+    <div class="paginacion">
+      <span>{{ totalRegistros }} materiales en total</span>
+      <div>
+        <button [disabled]="!hayAnterior" (click)="paginaAnterior()">Anterior</button>
+        <span>Página {{ paginaActual }}</span>
+        <button [disabled]="!haySiguiente" (click)="paginaSiguiente()">Siguiente</button>
+      </div>
+    </div>
+  </main>
 </div>
