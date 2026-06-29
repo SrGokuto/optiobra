@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './materiales.html',
-  styleUrl: './materiales.scss'
+  styleUrls: ['./materiales.scss']
 })
 export class Materiales {
 

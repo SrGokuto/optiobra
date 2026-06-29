@@ -1,11 +1,13 @@
 import { Routes } from '@angular/router';
 import { Materiales } from './pages/materiales/materiales';
 import { Login } from './pages/login/login';
+import { AvanceObra } from './pages/avance-obra/avance-obra';
+import { Trabajadores } from './pages/trabajadores/trabajadores';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'register',
+    redirectTo: 'avance-obra',
     pathMatch: 'full'
   },
   {
@@ -22,12 +24,22 @@ export const routes: Routes = [
     title: 'Materiales'
   },
   {
+    path: 'avance-obra',
+    component: AvanceObra,
+    title: 'Avance de obra'
+  },
+  {
+    path: 'trabajadores',
+    component: Trabajadores,
+    title: 'Trabajadores'
+  },
+  {
     path: 'login',
     component: Login,
     title: 'Login'
   },
   {
     path: '**',
-    redirectTo: 'register'
+    redirectTo: 'trabajadores'
   }
 ];
