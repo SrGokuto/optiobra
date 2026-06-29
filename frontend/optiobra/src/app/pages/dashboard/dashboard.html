@@ -1,0 +1,64 @@
+<div class="dashboard">
+
+    <aside class="sidebar" [class.oculto]="!menuAbierto">
+
+        <div class="logo">
+            <img src="assets/Logo.png" alt="logo">
+            <span>OPTIOBRA</span>
+            <button class="menu-btn" (click)="toggleMenu()">☰</button>
+        </div>
+
+        <ul>
+            <li class="activo"><a routerLink="/dashboard">🏠 Dashboard</a></li>
+            <li><a routerLink="/proyectos">📁 Proyectos</a></li>
+            <li><a routerLink="/materiales">📦 Materiales</a></li>
+        </ul>
+
+        <div class="usuario">
+            <img src="https://i.pravatar.cc/150" alt="usuario">
+            <div>
+                <h4>{{ nombreUsuario() }}</h4>
+                <small>{{ emailUsuario() }}</small>
+            </div>
+        </div>
+
+    </aside>
+
+    <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
+
+    <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+        <div class="header">
+            <div>
+                <h2>Dashboard</h2>
+                <p>Resumen general de tus proyectos</p>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h4>Proyectos activos</h4>
+                <h2>{{ totalProyectos }}</h2>
+            </div>
+            <div class="card">
+                <h4>Materiales</h4>
+                <h2>{{ totalMateriales }}</h2>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Accesos rápidos</h3>
+            <div class="accesos-rapidos">
+                <a routerLink="/proyectos" class="acceso-item">
+                    <span>📁</span>
+                    <span>Ver Proyectos</span>
+                </a>
+                <a routerLink="/materiales" class="acceso-item">
+                    <span>📦</span>
+                    <span>Ver Materiales</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+</div>
