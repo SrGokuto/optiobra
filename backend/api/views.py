@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import logging
@@ -20,7 +20,7 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     """
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated] # Cambiar a
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion']
     ordering_fields = ['nombre', 'creado_en']
@@ -50,7 +50,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = Material.objects.all().select_related('categoria', 'creado_por')
     serializer_class = MaterialSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated] # Cambiar a IsAuthenticated en produccion
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'codigo', 'descripcion', 'proveedor']
     ordering_fields = ['nombre', 'precio', 'cantidad', 'creado_en']
@@ -80,6 +80,8 @@ class MaterialViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        print("USER:", self.request.user)
+        print("AUTH:", self.request.auth)
         """Crear material y registrar en historial"""
         material = serializer.save(creado_por=self.request.user)
         
@@ -149,7 +151,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         instance.delete()
         logger.info(f"Material eliminado: {material_nombre} (ID: {material_id}) por {self.request.user.username}")
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def actualizar_cantidad(self, request, pk=None):
         """
         Actualizar cantidad de un material
@@ -198,7 +200,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
             'material': serializer.data
         })
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def historial(self, request, pk=None):
         """
         Obtener historial de cambios de un material
@@ -215,7 +217,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         serializer = HistorialMaterialSerializer(historial, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def estadisticas(self, request):
         """
         Obtener estadísticas de materiales
@@ -329,7 +331,7 @@ class AuthViewSet(viewsets.ViewSet):
         
         return Response(result, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def logout(self, request):
         """
         Cerrar sesión
@@ -347,7 +349,7 @@ class AuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def me(self, request):
         """
         Obtener información del usuario autenticado

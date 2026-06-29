@@ -1,33 +1,35 @@
 import { Routes } from '@angular/router';
 import { Materiales } from './pages/materiales/materiales';
 import { Login } from './pages/login/login';
+import { authGuard, guestGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'register',
-    pathMatch: 'full'
+    redirectTo: 'login',
+    pathMatch: 'full',
   },
   {
     path: 'register',
     loadComponent: () =>
-      import('./components/register/register').then(
-        m => m.RegisterComponent
-      ),
-    title: 'Register'
-  },
-  {
-    path: 'materiales',
-    component: Materiales,
-    title: 'Materiales'
+      import('./components/register/register').then((m) => m.RegisterComponent),
+    canActivate: [guestGuard],
+    title: 'Registro',
   },
   {
     path: 'login',
     component: Login,
-    title: 'Login'
+    canActivate: [guestGuard],
+    title: 'Login',
+  },
+  {
+    path: 'materiales',
+    component: Materiales,
+    canActivate: [authGuard],
+    title: 'Materiales',
   },
   {
     path: '**',
-    redirectTo: 'register'
-  }
+    redirectTo: 'login',
+  },
 ];
