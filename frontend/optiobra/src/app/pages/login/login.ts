@@ -7,110 +7,76 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../Services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
+  styleUrls: ['./login.scss'],
 })
-export class Login implements OnInit {
+export class Login {
+  email = '';
+  password = '';
+  error = '';
+  cargando = false;
 
-  loginForm!: FormGroup;
-  showPassword = false;
-  isLoading = false;
-
-  constructor(private fb: FormBuilder) {}
-
-  ngOnInit(): void {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
-  }
-
-  isInvalid(controlName: string): boolean {
-    const control = this.loginForm.get(controlName);
-
-    if (!control || !control.invalid) {
-      return false;
-    }
-
-    // Mostrar error si el campo está siendo escrito (dirty)
-    if (control.dirty) {
-      return true;
-    }
-
-    // O si algún campo del formulario está siendo escrito, mostrar todos los errores
-    const isFormBeingEdited = Object.keys(this.loginForm.controls).some(
-      key => this.loginForm.get(key)?.dirty
-    );
-
-    return isFormBeingEdited || control.touched;
-  }
-
-  getErrorMessage(controlName: string): string {
-    const control = this.loginForm.get(controlName);
-
-    if (!control || !this.isInvalid(controlName)) {
-      return '';
-    }
-
-    const errors = control.errors;
-
-    if (!errors) {
-      return '';
-    }
-
-    switch (controlName) {
-      case 'email':
-        if (errors['required']) {
-          return 'El correo electrónico es obligatorio.';
-        }
-        if (errors['email']) {
-          return 'Ingresa un correo electrónico válido.';
-        }
-        break;
-
-      case 'password':
-        if (errors['required']) {
-          return 'La contraseña es obligatoria.';
-        }
-        if (errors['minlength']) {
-          return 'La contraseña debe tener mínimo 6 caracteres.';
-        }
-        break;
-
-      default:
-        return 'Este campo es inválido.';
-    }
-
-    return 'Este campo es inválido.';
-  }
-
-  togglePassword(): void {
-    this.showPassword = !this.showPassword;
-  }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   onSubmit(): void {
-    this.loginForm.markAllAsTouched();
+    this.error = '';
 
-    if (this.loginForm.invalid) {
+    const email = this.email.trim().toLowerCase();
+    const password = this.password;
+
+    // Validaciones
+    if (!email) {
+      alert('El correo electrónico es obligatorio');
       return;
     }
 
-    this.isLoading = true;
+    if (!email.includes('@')) {
+      alert('Ingrese un correo válido');
+      return;
+    }
 
-    const payload = {
-      email: this.loginForm.value.email?.trim().toLowerCase(),
-      password: this.loginForm.value.password
-    };
+    if (!password.trim()) {
+      alert('La contraseña es obligatoria');
+      return;
+    }
 
-    console.log('Iniciando sesión:', payload);
+    if (password.length < 8) {
+      alert('La contraseña debe tener mínimo 8 caracteres');
+      return;
+    }
 
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1500);
+    this.cargando = true;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.cargando = false;
+
+        if (response.error) {
+          this.error = response.mensaje || 'No se pudo iniciar sesión';
+          alert(this.error);
+          return;
+        }
+
+        alert('Inicio de sesión exitoso');
+
+        this.router.navigate(['/materiales']);
+      },
+      error: (err) => {
+        this.cargando = false;
+        this.error = AuthService.extraerMensajeError(err);
+        alert(this.error);
+      },
+    });
   }
 }

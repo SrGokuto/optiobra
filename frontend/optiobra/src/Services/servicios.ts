@@ -1,60 +1,70 @@
-// services/material.service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 import {
+  Categoria,
+  FiltroMaterial,
   Material,
   MaterialPaginado,
-  FiltroMaterial,
+  MaterialPayload,
 } from '../Models/material';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MaterialService {
-
-  private apiUrl = 'http://localhost:3000/api/materiales';
+  private readonly apiUrl = `${environment.apiUrl}/materiales`;
 
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los materiales con filtros y paginación
-  getMateriales(filtros: FiltroMaterial): Observable<MaterialPaginado> {
+  getMateriales(filtros: FiltroMaterial = {}): Observable<MaterialPaginado> {
     let params = new HttpParams();
 
-    if (filtros.busqueda) {
-      params = params.set('busqueda', filtros.busqueda);
+    if (filtros.search) {
+      params = params.set('search', filtros.search);
     }
-    if (filtros.proyecto && filtros.proyecto !== 'Todos los proyectos') {
-      params = params.set('proyecto', filtros.proyecto);
+    if (filtros.categoria) {
+      params = params.set('categoria', filtros.categoria.toString());
     }
-    if (filtros.pagina) {
-      params = params.set('pagina', filtros.pagina.toString());
+    if (filtros.estado) {
+      params = params.set('estado', filtros.estado);
     }
-    if (filtros.limite) {
-      params = params.set('limite', filtros.limite.toString());
+    if (filtros.page) {
+      params = params.set('page', filtros.page.toString());
     }
 
-    return this.http.get<MaterialPaginado>(this.apiUrl, { params });
+    return this.http.get<MaterialPaginado>(`${this.apiUrl}/`, { params });
   }
 
-  // Obtener un material por ID
   getMaterialById(id: number): Observable<Material> {
-    return this.http.get<Material>(`${this.apiUrl}/${id}`);
+    return this.http.get<Material>(`${this.apiUrl}/${id}/`);
   }
 
-  // Crear un nuevo material
-  crearMaterial(material: Omit<Material, 'id'>): Observable<Material> {
-    return this.http.post<Material>(this.apiUrl, material);
+  crearMaterial(material: MaterialPayload): Observable<Material> {
+    return this.http.post<Material>(`${this.apiUrl}/`, material);
   }
 
-  // Editar un material existente
-  editarMaterial(id: number, material: Omit<Material, 'id'>): Observable<Material> {
-    return this.http.put<Material>(`${this.apiUrl}/${id}`, material);
+  editarMaterial(id: number, material: MaterialPayload): Observable<Material> {
+    return this.http.put<Material>(`${this.apiUrl}/${id}/`, material);
   }
 
-  // Eliminar un material
   eliminarMaterial(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}/`);
+  }
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class CategoriaService {
+  private readonly apiUrl = `${environment.apiUrl}/categorias`;
+
+  constructor(private http: HttpClient) {}
+
+  getCategorias(): Observable<Categoria[]> {
+    return this.http
+      .get<{ results: Categoria[] }>(`${this.apiUrl}/`)
+      .pipe(map((response) => response.results ?? []));
   }
 }

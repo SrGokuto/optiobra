@@ -6,9 +6,9 @@ import {
   AbstractControl,
   ValidationErrors
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../Services/auth.service';
 
 export function passwordsMatchValidator(
   control: AbstractControl
@@ -43,7 +43,8 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -206,19 +207,30 @@ export class RegisterComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
+    const firstName = this.registerForm.value.firstName?.trim();
+    const lastName = this.registerForm.value.lastName?.trim();
+
     const payload = {
-      firstName: this.registerForm.value.firstName?.trim(),
-      lastName: this.registerForm.value.lastName?.trim(),
       email: this.registerForm.value.email?.trim().toLowerCase(),
       password: this.registerForm.value.password,
-      phone: this.registerForm.value.phone?.trim()
+      nombre_completo: `${firstName} ${lastName}`.trim(),
     };
 
-    console.log('Usuario registrado:', payload);
+    this.authService.register(payload).subscribe({
+      next: (response) => {
+        this.isLoading = false;
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/login']);
-    }, 1500);
+        if (response.error) {
+          this.errorMessage = response.mensaje || 'No se pudo completar el registro';
+          return;
+        }
+
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = AuthService.extraerMensajeError(err);
+      },
+    });
   }
 }

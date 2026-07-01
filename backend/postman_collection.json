@@ -1,0 +1,424 @@
+{
+  "info": {
+    "name": "OptiObra API - Colección de Pruebas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Registro de Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo_usuario@optiobra.local\",\n  \"password\": \"contraseña_segura123\",\n  \"nombre_completo\": \"Juan Pérez García\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth/register/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth", "register", ""]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@optiobra.local\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/auth/login/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "Obtener Usuario Actual",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/auth/me/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth", "me", ""]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/auth/logout/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "auth", "logout", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Materiales - CRUD",
+      "item": [
+        {
+          "name": "Listar Materiales",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/?search=cable&estado=disponible",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", ""],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "cable"
+                },
+                {
+                  "key": "estado",
+                  "value": "disponible"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Material",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tornillo de Acero 3/8x2.5\",\n  \"codigo\": \"TOR-001\",\n  \"categoria\": 2,\n  \"precio\": \"0.75\",\n  \"cantidad\": 500,\n  \"unidad_medida\": \"caja\",\n  \"estado\": \"disponible\",\n  \"proveedor\": \"Suministros Industriales\",\n  \"descripcion\": \"Tornillos de acero galvanizado de alta calidad\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", ""]
+            }
+          }
+        },
+        {
+          "name": "Obtener Material Específico",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Editar Material (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Tornillo de Acero Galvanizado 3/8x2.5\",\n  \"codigo\": \"TOR-001\",\n  \"categoria\": 2,\n  \"precio\": \"0.85\",\n  \"cantidad\": 450,\n  \"unidad_medida\": \"caja\",\n  \"estado\": \"disponible\",\n  \"proveedor\": \"Suministros Premium\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Editar Parcialmente (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 300,\n  \"precio\": \"0.80\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Material",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Materiales - Acciones",
+      "item": [
+        {
+          "name": "Actualizar Cantidad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad\": 50,\n  \"tipo\": \"salida\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/actualizar_cantidad/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", "actualizar_cantidad", ""]
+            }
+          }
+        },
+        {
+          "name": "Ver Historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/1/historial/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "1", "historial", ""]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/materiales/estadisticas/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "materiales", "estadisticas", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "item": [
+        {
+          "name": "Listar Categorías",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/categorias/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "categorias", ""]
+            }
+          }
+        },
+        {
+          "name": "Crear Categoría",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cerrajería\",\n  \"descripcion\": \"Productos y materiales para cerrajería\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categorias/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "categorias", ""]
+            }
+          }
+        },
+        {
+          "name": "Editar Categoría",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Cerrajería y Seguridad\",\n  \"descripcion\": \"Productos y materiales para cerrajería y sistemas de seguridad\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/categorias/6/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "categorias", "6", ""]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Categoría",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Token {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/categorias/6/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "categorias", "6", ""]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
