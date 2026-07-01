@@ -1,42 +1,75 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../Services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
+  styleUrls: ['./login.scss'],
 })
 export class Login {
-
-  correo = '';
+  email = '';
   password = '';
+  error = '';
+  cargando = false;
 
-  iniciarSesion() {
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
-    if (!this.correo.trim()) {
+  onSubmit(): void {
+    this.error = '';
+
+    const email = this.email.trim().toLowerCase();
+    const password = this.password;
+
+    // Validaciones
+    if (!email) {
       alert('El correo electrónico es obligatorio');
       return;
     }
 
-    if (!this.correo.includes('@')) {
+    if (!email.includes('@')) {
       alert('Ingrese un correo válido');
       return;
     }
 
-    if (!this.password.trim()) {
+    if (!password.trim()) {
       alert('La contraseña es obligatoria');
       return;
     }
 
-    if (this.password.length < 8) {
+    if (password.length < 8) {
       alert('La contraseña debe tener mínimo 8 caracteres');
       return;
     }
 
-    alert('Inicio de sesión exitoso');
-  }
+    this.cargando = true;
 
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.cargando = false;
+
+        if (response.error) {
+          this.error = response.mensaje || 'No se pudo iniciar sesión';
+          alert(this.error);
+          return;
+        }
+
+        alert('Inicio de sesión exitoso');
+
+        this.router.navigate(['/materiales']);
+      },
+      error: (err) => {
+        this.cargando = false;
+        this.error = AuthService.extraerMensajeError(err);
+        alert(this.error);
+      },
+    });
+  }
 }
