@@ -1,78 +1,75 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Trabajador {
-  id: number;
-  nombre: string;
-  dni: string;
-  rol: string;
-  telefono: string;
-  estado: string;
-}
+import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { TrabajadorService } from '../../../Services/trabajador.service';
+import { Trabajador, TrabajadorPayload } from '../../../Models/trabajador';
+import { AuthService } from '../../../Services/auth.service';
 
 @Component({
   selector: 'app-trabajadores',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './trabajadores.html',
   styleUrls: ['./trabajadores.scss']
 })
-export class Trabajadores {
-
-  /*==========================
-      MENÚ
-  ==========================*/
+export class Trabajadores implements OnInit {
 
   menuAbierto = true;
+  trabajadores: Trabajador[] = [];
+  trabajadoresFiltrados: Trabajador[] = [];
+  cargando = false;
+  error = '';
+  mensaje = '';
+
+  textoBusqueda = '';
+  rolSeleccionado = '';
+  mostrarModal = false;
+  mostrarEditar = false;
+  mostrarEliminar = false;
+  idEliminar = 0;
+
+  roles: string[] = [
+    'Ingeniero', 'Arquitecto', 'Maestro de obra', 'Supervisor',
+    'Albañil', 'Electricista', 'Plomero', 'Carpintero',
+  ];
+
+  nuevo: TrabajadorPayload = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
+  trabajadorEditar: TrabajadorPayload = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
+
+  paginaActual = 1;
+  porPagina = 5;
+
+  constructor(
+    private trabajadorService: TrabajadorService,
+    private authService: AuthService,
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarTrabajadores();
+  }
 
   toggleMenu() {
     this.menuAbierto = !this.menuAbierto;
   }
 
-  navigateTo(ruta: string) {
-    // Implementar navegación según tu router
-    console.log('Navegar a:', ruta);
+  cargarTrabajadores(): void {
+    this.cargando = true;
+    this.error = '';
+    this.trabajadorService.getTrabajadores().subscribe({
+      next: (response) => {
+        this.trabajadores = response.results;
+        this.trabajadoresFiltrados = [...this.trabajadores];
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los trabajadores';
+        this.cargando = false;
+      },
+    });
   }
 
-  /*==========================
-      FILTROS
-  ==========================*/
-
-  textoBusqueda = '';
-  rolSeleccionado = '';
-
-  roles: string[] = [
-    'Ingeniero',
-    'Arquitecto',
-    'Maestro de obra',
-    'Supervisor',
-    'Albañil',
-    'Electricista',
-    'Plomero',
-    'Carpintero'
-  ];
-
-  /*==========================
-      DATOS
-  ==========================*/
-
-  trabajadores: Trabajador[] = [
-    { id: 1, nombre: 'Juan Pérez García',   dni: '12345678', rol: 'Maestro de obra', telefono: '967 854 321', estado: 'Activo'   },
-    { id: 2, nombre: 'María Fernández',     dni: '87654321', rol: 'Ingeniero',       telefono: '912 345 678', estado: 'Activo'   },
-    { id: 3, nombre: 'Carlos López',        dni: '23456789', rol: 'Operario',        telefono: '989 765 432', estado: 'Activo'   },
-    { id: 4, nombre: 'Luis Rodríguez',      dni: '34567890', rol: 'Electricista',    telefono: '923 456 789', estado: 'Activo'   },
-    { id: 5, nombre: 'Ana Martínez',        dni: '45678901', rol: 'Arquitecto',      telefono: '944 567 890', estado: 'Inactivo' },
-  ];
-
-  trabajadoresFiltrados: Trabajador[] = [...this.trabajadores];
-
-  /*==========================
-      PAGINACIÓN
-  ==========================*/
-
-  paginaActual = 1;
-  porPagina = 5;
+  /* PAGINACIÓN */
 
   get totalPaginas(): number {
     return Math.ceil(this.trabajadoresFiltrados.length / this.porPagina);
@@ -82,14 +79,11 @@ export class Trabajadores {
     return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
   }
 
-  // Páginas visibles con puntos suspensivos cuando hay muchas páginas
   get paginasVisible(): Array<number | string> {
     const total = this.totalPaginas;
     if (total <= 5) return this.paginas;
-
     const current = this.paginaActual;
     const visible: Array<number | string> = [];
-
     if (current <= 3) {
       visible.push(1, 2, 3, '...', total);
     } else if (current >= total - 2) {
@@ -97,7 +91,6 @@ export class Trabajadores {
     } else {
       visible.push(1, '...', current - 1, current, current + 1, '...', total);
     }
-
     return visible;
   }
 
@@ -112,71 +105,63 @@ export class Trabajadores {
   }
 
   cambiarPagina(pagina: number) {
-    // Acepta cualquier valor y lo clampa dentro del rango válido
     const clamped = Math.max(1, Math.min(pagina, Math.max(1, this.totalPaginas)));
     this.paginaActual = clamped;
   }
 
-  min(a: number, b: number): number {
-    return Math.min(a, b);
-  }
-
-  /*==========================
-      BUSCADOR
-  ==========================*/
+  /* BUSCADOR */
 
   filtrarTrabajadores() {
     this.paginaActual = 1;
     this.trabajadoresFiltrados = this.trabajadores.filter(t => {
-      const coincideNombre = t.nombre
-        .toLowerCase()
-        .includes(this.textoBusqueda.toLowerCase());
-      const coincideRol =
-        this.rolSeleccionado === '' || t.rol === this.rolSeleccionado;
+      const coincideNombre = t.nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase());
+      const coincideRol = this.rolSeleccionado === '' || t.rol === this.rolSeleccionado;
       return coincideNombre && coincideRol;
     });
   }
 
-  /*==========================
-      MODAL NUEVO
-  ==========================*/
-
-  mostrarModal = false;
-
-  nuevo: Trabajador = {
-    id: 0, nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo'
-  };
+  /* MODAL NUEVO */
 
   nuevoTrabajador() {
+    this.nuevo = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
     this.mostrarModal = true;
   }
 
   cerrarModal() {
     this.mostrarModal = false;
-    this.nuevo = { id: 0, nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
   }
 
   guardarTrabajador() {
-    const nuevoId = this.trabajadores.length > 0
-      ? Math.max(...this.trabajadores.map(t => t.id)) + 1
-      : 1;
-    this.trabajadores.push({ ...this.nuevo, id: nuevoId });
-    this.filtrarTrabajadores();
-    this.cerrarModal();
+    if (!this.nuevo.nombre || !this.nuevo.dni || !this.nuevo.rol) {
+      this.error = 'Completa nombre, DNI y rol';
+      return;
+    }
+
+    this.mensaje = '';
+    this.error = '';
+
+    this.trabajadorService.crearTrabajador(this.nuevo).subscribe({
+      next: () => {
+        this.mensaje = 'Trabajador creado correctamente';
+        this.cerrarModal();
+        this.cargarTrabajadores();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+      },
+    });
   }
 
-  /*==========================
-      EDITAR
-  ==========================*/
-
-  mostrarEditar = false;
-
-  trabajadorEditar: Trabajador = {
-    id: 0, nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo'
-  };
+  /* EDITAR */
 
   editarTrabajador(trabajador: Trabajador) {
-    this.trabajadorEditar = { ...trabajador };
+    this.trabajadorEditar = {
+      nombre: trabajador.nombre,
+      dni: trabajador.dni,
+      rol: trabajador.rol,
+      telefono: trabajador.telefono,
+      estado: trabajador.estado,
+    };
     this.mostrarEditar = true;
   }
 
@@ -185,20 +170,30 @@ export class Trabajadores {
   }
 
   actualizarTrabajador() {
-    const index = this.trabajadores.findIndex(t => t.id === this.trabajadorEditar.id);
-    if (index !== -1) {
-      this.trabajadores[index] = { ...this.trabajadorEditar };
+    if (!this.trabajadorEditar.nombre || !this.trabajadorEditar.dni || !this.trabajadorEditar.rol) {
+      this.error = 'Completa todos los campos obligatorios';
+      return;
     }
-    this.filtrarTrabajadores();
-    this.cerrarEditar();
+
+    this.mensaje = '';
+    this.error = '';
+
+    const original = this.trabajadores.find(t => t.dni === this.trabajadorEditar.dni);
+    if (!original) return;
+
+    this.trabajadorService.editarTrabajador(original.id, this.trabajadorEditar).subscribe({
+      next: () => {
+        this.mensaje = 'Trabajador actualizado correctamente';
+        this.cerrarEditar();
+        this.cargarTrabajadores();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+      },
+    });
   }
 
-  /*==========================
-      ELIMINAR
-  ==========================*/
-
-  mostrarEliminar = false;
-  idEliminar = 0;
+  /* ELIMINAR */
 
   eliminarTrabajador(id: number) {
     this.idEliminar = id;
@@ -211,8 +206,19 @@ export class Trabajadores {
   }
 
   confirmarEliminar() {
-    this.trabajadores = this.trabajadores.filter(t => t.id !== this.idEliminar);
-    this.filtrarTrabajadores();
-    this.cancelarEliminar();
+    this.mensaje = '';
+    this.error = '';
+
+    this.trabajadorService.eliminarTrabajador(this.idEliminar).subscribe({
+      next: () => {
+        this.mensaje = 'Trabajador eliminado correctamente';
+        this.cancelarEliminar();
+        this.cargarTrabajadores();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+        this.cancelarEliminar();
+      },
+    });
   }
 }

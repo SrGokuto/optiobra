@@ -1,138 +1,140 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Avance {
-  id: number;
-  fecha: string;
-  proyecto: string;
-  actividad: string;
-  avance: number;
-  responsable: string;
-}
+import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { AvanceObraService } from '../../../Services/avance-obra.service';
+import { ProyectoService } from '../../../Services/proyecto.service';
+import { AvanceObra as AvanceObraModel, AvanceObraPayload } from '../../../Models/avance-obra';
+import { Proyecto } from '../../../Models/proyecto';
+import { AuthService } from '../../../Services/auth.service';
 
 @Component({
   selector: 'app-avance-obra',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './avance-obra.html',
   styleUrls: ['./avance-obra.scss']
 })
-export class AvanceObra {
+export class AvanceObraComponent implements OnInit {
   menuAbierto = true;
-  selectedProyecto = 'Todos los proyectos';
   mostrarModal = false;
   mostrarEliminar = false;
   modoEdicion = false;
   idEliminar = 0;
 
-  nuevoAvance: Omit<Avance, 'id'> = {
+  avances: AvanceObraModel[] = [];
+  proyectos: Proyecto[] = [];
+  selectedProyecto = 'Todos los proyectos';
+  cargando = false;
+  error = '';
+  mensaje = '';
+
+  nuevoAvance: AvanceObraPayload = {
+    proyecto: 0,
     fecha: new Date().toISOString().slice(0, 10),
-    proyecto: 'Edificio A',
     actividad: '',
-    avance: 0,
-    responsable: ''
+    porcentaje: 0,
+    responsable: '',
   };
 
-  avanceSeleccionado: Avance | null = null;
+  avanceSeleccionado: AvanceObraModel | null = null;
 
-  proyectos = [
-    { nombre: 'Edificio A', avance: 75 },
-    { nombre: 'Casa Residencial', avance: 60 },
-    { nombre: 'Puente San Martín', avance: 30 },
-    { nombre: 'Almacén Central', avance: 0 },
-    { nombre: 'Colegio Primaria', avance: 100 }
-  ];
+  constructor(
+    private avanceObraService: AvanceObraService,
+    private proyectoService: ProyectoService,
+    private authService: AuthService,
+  ) {}
 
-  avancesRecientes: Avance[] = [
-    { id: 1, fecha: '2024-05-24', proyecto: 'Edificio A', actividad: 'Vaciado de columnas', avance: 78, responsable: 'Juan Pérez' },
-    { id: 2, fecha: '2024-05-24', proyecto: 'Casa Residencial', actividad: 'Instalación eléctrica', avance: 60, responsable: 'María Fernández' },
-    { id: 3, fecha: '2024-05-23', proyecto: 'Puente San Martín', actividad: 'Fundición de losa', avance: 30, responsable: 'Carlos López' },
-    { id: 4, fecha: '2024-05-22', proyecto: 'Almacén Central', actividad: 'Limpieza de terreno', avance: 0, responsable: 'Luis Rodríguez' },
-    { id: 5, fecha: '2024-05-21', proyecto: 'Colegio Primaria', actividad: 'Acabados finales', avance: 100, responsable: 'Ana Martínez' }
-  ];
-
-  get proyectosDisponibles(): string[] {
-    return [
-      'Todos los proyectos',
-      ...Array.from(new Set(this.proyectos.map((p) => p.nombre)))
-    ];
-  }
-
-  get avancesFiltrados(): Avance[] {
-    return this.selectedProyecto === 'Todos los proyectos'
-      ? this.avancesRecientes
-      : this.avancesRecientes.filter((avance) => avance.proyecto === this.selectedProyecto);
-  }
-
-  get avancePromedio(): number {
-    if (this.avancesRecientes.length === 0) {
-      return 0;
-    }
-    const total = this.avancesRecientes.reduce((sum, avance) => sum + avance.avance, 0);
-    return Math.round(total / this.avancesRecientes.length);
-  }
-
-  get tareasCompletas(): number {
-    return this.avancesRecientes.filter((avance) => avance.avance >= 100).length;
-  }
-
-  get tareasPendientes(): number {
-    return this.avancesRecientes.filter((avance) => avance.avance < 100).length;
-  }
-
-  get estadisticas() {
-    return [
-      {
-        icon: 'folder',
-        titulo: 'Proyectos en progreso',
-        valor: this.proyectos.length,
-        detalle: 'proyectos',
-        color: 'amber'
-      },
-      {
-        icon: 'trending_up',
-        titulo: 'Avance promedio',
-        valor: `${this.avancePromedio}%`,
-        detalle: '+5% este mes',
-        success: true,
-        color: 'emerald'
-      },
-      {
-        icon: 'check_circle',
-        titulo: 'Tareas completadas',
-        valor: this.tareasCompletas,
-        detalle: 'tareas',
-        color: 'blue'
-      },
-      {
-        icon: 'schedule',
-        titulo: 'Tareas pendientes',
-        valor: this.tareasPendientes,
-        detalle: 'tareas',
-        warning: true,
-        color: 'orange'
-      }
-    ];
+  ngOnInit(): void {
+    this.cargarProyectos();
+    this.cargarAvances();
   }
 
   toggleMenu() {
     this.menuAbierto = !this.menuAbierto;
   }
 
+  cargarProyectos(): void {
+    this.proyectoService.getProyectos().subscribe({
+      next: (response) => {
+        this.proyectos = response.results;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los proyectos';
+      },
+    });
+  }
+
+  cargarAvances(): void {
+    this.cargando = true;
+    this.error = '';
+
+    const filtros: { proyecto?: number } = {};
+    if (this.selectedProyecto !== 'Todos los proyectos') {
+      const proyecto = this.proyectos.find(p => p.nombre === this.selectedProyecto);
+      if (proyecto) filtros.proyecto = proyecto.id;
+    }
+
+    this.avanceObraService.getAvances(filtros).subscribe({
+      next: (response) => {
+        this.avances = response.results;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los avances';
+        this.cargando = false;
+      },
+    });
+  }
+
+  get proyectosDisponibles(): string[] {
+    return [
+      'Todos los proyectos',
+      ...this.proyectos.map(p => p.nombre),
+    ];
+  }
+
+  get avancesFiltrados(): AvanceObraModel[] {
+    return this.avances;
+  }
+
+  get avancePromedio(): number {
+    if (this.avances.length === 0) return 0;
+    const total = this.avances.reduce((sum, a) => sum + a.porcentaje, 0);
+    return Math.round(total / this.avances.length);
+  }
+
+  get tareasCompletas(): number {
+    return this.avances.filter(a => a.porcentaje >= 100).length;
+  }
+
+  get tareasPendientes(): number {
+    return this.avances.filter(a => a.porcentaje < 100).length;
+  }
+
+  get estadisticas() {
+    return [
+      { icon: 'folder', titulo: 'Proyectos en progreso', valor: this.proyectos.length, detalle: 'proyectos', color: 'amber' },
+      { icon: 'trending_up', titulo: 'Avance promedio', valor: `${this.avancePromedio}%`, detalle: '+5% este mes', success: true, color: 'emerald' },
+      { icon: 'check_circle', titulo: 'Tareas completadas', valor: this.tareasCompletas, detalle: 'tareas', color: 'blue' },
+      { icon: 'schedule', titulo: 'Tareas pendientes', valor: this.tareasPendientes, detalle: 'tareas', warning: true, color: 'orange' },
+    ];
+  }
+
   seleccionarProyecto(value: string) {
     this.selectedProyecto = value;
+    this.cargarAvances();
   }
 
   abrirNuevoAvance() {
     this.modoEdicion = false;
     this.avanceSeleccionado = null;
     this.nuevoAvance = {
+      proyecto: this.proyectos[0]?.id ?? 0,
       fecha: new Date().toISOString().slice(0, 10),
-      proyecto: this.proyectos[0]?.nombre ?? 'Edificio A',
       actividad: '',
-      avance: 0,
-      responsable: ''
+      porcentaje: 0,
+      responsable: '',
     };
     this.mostrarModal = true;
   }
@@ -142,48 +144,39 @@ export class AvanceObra {
   }
 
   guardarAvance() {
-    if (this.modoEdicion && this.avanceSeleccionado) {
-      const index = this.avancesRecientes.findIndex((item) => item.id === this.avanceSeleccionado?.id);
-      if (index !== -1) {
-        this.avancesRecientes[index] = {
-          ...this.avanceSeleccionado,
-          fecha: this.nuevoAvance.fecha,
-          proyecto: this.nuevoAvance.proyecto,
-          actividad: this.nuevoAvance.actividad,
-          avance: Number(this.nuevoAvance.avance),
-          responsable: this.nuevoAvance.responsable
-        };
-      }
-    } else {
-      const nuevoId = this.avancesRecientes.length > 0
-        ? Math.max(...this.avancesRecientes.map((avance) => avance.id)) + 1
-        : 1;
-
-      this.avancesRecientes = [
-        {
-          id: nuevoId,
-          fecha: this.nuevoAvance.fecha,
-          proyecto: this.nuevoAvance.proyecto,
-          actividad: this.nuevoAvance.actividad,
-          avance: Number(this.nuevoAvance.avance),
-          responsable: this.nuevoAvance.responsable
-        },
-        ...this.avancesRecientes
-      ];
+    if (!this.nuevoAvance.actividad || !this.nuevoAvance.responsable || !this.nuevoAvance.proyecto) {
+      this.error = 'Completa todos los campos obligatorios';
+      return;
     }
 
-    this.cerrarModal();
+    this.mensaje = '';
+    this.error = '';
+
+    const request = this.modoEdicion && this.avanceSeleccionado
+      ? this.avanceObraService.editarAvance(this.avanceSeleccionado.id, this.nuevoAvance)
+      : this.avanceObraService.crearAvance(this.nuevoAvance);
+
+    request.subscribe({
+      next: () => {
+        this.mensaje = this.modoEdicion ? 'Avance actualizado correctamente' : 'Avance creado correctamente';
+        this.cerrarModal();
+        this.cargarAvances();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+      },
+    });
   }
 
-  editarAvance(avance: Avance) {
+  editarAvance(avance: AvanceObraModel) {
     this.modoEdicion = true;
     this.avanceSeleccionado = { ...avance };
     this.nuevoAvance = {
-      fecha: avance.fecha,
       proyecto: avance.proyecto,
+      fecha: avance.fecha,
       actividad: avance.actividad,
-      avance: avance.avance,
-      responsable: avance.responsable
+      porcentaje: avance.porcentaje,
+      responsable: avance.responsable,
     };
     this.mostrarModal = true;
   }
@@ -199,7 +192,16 @@ export class AvanceObra {
   }
 
   confirmarEliminar() {
-    this.avancesRecientes = this.avancesRecientes.filter((avance) => avance.id !== this.idEliminar);
-    this.cancelarEliminar();
+    this.avanceObraService.eliminarAvance(this.idEliminar).subscribe({
+      next: () => {
+        this.mensaje = 'Avance eliminado correctamente';
+        this.cancelarEliminar();
+        this.cargarAvances();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+        this.cancelarEliminar();
+      },
+    });
   }
 }

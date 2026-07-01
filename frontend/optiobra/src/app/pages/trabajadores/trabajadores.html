@@ -1,84 +1,10 @@
 <div class="dashboard">
 
-  <!--==========================
-      SIDEBAR
-  ===========================-->
-
-  <aside class="sidebar" [class.oculto]="!menuAbierto">
-
-    <div class="logo">
-      <img src="assets/Logo.png" alt="OPTIOBRA">
-      <span>OPTIOBRA</span>
-      <button class="menu-btn" (click)="toggleMenu()">
-        ☰
-      </button>
-    </div>
-
-    <ul>
-
-      <li>
-        <span class="item-icon">🏠</span>
-        <span>Dashboard</span>
-      </li>
-
-      <li>
-        <span class="item-icon">📁</span>
-        <span>Proyectos</span>
-      </li>
-
-      <li>
-        <span class="item-icon">📦</span>
-        <span>Materiales</span>
-      </li>
-
-      <li>
-        <span class="item-icon">📈</span>
-        <span>Avance de obra</span>
-      </li>
-
-      <li class="activo">
-        <span class="item-icon">👷</span>
-        <span>Trabajadores</span>
-      </li>
-
-      <li>
-        <span class="item-icon">📊</span>
-        <span>Reportes</span>
-      </li>
-
-      <li>
-        <span class="item-icon">👤</span>
-        <span>Usuarios</span>
-      </li>
-
-      <li>
-        <span class="item-icon">⚙️</span>
-        <span>Configuración</span>
-      </li>
-
-    </ul>
-
-    <div class="usuario">
-      <img src="https://i.pravatar.cc/150?img=12" alt="Administrador">
-      <div>
-        <h4>Administrador</h4>
-        <small>admin@optiobra.com</small>
-      </div>
-    </div>
-
-  </aside>
-
-  <!--==========================
-      BOTÓN MENÚ FLOTANTE
-  ===========================-->
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
     ☰
   </button>
-
-  <!--==========================
-      CONTENIDO
-  ===========================-->
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
 

@@ -12,11 +12,12 @@ import {
 import { UsuarioAuth } from '../../../Models/usuario';
 import { AuthService } from '../../../Services/auth.service';
 import { CategoriaService, MaterialService } from '../../../Services/servicios';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './materiales.html',
   styleUrl: './materiales.scss',
 })
@@ -66,33 +67,16 @@ export class Materiales implements OnInit {
     this.cargarMateriales();
   }
 
+  crearMaterial(): void {
+    this.abrirFormularioNuevo();
+  }
+
+  editarMaterial(material: Material): void {
+    this.abrirFormularioEdicion(material);
+  }
+
   toggleMenu(): void {
     this.menuAbierto = !this.menuAbierto;
-  }
-
-  crearMaterial() {
-    alert('Material registrado correctamente');
-  }
-
-  editarMaterial(material: any) {
-    alert('Editando material: ' + material.nombre);
-  }
-
-  eliminarMaterial(material: any) {
-
-    const confirmar = confirm(
-      '¿Desea eliminar el material ' + material.nombre + '?'
-    );
-
-    if (confirmar) {
-
-      this.materiales =
-        this.materiales.filter(
-          (m) => m.id !== material.id
-        );
-
-      alert('Material eliminado correctamente');
-    }
   }
 
   cargarCategorias(): void {

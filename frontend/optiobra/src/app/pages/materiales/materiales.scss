@@ -1,67 +1,7 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
-}
-
 .dashboard{
   display:flex;
   min-height:100vh;
   background:#f5f7fa;
-}
-
-/* SIDEBAR */
-
-.sidebar{
-  width:260px;
-  min-height:100vh;
-  background:#0d1b2a;
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  transition:.3s;
-  box-shadow:4px 0 15px rgba(0,0,0,.15);
-}
-
-.sidebar.oculto{
-  margin-left:-260px;
-}
-
-/* LOGO */
-
-.logo{
-  height:70px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:15px;
-  border-bottom:1px solid rgba(255,255,255,.15);
-}
-
-.logo img{
-  width:40px;
-  height:40px;
-  object-fit:contain;
-}
-
-.logo span{
-  flex:1;
-  font-size:18px;
-  font-weight:bold;
-}
-
-.menu-btn{
-  background:transparent;
-  border:none;
-  color:#fff;
-  font-size:24px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.menu-btn:hover{
-  background:transparent;
 }
 
 /* BOTÓN CUANDO EL MENÚ ESTÁ CERRADO */
@@ -77,61 +17,6 @@
   font-weight:bold;
   cursor:pointer;
   z-index:9999;
-}
-
-/* MENÚ */
-
-.sidebar ul{
-  list-style:none;
-  padding:15px;
-}
-
-.sidebar li{
-  padding:14px;
-  margin-bottom:8px;
-  border-radius:8px;
-  cursor:pointer;
-  transition:.3s;
-}
-
-.sidebar li:hover{
-  background:rgba(255,255,255,.1);
-}
-
-.activo{
-  background:rgba(255,255,255,.15);
-  border-left:4px solid #F29F05;
-  font-weight:600;
-}
-
-/* USUARIO */
-
-.usuario{
-  margin-top:auto;
-  padding:15px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  border-top:1px solid rgba(255,255,255,.15);
-}
-
-.usuario img{
-  width:45px;
-  height:45px;
-  border-radius:50%;
-}
-
-.usuario-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.usuario-info h4,
-.usuario-info small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* CONTENIDO */
@@ -273,12 +158,9 @@ tr:hover{
   background:#b91c1c;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+/* RESPONSIVE */
 
 @media (max-width:768px){
-
   .contenido{
     padding:15px;
   }
@@ -351,44 +233,20 @@ tr:hover{
     color:#0d1b2a;
   }
 
-  td:nth-child(1)::before{
-    content:"ID";
-  }
-
-  td:nth-child(2)::before{
-    content:"Nombre";
-  }
-
-  td:nth-child(3)::before{
-    content:"Categoría";
-  }
-
-  td:nth-child(4)::before{
-    content:"Unidad";
-  }
-
-  td:nth-child(5)::before{
-    content:"Cantidad";
-  }
-
-  td:nth-child(6)::before{
-    content:"Precio";
-  }
-
-  td:nth-child(7)::before{
-    content:"Proyecto";
-  }
-
-  td:nth-child(8)::before{
-    content:"Acciones";
-  }
+  td:nth-child(1)::before{ content:"ID"; }
+  td:nth-child(2)::before{ content:"Nombre"; }
+  td:nth-child(3)::before{ content:"Categoría"; }
+  td:nth-child(4)::before{ content:"Unidad"; }
+  td:nth-child(5)::before{ content:"Cantidad"; }
+  td:nth-child(6)::before{ content:"Precio"; }
+  td:nth-child(7)::before{ content:"Proyecto"; }
+  td:nth-child(8)::before{ content:"Acciones"; }
 
   .acciones{
     display:flex;
     justify-content:flex-end;
     gap:8px;
   }
-
 }
 
 .alert-success,

@@ -1,11 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule
-} from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -35,7 +28,6 @@ export class Login {
     const email = this.email.trim().toLowerCase();
     const password = this.password;
 
-    // Validaciones
     if (!email) {
       alert('El correo electrónico es obligatorio');
       return;
@@ -70,7 +62,7 @@ export class Login {
 
         alert('Inicio de sesión exitoso');
 
-        this.router.navigate(['/materiales']);
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;

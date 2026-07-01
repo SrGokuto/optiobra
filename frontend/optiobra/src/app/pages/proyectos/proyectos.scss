@@ -1,147 +1,21 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
-}
-
 .dashboard{
   display:flex;
   min-height:100vh;
   background:#f5f7fa;
 }
 
-/* ================= SIDEBAR ================= */
-
-.sidebar{
-  width:260px;
-  min-height:100vh;
-  background:#0d1b2a;
-  color:#fff;
-
-  display:flex;
-  flex-direction:column;
-
-  transition:.3s;
-  box-shadow:4px 0 15px rgba(0,0,0,.15);
-}
-
-.sidebar.oculto{
-  margin-left:-260px;
-}
-
-/* LOGO */
-
-.logo{
-  height:70px;
-
-  display:flex;
-  align-items:center;
-
-  gap:10px;
-  padding:15px;
-
-  border-bottom:1px solid rgba(255,255,255,.15);
-}
-
-.logo img{
-  width:40px;
-  height:40px;
-  object-fit:contain;
-}
-
-.logo span{
-  flex:1;
-  font-size:18px;
-  font-weight:bold;
-}
-
-.menu-btn{
-  background:none;
-  border:none;
-  color:#fff;
-  font-size:24px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.menu-btn:hover{
-  background:transparent;
-}
-
-/* BOTÓN MENÚ */
-
 .menu-fijo{
   position:fixed;
   top:15px;
   left:15px;
-
   background:transparent;
   border:none;
-
   color:#0d1b2a;
-
   font-size:32px;
   font-weight:bold;
-
   cursor:pointer;
   z-index:9999;
 }
-
-.menu-fijo:hover{
-  background:transparent;
-}
-
-/* MENÚ */
-
-.sidebar ul{
-  list-style:none;
-  padding:15px;
-  flex:1;
-}
-
-.sidebar li{
-  padding:14px;
-  margin-bottom:8px;
-
-  border-radius:8px;
-
-  cursor:pointer;
-
-  transition:.3s;
-}
-
-.sidebar li:hover{
-  background:rgba(255,255,255,.1);
-}
-
-.activo{
-  background:rgba(255,255,255,.15);
-  border-left:4px solid #F29F05;
-  font-weight:600;
-}
-
-/* USUARIO */
-
-.usuario{
-  margin-top:auto;
-
-  display:flex;
-  align-items:center;
-  gap:10px;
-
-  padding:15px;
-
-  border-top:1px solid rgba(255,255,255,.15);
-}
-
-.usuario img{
-  width:45px;
-  height:45px;
-  border-radius:50%;
-}
-
-/* ================= CONTENIDO ================= */
 
 .contenido{
   flex:1;
@@ -153,261 +27,174 @@
   padding-top:70px;
 }
 
-/* HEADER */
-
 .header{
   background:#fff;
-
   padding:20px;
-
   border-radius:15px;
-
   display:flex;
   justify-content:space-between;
   align-items:center;
-
   margin-bottom:20px;
-
   box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
-.header p{
-  color:#6b7280;
-}
-
-/* BOTÓN */
+.header p{ color:#6b7280; }
 
 .btn-nuevo{
   height:50px;
   padding:0 20px;
-
   border:none;
   border-radius:8px;
-
   background:#F29F05;
   color:#fff;
-
   font-size:16px;
   font-weight:600;
-
   cursor:pointer;
 }
+.btn-nuevo:hover{ background:#d88e04; }
 
-.btn-nuevo:hover{
-  background:#d88e04;
+.alert-success, .alert-error{
+  padding:12px 16px;
+  border-radius:8px;
+  margin-bottom:16px;
 }
+.alert-success{ background:#dcfce7; color:#166534; }
+.alert-error{ background:#fee2e2; color:#991b1b; }
 
-/* FILTROS */
+/* FORMULARIO */
 
-.filtros{
+.form-panel{
   background:#fff;
-
-  padding:15px;
-
+  padding:20px;
   border-radius:15px;
-
-  display:flex;
-  gap:15px;
-
   margin-bottom:20px;
-
   box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
-.filtros input{
-  flex:1;
+.form-panel h3{
+  margin-bottom:16px;
+  font-size:18px;
 }
 
-.filtros input,
-.filtros select{
-  padding:12px;
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+}
 
+.form-panel label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:14px;
+  color:#374151;
+}
+
+.form-panel input,
+.form-panel select{
+  padding:10px 12px;
   border:1px solid #d1d5db;
   border-radius:8px;
+  font-size:14px;
 }
 
-.filtros input:focus,
-.filtros select:focus{
+.form-panel input:focus,
+.form-panel select:focus{
   outline:none;
   border-color:#0d1b2a;
 }
 
-/* ================= TABLA ================= */
-
-.tabla-container{
-  width:100%;
-  overflow-x:hidden;
-
-  background:#fff;
-
-  border-radius:15px;
-
-  box-shadow:0 2px 10px rgba(0,0,0,.05);
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th{
-  background:#f8fafc;
-}
-
-th,
-td{
-  padding:15px 12px;
-  text-align:left;
-  border-bottom:1px solid #e5e7eb;
-}
-
-tr:hover{
-  background:#f9fafb;
-}
-
-/* BOTONES */
-
-.acciones{
+.form-actions{
   display:flex;
-  gap:8px;
+  gap:10px;
+  margin-top:16px;
 }
 
-.editar,
-.eliminar{
+.btn-guardar{
   border:none;
-  padding:8px 12px;
   border-radius:6px;
-  color:white;
+  padding:10px 20px;
+  background:#2563eb;
+  color:#fff;
+  cursor:pointer;
+  font-weight:600;
+}
+.btn-guardar:hover{ background:#1d4ed8; }
+
+.btn-cancelar{
+  border:none;
+  border-radius:6px;
+  padding:10px 20px;
+  background:#e5e7eb;
+  color:#111827;
   cursor:pointer;
 }
 
-.editar{
-  background:#2563EB;
+/* TABLA */
+
+.tabla-container{
+  width:100%;
+  background:#fff;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
-.editar:hover{
-  background:#1d4ed8;
-}
+table{ width:100%; border-collapse:collapse; }
+th{ background:#f8fafc; }
+th, td{ padding:15px 12px; text-align:left; border-bottom:1px solid #e5e7eb; font-size:14px; }
+tr:hover{ background:#f9fafb; }
 
-.eliminar{
-  background:#dc2626;
+.badge-estado{
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+  white-space:nowrap;
 }
+.badge-estado.pendiente{ background:#fef3c7; color:#92400e; }
+.badge-estado.en-progreso{ background:#dbeafe; color:#1e40af; }
+.badge-estado.completado{ background:#dcfce7; color:#166534; }
 
-.eliminar:hover{
-  background:#b91c1c;
+.acciones{ display:flex; gap:8px; }
+
+.editar, .eliminar{
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  color:#fff;
+  cursor:pointer;
 }
+.editar{ background:#2563EB; }
+.editar:hover{ background:#1d4ed8; }
+.eliminar{ background:#dc2626; }
+.eliminar:hover{ background:#b91c1c; }
 
-/* ================= RESPONSIVE ================= */
+.estado-tabla{ padding:24px; text-align:center; color:#6b7280; }
+
+/* RESPONSIVE */
 
 @media (max-width:768px){
+  .contenido{ padding:15px; }
+  .menu-cerrado{ padding-top:70px; }
+  .header{ flex-direction:column; align-items:stretch; gap:15px; }
+  .btn-nuevo{ width:100%; }
 
-  .contenido{
-    padding:15px;
-  }
-
-  .menu-cerrado{
-    padding-top:70px;
-  }
-
-  .header{
-    flex-direction:column;
-    align-items:stretch;
-    gap:15px;
-  }
-
-  .btn-nuevo{
-    width:100%;
-  }
-
-  .filtros{
-    flex-direction:column;
-  }
-
-  /* TABLA COMO TARJETAS */
-
-  .tabla-container{
-    overflow:visible;
-    background:transparent;
-    box-shadow:none;
-  }
-
-  table{
-    width:100%;
-    border-collapse:collapse;
-  }
-
-  thead{
-    display:none;
-  }
-
-  tbody{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-  }
-
-  tr{
-    display:block;
-    width:100%;
-
-    background:#fff;
-
-    border-radius:12px;
-
-    padding:12px;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-  }
-
-  td{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    text-align:right;
-
-    padding:10px 0;
-
-    border-bottom:1px solid #ececec;
-  }
-
-  td:last-child{
-    border-bottom:none;
-  }
-
-  td::before{
-    font-weight:bold;
-    color:#0d1b2a;
-  }
-
-  td:nth-child(1)::before{
-    content:"ID";
-  }
-
-  td:nth-child(2)::before{
-    content:"Proyecto";
-  }
-
-  td:nth-child(3)::before{
-    content:"Responsable";
-  }
-
-  td:nth-child(4)::before{
-    content:"Estado";
-  }
-
-  td:nth-child(5)::before{
-    content:"Avance";
-  }
-
-  td:nth-child(6)::before{
-    content:"Acciones";
-  }
-
-  .acciones{
-    display:flex;
-    justify-content:flex-end;
-    gap:8px;
-  }
-
+  .tabla-container{ overflow-x:visible; background:transparent; box-shadow:none; }
+  table{ min-width:100%; border-collapse:separate; border-spacing:0; }
+  thead{ display:none; }
+  tbody, tr, td{ display:block; width:100%; }
+  tr{ background:#fff; margin-bottom:15px; border-radius:12px; padding:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+  td{ position:relative; text-align:right; padding:10px 10px 10px 120px; border-bottom:1px solid #eee; }
+  td:last-child{ border-bottom:none; }
+  td::before{ position:absolute; left:10px; font-weight:bold; color:#0d1b2a; }
+  td:nth-child(1)::before{ content:"ID"; }
+  td:nth-child(2)::before{ content:"Nombre"; }
+  td:nth-child(3)::before{ content:"Ubicación"; }
+  td:nth-child(4)::before{ content:"Estado"; }
+  td:nth-child(5)::before{ content:"Avance"; }
+  td:nth-child(6)::before{ content:"Fecha inicio"; }
+  td:nth-child(7)::before{ content:"Fecha fin"; }
+  td:nth-child(8)::before{ content:"Acciones"; }
+  .acciones{ justify-content:flex-end; gap:8px; }
 }

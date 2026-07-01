@@ -1,6 +1,4 @@
-/*==============================
-RESET
-==============================*/
+/* RESET */
 
 * {
   margin: 0;
@@ -9,9 +7,7 @@ RESET
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/*==============================
-DASHBOARD
-==============================*/
+/* DASHBOARD */
 
 .dashboard {
   display: flex;
@@ -20,120 +16,7 @@ DASHBOARD
   overflow-x: hidden;
 }
 
-/*==============================
-SIDEBAR
-==============================*/
-
-.sidebar {
-  width: 240px;
-  min-height: 100vh;
-  background: #0d1b2a;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  transition: transform .3s ease;
-  box-shadow: 4px 0 15px rgba(0, 0, 0, .18);
-  transform: translateX(0);
-}
-
-.sidebar.oculto {
-  transform: translateX(-100%);
-}
-
-.logo {
-  height: 70px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px;
-  border-bottom: 1px solid rgba(255,255,255,.12);
-}
-
-.logo img {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.logo span {
-  flex: 1;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.menu-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 28px;
-  cursor: pointer;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 22px 16px 0;
-  flex: 1;
-}
-
-.sidebar li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 20px;
-  margin-bottom: 10px;
-  border-radius: 18px;
-  cursor: pointer;
-  transition: background .2s ease, color .2s ease;
-  color: rgba(255,255,255,.8);
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.sidebar li:hover {
-  background: rgba(255,255,255,.08);
-  color: #fff;
-}
-
-.sidebar li .item-icon {
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: transparent;
-  color: #fff;
-  font-size: 18px;
-}
-
-.activo {
-  background: #f59e0b;
-  color: #0a1622;
-  font-weight: 700;
-}
-
-.activo .item-icon {
-  color: #0a1622;
-}
-
-.usuario {
-  margin-top: 16px;
-  margin-bottom: 20px;
-  padding: 18px 20px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  background: transparent;
-  border-radius: 18px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.usuario img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-}
+/* BOTÓN MENÚ FLOTANTE */
 
 .menu-fijo {
   position: fixed;
@@ -148,68 +31,7 @@ SIDEBAR
   z-index: 9999;
 }
 
-/*==============================
-USUARIO
-==============================*/
-
-.usuario {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  border-top: 1px solid rgba(255, 255, 255, .08);
-
-  img {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  h4 {
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  small {
-    color: rgba(255, 255, 255, .45);
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-/*==============================
-BOTÓN MENÚ FLOTANTE
-==============================*/
-
-.menu-fijo {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  border: none;
-  background: transparent;
-  color: #0d1b2a;
-  font-size: 32px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 9999;
-}
-/*==============================
-CONTENIDO
-==============================*/
+/* CONTENIDO */
 
 .contenido {
   flex: 1;
@@ -229,9 +51,7 @@ CONTENIDO
   max-width: 1400px;
 }
 
-/*==============================
-HEADER
-==============================*/
+/* HEADER */
 
 .header {
   display: flex;
@@ -283,9 +103,7 @@ HEADER
   }
 }
 
-/*==============================
-TOOLBAR
-==============================*/
+/* TOOLBAR */
 
 .toolbar {
   display: flex;
@@ -357,9 +175,7 @@ TOOLBAR
   }
 }
 
-/*==============================
-CARD TABLA
-==============================*/
+/* CARD TABLA */
 
 .card {
   background: #fff;
@@ -386,9 +202,7 @@ CARD TABLA
   }
 }
 
-/*==============================
-TABLA
-==============================*/
+/* TABLA */
 
 table {
   width: 100%;
@@ -432,9 +246,7 @@ tbody {
   }
 }
 
-/*==============================
-TRABAJADOR (AVATAR + NOMBRE)
-==============================*/
+/* TRABAJADOR (AVATAR + NOMBRE) */
 
 .trabajador {
   display: flex;
@@ -443,7 +255,7 @@ TRABAJADOR (AVATAR + NOMBRE)
 }
 
 .avatar {
-  display: none; /* Ocultar los círculos azules de avatar según solicitud */
+  display: none;
 }
 
 .datos {
@@ -463,9 +275,7 @@ TRABAJADOR (AVATAR + NOMBRE)
   }
 }
 
-/*==============================
-BADGES
-==============================*/
+/* BADGES */
 
 .badge-rol {
   background: #eff6ff;
@@ -499,9 +309,7 @@ BADGES
   }
 }
 
-/*==============================
-ACCIONES
-==============================*/
+/* ACCIONES */
 
 .acciones {
   display: flex;
@@ -542,9 +350,7 @@ ACCIONES
   }
 }
 
-/*==============================
-SIN REGISTROS
-==============================*/
+/* SIN REGISTROS */
 
 .sin-registros {
   text-align: center;
@@ -553,9 +359,7 @@ SIN REGISTROS
   font-size: 14px;
 }
 
-/*==============================
-FOOTER TABLA
-==============================*/
+/* FOOTER TABLA */
 
 .table-footer {
   display: flex;
@@ -576,9 +380,7 @@ FOOTER TABLA
   }
 }
 
-/*==============================
-PAGINACIÓN
-==============================*/
+/* PAGINACIÓN */
 
 .pagination {
   display: flex;
@@ -619,9 +421,7 @@ PAGINACIÓN
   }
 }
 
-/*==============================
-MODAL
-==============================*/
+/* MODAL */
 
 .modal-backdrop {
   position: fixed;
@@ -643,14 +443,8 @@ MODAL
 }
 
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .modal-header {
@@ -764,9 +558,7 @@ MODAL
   }
 }
 
-/*==============================
-MODAL CONFIRMACIÓN
-==============================*/
+/* MODAL CONFIRMACIÓN */
 
 .modal-confirmacion {
   width: 400px;
@@ -807,9 +599,7 @@ MODAL CONFIRMACIÓN
   }
 }
 
-/*==============================
-RESPONSIVE TABLET
-==============================*/
+/* RESPONSIVE TABLET */
 
 @media (max-width: 1100px) {
   .header {
@@ -819,15 +609,10 @@ RESPONSIVE TABLET
   }
 }
 
-/*==============================
-RESPONSIVE MÓVIL
-==============================*/
+/* RESPONSIVE MÓVIL */
 
 @media (max-width: 768px) {
-  .dashboard {
-    display: block;
-    min-height: auto;
-  }
+  .dashboard { display: block; min-height: auto; }
 
   .sidebar {
     position: fixed;
@@ -840,22 +625,7 @@ RESPONSIVE MÓVIL
     transition: transform .28s ease;
   }
 
-  .sidebar.oculto {
-    transform: translateX(-110%);
-  }
-
-  .menu-fijo {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    background: transparent;
-    border: none;
-    color: #0d1b2a;
-    font-size: 36px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 9999;
-  }
+  .sidebar.oculto { transform: translateX(-110%); }
 
   .contenido {
     padding: 80px 16px 16px;
@@ -890,56 +660,23 @@ RESPONSIVE MÓVIL
     grid-template-columns: 1fr;
   }
 
-  .modal {
-    width: 95%;
-    margin: 16px auto;
-  }
+  .modal { width: 95%; margin: 16px auto; }
+  .modal-confirmacion { width: 92%; padding: 24px; }
 
-  .modal-confirmacion {
-    width: 92%;
-    padding: 24px;
-  }
+  .btn-primary { width: 100%; justify-content: center; }
 
-  .btn-primary {
-    width: 100%;
-    justify-content: center;
-  }
+  .cards { grid-template-columns: 1fr; }
+  .content { grid-template-columns: 1fr; }
+  .panel { height: auto; min-height: 0; overflow: visible; }
+  .table-wrapper { overflow-x: auto; overflow-y: visible; }
+  table { min-width: 450px; }
 
-  .cards {
-    grid-template-columns: 1fr;
-  }
-
-  .content {
-    grid-template-columns: 1fr;
-  }
-
-  .panel {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    overflow-y: visible;
-  }
-
-  table {
-    min-width: 450px;
-  }
-
-  table,
-  thead,
-  tbody,
-  tr,
-  td {
+  table, thead, tbody, tr, td {
     display: block;
     width: 100%;
   }
 
-  thead {
-    display: none;
-  }
+  thead { display: none; }
 
   tbody tr {
     display: block;
@@ -974,10 +711,7 @@ RESPONSIVE MÓVIL
   tbody td:nth-child(6)::before { content: "Estado"; }
   tbody td:nth-child(7)::before { content: "Acciones"; }
 
-  .acciones {
-    justify-content: flex-end;
-    gap: 8px;
-  }
+  .acciones { justify-content: flex-end; gap: 8px; }
 
   .btn-icon {
     width: auto;
@@ -990,43 +724,20 @@ RESPONSIVE MÓVIL
     font-weight: 600;
   }
 
-  .btn-icon .btn-label {
-    display: inline-block;
-  }
+  .btn-icon .btn-label { display: inline-block; }
 }
 
-/* Hide button labels on desktop/tablet by default */
-.btn-icon .btn-label {
-  display: none;
-}
+.btn-icon .btn-label { display: none; }
 
-/*==============================
-MÓVILES PEQUEÑOS
-==============================*/
-
-/*==============================
-MÓVILES PEQUEÑOS
-==============================*/
+/* MÓVILES PEQUEÑOS */
 
 @media (max-width: 480px) {
-
-  .header-info h2 {
-    font-size: 22px;
-  }
-
-  .pagination {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .usuario {
-    display: none;
-  }
+  .header-info h2 { font-size: 22px; }
+  .pagination { flex-wrap: wrap; justify-content: center; }
+  .usuario { display: none; }
 }
 
-/*==============================
-ITEM-ICON (emojis menú)
-==============================*/
+/* ITEM-ICON (emojis menú) */
 
 .item-icon {
   font-size: 17px;
@@ -1038,11 +749,8 @@ ITEM-ICON (emojis menú)
   line-height: 1;
 }
 
-/*==============================
-BTN-ICON (acciones)
-==============================*/
-
 /* Material Symbols font for icons */
+
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
@@ -1085,6 +793,7 @@ BTN-ICON (acciones)
 .btn-icon.eliminar:hover { transform: scale(1.06); }
 
 /* Paginación: activo en naranja */
+
 .pagination button.active {
   background: #ff8c00;
   color: #fff;

@@ -1,30 +1,5 @@
 <div class="dashboard">
-  <aside class="sidebar" [class.oculto]="!menuAbierto">
-    <div class="logo">
-      <img src="assets/Logo.png" alt="logo">
-      <span>OPTIOBRA</span>
-      <button class="menu-btn" (click)="toggleMenu()">☰</button>
-    </div>
-
-    <ul>
-      <li><span class="item-icon">🏠</span><span>Dashboard</span></li>
-      <li><span class="item-icon">📁</span><span>Proyectos</span></li>
-      <li><span class="item-icon">📦</span><span>Materiales</span></li>
-      <li class="activo"><span class="item-icon">📈</span><span>Avance de obra</span></li>
-      <li><span class="item-icon">👷</span><span>Trabajadores</span></li>
-      <li><span class="item-icon">📊</span><span>Reportes</span></li>
-      <li><span class="item-icon">👤</span><span>Usuarios</span></li>
-      <li><span class="item-icon">⚙️</span><span>Configuración</span></li>
-    </ul>
-
-    <div class="usuario">
-      <img src="https://i.pravatar.cc/150" alt="usuario">
-      <div>
-        <h4>Administrador</h4>
-        <small>admin@optiobra.com</small>
-      </div>
-    </div>
-  </aside>
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
 
@@ -65,10 +40,10 @@
                 <div class="project" *ngFor="let p of proyectos">
                   <div class="row">
                     <span>{{ p.nombre }}</span>
-                    <span>{{ p.avance }}%</span>
+                    <span>{{ p.porcentaje_avance }}%</span>
                   </div>
                   <div class="progress">
-                    <div class="fill" [style.width.%]="p.avance"></div>
+                    <div class="fill" [style.width.%]="p.porcentaje_avance"></div>
                   </div>
                 </div>
               </div>
@@ -92,9 +67,9 @@
                   <tbody>
                     <tr *ngFor="let a of avancesFiltrados">
                       <td>{{ a.fecha }}</td>
-                      <td>{{ a.proyecto }}</td>
+                      <td>{{ a.proyecto_nombre }}</td>
                       <td>{{ a.actividad }}</td>
-                      <td>{{ a.avance }}%</td>
+                      <td>{{ a.porcentaje }}%</td>
                       <td>{{ a.responsable }}</td>
                       <td class="actions-cell">
                           <button class="icon-btn edit" (click)="editarAvance(a)" aria-label="Editar">
@@ -134,7 +109,7 @@
           <label>
             Proyecto
             <select [(ngModel)]="nuevoAvance.proyecto" name="proyecto" required>
-              <option *ngFor="let proyecto of proyectosDisponibles.slice(1)" [value]="proyecto">{{ proyecto }}</option>
+              <option *ngFor="let proyecto of proyectos" [ngValue]="proyecto.id">{{ proyecto.nombre }}</option>
             </select>
           </label>
           <label>
@@ -143,7 +118,7 @@
           </label>
           <label>
             Avance (%)
-            <input type="number" [(ngModel)]="nuevoAvance.avance" name="avance" min="0" max="100" required />
+            <input type="number" [(ngModel)]="nuevoAvance.porcentaje" name="porcentaje" min="0" max="100" required />
           </label>
           <label>
             Responsable

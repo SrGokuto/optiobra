@@ -3,11 +3,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Avg
 import logging
 
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
-from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer
+from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto, AvanceObra, Trabajador
+from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer, ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer
 from .services import SupabaseAuthService
 
 logger = logging.getLogger(__name__)
@@ -243,6 +243,95 @@ class MaterialViewSet(viewsets.ModelViewSet):
             'valor_total_inventario': float(total_valor_inventario),
             'distribucion_por_categoria': list(categorias),
         })
+
+
+class DashboardViewSet(viewsets.ViewSet):
+    """ViewSet para estadísticas del dashboard"""
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['get'])
+    def estadisticas(self, request):
+        """
+        GET /api/dashboard/estadisticas/
+        Retorna resumen general para el dashboard.
+        """
+        total_proyectos = Proyecto.objects.count()
+        proyectos_en_progreso = Proyecto.objects.filter(estado='En progreso').count()
+        total_materiales = Material.objects.count()
+        total_trabajadores = Trabajador.objects.count()
+
+        avance = Proyecto.objects.aggregate(promedio=Avg('porcentaje_avance'))
+        avance_promedio = round(avance['promedio'] or 0)
+
+        proyectos_recientes = Proyecto.objects.all()[:5].values(
+            'id', 'nombre', 'estado', 'porcentaje_avance'
+        )
+
+        return Response({
+            'total_proyectos': total_proyectos,
+            'proyectos_en_progreso': proyectos_en_progreso,
+            'total_materiales': total_materiales,
+            'total_trabajadores': total_trabajadores,
+            'avance_promedio': avance_promedio,
+            'proyectos_recientes': list(proyectos_recientes),
+        })
+
+
+class ProyectoViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar proyectos"""
+    queryset = Proyecto.objects.all()
+    serializer_class = ProyectoSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre', 'ubicacion']
+    ordering_fields = ['nombre', 'fecha_inicio', 'estado', 'porcentaje_avance', 'creado_en']
+    ordering = ['-creado_en']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        estado = self.request.query_params.get('estado', '')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        return queryset
+
+
+class AvanceObraViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar avances de obra"""
+    queryset = AvanceObra.objects.all().select_related('proyecto')
+    serializer_class = AvanceObraSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['actividad', 'responsable', 'proyecto__nombre']
+    ordering_fields = ['fecha', 'porcentaje', 'creado_en']
+    ordering = ['-fecha']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        proyecto_id = self.request.query_params.get('proyecto', '')
+        if proyecto_id:
+            queryset = queryset.filter(proyecto_id=proyecto_id)
+        return queryset
+
+
+class TrabajadorViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar trabajadores"""
+    queryset = Trabajador.objects.all()
+    serializer_class = TrabajadorSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre', 'dni', 'rol', 'telefono']
+    ordering_fields = ['nombre', 'rol', 'estado', 'creado_en']
+    ordering = ['-creado_en']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        rol = self.request.query_params.get('rol', '')
+        if rol:
+            queryset = queryset.filter(rol=rol)
+        estado = self.request.query_params.get('estado', '')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        return queryset
 
 
 class AuthViewSet(viewsets.ViewSet):
