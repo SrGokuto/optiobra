@@ -1,6 +1,6 @@
 .dashboard {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: #f5f7fa;
 }
 
@@ -24,7 +24,7 @@
 .contenido{
   flex:1;
   padding:16px 20px;
-  overflow-x:hidden;
+  overflow:auto;
 }
 
 .menu-cerrado{
@@ -232,7 +232,7 @@ tr:hover{
 @media(max-width:768px){
   .dashboard{
     display:block;
-    min-height:auto;
+    height:auto;
   }
 
   .contenido{
@@ -261,12 +261,6 @@ tr:hover{
 @media(min-width:769px){
   .dashboard{
     overflow:hidden;
-  }
-
-  .contenido{
-    height:100vh;
-    overflow:auto;
-    padding-bottom:15px;
   }
 }
 
