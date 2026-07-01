@@ -70,6 +70,31 @@ export class Materiales implements OnInit {
     this.menuAbierto = !this.menuAbierto;
   }
 
+  crearMaterial() {
+    alert('Material registrado correctamente');
+  }
+
+  editarMaterial(material: any) {
+    alert('Editando material: ' + material.nombre);
+  }
+
+  eliminarMaterial(material: any) {
+
+    const confirmar = confirm(
+      '¿Desea eliminar el material ' + material.nombre + '?'
+    );
+
+    if (confirmar) {
+
+      this.materiales =
+        this.materiales.filter(
+          (m) => m.id !== material.id
+        );
+
+      alert('Material eliminado correctamente');
+    }
+  }
+
   cargarCategorias(): void {
     this.categoriaService.getCategorias().subscribe({
       next: (categorias) => {

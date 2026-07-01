@@ -1,110 +1,89 @@
 <div class="dashboard">
-  <aside class="sidebar" [class.oculto]="!menuAbierto">
-    <div class="logo">
-      <img src="assets/Logo.png" alt="logo">
-      <span>OPTIOBRA</span>
-      <button class="menu-btn" (click)="toggleMenu()">☰</button>
-    </div>
 
-    <ul>
-      <li>🏠 Dashboard</li>
-      <li>📁 Proyectos</li>
-      <li class="activo">📦 Materiales</li>
-      <li>📈 Avance de obra</li>
-      <li>👷 Trabajadores</li>
-      <li>📊 Reportes</li>
-      <li>👤 Usuarios</li>
-      <li>⚙️ Configuración</li>
-    </ul>
+    <aside class="sidebar" [class.oculto]="!menuAbierto">
 
-    <div class="usuario">
-      <img src="https://i.pravatar.cc/150" alt="usuario">
-      <div class="usuario-info">
-        <h4>{{ nombreUsuario() }}</h4>
-        <small>{{ emailUsuario() }}</small>
-        <button class="btn-logout" (click)="cerrarSesion()">Salir</button>
-      </div>
-    </div>
-  </aside>
+        <div class="logo">
 
-  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
+            <img src="assets/Logo.png" alt="logo">
 
-  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
-    <div class="header">
-      <div>
-        <h2>Materiales</h2>
-        <p>Gestiona los materiales de tus proyectos</p>
-      </div>
-      <button class="btn-nuevo" (click)="abrirFormularioNuevo()">+ Nuevo material</button>
-    </div>
+            <span>OPTIOBRA</span>
 
-    @if (mensaje) {
-      <div class="alert-success">{{ mensaje }}</div>
-    }
+            <button class="menu-btn" (click)="toggleMenu()">
+                ☰
+            </button>
 
-    @if (error) {
-      <div class="alert-error">{{ error }}</div>
-    }
+        </div>
 
-    <div class="filtros">
-      <input
-        type="text"
-        placeholder="Buscar materiales..."
-        [(ngModel)]="filtroBusqueda"
-        (keyup.enter)="buscar()">
+        <ul>
 
-      <select [(ngModel)]="filtroCategoria" (change)="buscar()">
-        <option value="">Todas las categorías</option>
-        @for (categoria of categorias; track categoria.id) {
-          <option [value]="categoria.id">{{ categoria.nombre }}</option>
-        }
-      </select>
+            <li>🏠 Dashboard</li>
 
-      <button class="btn-filtrar" (click)="buscar()">Buscar</button>
-      <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar</button>
-    </div>
+            <li>📁 Proyectos</li>
 
-    @if (mostrarFormulario) {
-      <section class="form-panel">
-        <h3>{{ materialEnEdicion ? 'Editar material' : 'Nuevo material' }}</h3>
+            <li class="activo">
+                📦 Materiales
+            </li>
 
-        <div class="form-grid">
-          <label>
-            Nombre
-            <input type="text" [(ngModel)]="formulario.nombre">
-          </label>
+            <li>📈 Avance de obra</li>
 
-          <label>
-            Código
-            <input type="text" [(ngModel)]="formulario.codigo" [disabled]="!!materialEnEdicion">
-          </label>
+            <li>👷 Trabajadores</li>
 
-          <label>
-            Categoría
-            <select [(ngModel)]="formulario.categoria">
-              <option [ngValue]="0">Selecciona una categoría</option>
-              @for (categoria of categorias; track categoria.id) {
-                <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
-              }
-            </select>
-          </label>
+            <li>📊 Reportes</li>
 
-          <label>
-            Precio
-            <input type="number" min="0" step="0.01" [(ngModel)]="formulario.precio">
-          </label>
+            <li>👤 Usuarios</li>
 
-          <label>
-            Cantidad
-            <input type="number" min="0" [(ngModel)]="formulario.cantidad">
-          </label>
+            <li>⚙️ Configuración</li>
 
-          <label>
-            Unidad
-            <select [(ngModel)]="formulario.unidad_medida">
-              @for (unidad of unidades; track unidad) {
-                <option [value]="unidad">{{ unidad }}</option>
-              }
+        </ul>
+
+        <div class="usuario">
+
+            <img src="https://i.pravatar.cc/150" alt="usuario">
+
+            <div>
+
+                <h4>Administrador</h4>
+
+                <small>admin@optiobra.com</small>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+        ☰
+    </button>
+
+    <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+        <div class="header">
+
+            <div>
+
+                <h2>Materiales</h2>
+
+                <p>
+                    Gestiona los materiales de tus proyectos
+                </p>
+
+            </div>
+
+            <button class="btn-nuevo" (click)="crearMaterial()">
+
+                + Nuevo material
+
+            </button>
+
+        </div>
+
+        <div class="filtros">
+
+            <input type="text" placeholder="Buscar materiales...">
+
+            <select>
+                <option>Todos los proyectos</option>
             </select>
           </label>
 
@@ -123,6 +102,58 @@
           </label>
         </div>
 
+        <div class="tabla-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Proyecto</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr *ngFor="let material of materiales">
+
+                        <td>{{ material.id }}</td>
+                        <td>{{ material.nombre }}</td>
+                        <td>{{ material.categoria }}</td>
+                        <td>{{ material.unidad }}</td>
+                        <td>{{ material.cantidad }}</td>
+                        <td>{{ material.precio }}</td>
+                        <td>{{ material.proyecto }}</td>
+
+                        <td class="acciones">
+
+                            <button class="editar" (click)="editarMaterial(material)">
+
+                                Editar
+
+                            </button>
+
+                            <button class="eliminar" (click)="eliminarMaterial(material)">
+
+                                Eliminar
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
         <label class="full-width">
           Descripción
           <textarea rows="3" [(ngModel)]="formulario.descripcion"></textarea>

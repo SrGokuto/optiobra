@@ -1,0 +1,184 @@
+<div class="dashboard">
+
+  <aside
+    class="sidebar"
+    [class.oculto]="!menuAbierto">
+
+    <div class="logo">
+
+      <img src="assets/Logo.png" alt="logo">
+
+      <span>OPTIOBRA</span>
+
+      <button
+        class="menu-btn"
+        (click)="toggleMenu()">
+
+        ☰
+
+      </button>
+
+    </div>
+
+    <ul>
+
+      <li>🏠 Dashboard</li>
+
+      <li class="activo">📁 Proyectos</li>
+
+      <li>📦 Materiales</li>
+
+      <li>📈 Avance de obra</li>
+
+      <li>👷 Trabajadores</li>
+
+      <li>📊 Reportes</li>
+
+      <li>👤 Usuarios</li>
+
+      <li>⚙️ Configuración</li>
+
+    </ul>
+
+    <div class="usuario">
+
+      <img
+        src="https://i.pravatar.cc/150"
+        alt="usuario">
+
+      <div>
+
+        <h4>Administrador</h4>
+
+        <small>admin@optiobra.com</small>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+  <button
+    *ngIf="!menuAbierto"
+    class="menu-fijo"
+    (click)="toggleMenu()">
+
+    ☰
+
+  </button>
+
+  <main
+    class="contenido"
+    [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+
+      <div>
+
+        <h2>Proyectos</h2>
+
+        <p>
+          Gestiona todos los proyectos registrados
+        </p>
+
+      </div>
+
+      <button
+        class="btn-nuevo"
+        (click)="crearProyecto()">
+
+        + Nuevo proyecto
+
+      </button>
+
+    </div>
+
+    <div class="filtros">
+
+      <input
+        type="text"
+        placeholder="Buscar proyecto...">
+
+      <select>
+
+        <option>Todos los estados</option>
+
+        <option>En proceso</option>
+
+        <option>Pendiente</option>
+
+        <option>Finalizado</option>
+
+      </select>
+
+    </div>
+
+    <div class="tabla-container">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+
+            <th>Proyecto</th>
+
+            <th>Responsable</th>
+
+            <th>Estado</th>
+
+            <th>Avance</th>
+
+            <th>Acciones</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let proyecto of proyectos">
+
+            <td>{{ proyecto.id }}</td>
+
+            <td>{{ proyecto.nombre }}</td>
+
+            <td>{{ proyecto.responsable }}</td>
+
+            <td>{{ proyecto.estado }}</td>
+
+            <td>{{ proyecto.avance }}</td>
+
+            <td class="acciones">
+
+              <button
+                class="editar"
+                (click)="editarProyecto(proyecto)">
+
+                Editar
+
+              </button>
+
+              <button
+                class="eliminar"
+                (click)="eliminarProyecto(proyecto)">
+
+                Eliminar
+
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </main>
+
+</div>

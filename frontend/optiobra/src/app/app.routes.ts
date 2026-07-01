@@ -1,6 +1,10 @@
 import { Routes } from '@angular/router';
-import { Materiales } from './pages/materiales/materiales';
+
 import { Login } from './pages/login/login';
+import { Dashboard } from './pages/dashboard/dashboard';
+import { Materiales } from './pages/materiales/materiales';
+import { Proyectos } from './pages/proyectos/proyectos';
+
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
@@ -12,7 +16,9 @@ export const routes: Routes = [
   {
     path: 'register',
     loadComponent: () =>
-      import('./components/register/register').then((m) => m.RegisterComponent),
+      import('./components/register/register').then(
+        (m) => m.RegisterComponent
+      ),
     canActivate: [guestGuard],
     title: 'Registro',
   },
@@ -23,10 +29,22 @@ export const routes: Routes = [
     title: 'Login',
   },
   {
+    path: 'dashboard',
+    component: Dashboard,
+    canActivate: [authGuard],
+    title: 'Dashboard',
+  },
+  {
     path: 'materiales',
     component: Materiales,
     canActivate: [authGuard],
     title: 'Materiales',
+  },
+  {
+    path: 'proyectos',
+    component: Proyectos,
+    canActivate: [authGuard],
+    title: 'Proyectos',
   },
   {
     path: '**',
