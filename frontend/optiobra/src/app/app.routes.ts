@@ -4,6 +4,8 @@ import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
+import { AvanceObra } from './pages/avance-obra/avance-obra';
+import { Trabajadores } from './pages/trabajadores/trabajadores';
 
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
@@ -45,6 +47,18 @@ export const routes: Routes = [
     component: Proyectos,
     canActivate: [authGuard],
     title: 'Proyectos',
+  },
+  {
+    path: 'avance-obra',
+    component: AvanceObra,
+    canActivate: [authGuard],
+    title: 'Avance de obra',
+  },
+  {
+    path: 'trabajadores',
+    component: Trabajadores,
+    canActivate: [authGuard],
+    title: 'Trabajadores',
   },
   {
     path: '**',
