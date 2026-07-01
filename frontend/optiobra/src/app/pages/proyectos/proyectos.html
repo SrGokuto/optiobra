@@ -1,0 +1,117 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button
+    *ngIf="!menuAbierto"
+    class="menu-fijo"
+    (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main
+    class="contenido"
+    [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+      <div>
+        <h2>Proyectos</h2>
+        <p>Gestiona todos los proyectos registrados</p>
+      </div>
+      <button class="btn-nuevo" (click)="crearProyecto()">
+        + Nuevo proyecto
+      </button>
+    </div>
+
+    @if (mensaje) {
+      <div class="alert-success">{{ mensaje }}</div>
+    }
+    @if (error) {
+      <div class="alert-error">{{ error }}</div>
+    }
+
+    @if (mostrarFormulario) {
+      <div class="form-panel">
+        <h3>{{ proyectoEnEdicion ? 'Editar proyecto' : 'Nuevo proyecto' }}</h3>
+        <div class="form-grid">
+          <label>
+            Nombre
+            <input type="text" [(ngModel)]="formulario.nombre" placeholder="Nombre del proyecto">
+          </label>
+          <label>
+            Ubicación
+            <input type="text" [(ngModel)]="formulario.ubicacion" placeholder="Ubicación del proyecto">
+          </label>
+          <label>
+            Fecha inicio
+            <input type="date" [(ngModel)]="formulario.fecha_inicio">
+          </label>
+          <label>
+            Fecha fin
+            <input type="date" [(ngModel)]="formulario.fecha_fin">
+          </label>
+          <label>
+            Estado
+            <select [(ngModel)]="formulario.estado">
+              <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
+            </select>
+          </label>
+          <label>
+            Avance (%)
+            <input type="number" [(ngModel)]="formulario.porcentaje_avance" min="0" max="100">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
+          <button class="btn-guardar" (click)="guardarProyecto()">
+            {{ proyectoEnEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="tabla-container">
+      @if (cargando) {
+        <p class="estado-tabla">Cargando proyectos...</p>
+      } @else if (proyectos.length === 0) {
+        <p class="estado-tabla">No hay proyectos para mostrar.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Ubicación</th>
+              <th>Estado</th>
+              <th>Avance</th>
+              <th>Fecha inicio</th>
+              <th>Fecha fin</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let proyecto of proyectos">
+              <td>{{ proyecto.id }}</td>
+              <td>{{ proyecto.nombre }}</td>
+              <td>{{ proyecto.ubicacion }}</td>
+              <td>
+                <span class="badge-estado" [ngClass]="proyecto.estado.toLowerCase().replace(' ', '-')">
+                  {{ proyecto.estado }}
+                </span>
+              </td>
+              <td>{{ proyecto.porcentaje_avance }}%</td>
+              <td>{{ proyecto.fecha_inicio }}</td>
+              <td>{{ proyecto.fecha_fin }}</td>
+              <td class="acciones">
+                <button class="editar" (click)="editarProyecto(proyecto)">Editar</button>
+                <button class="eliminar" (click)="eliminarProyecto(proyecto)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      }
+    </div>
+
+  </main>
+
+</div>

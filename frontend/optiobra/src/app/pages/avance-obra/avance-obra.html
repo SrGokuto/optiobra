@@ -1,0 +1,146 @@
+<div class="dashboard">
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+    <div class="page">
+      <div class="header">
+        <div class="header-info">
+          <h2>Avance de obra</h2>
+          <p>Registra y controla el progreso de tus proyectos</p>
+        </div>
+        <div class="header-actions">
+          <select [(ngModel)]="selectedProyecto" (ngModelChange)="seleccionarProyecto($event)" name="filtroProyecto">
+            <option *ngFor="let proyecto of proyectosDisponibles" [value]="proyecto">{{ proyecto }}</option>
+          </select>
+          <button class="btn-primary" (click)="abrirNuevoAvance()">+ Nuevo avance</button>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card" *ngFor="let stat of estadisticas">
+          <div class="icon" [ngClass]="stat.color">
+            <span class="material-symbols-outlined">{{ stat.icon }}</span>
+          </div>
+          <div class="info">
+            <span>{{ stat.titulo }}</span>
+            <h3>{{ stat.valor }}</h3>
+            <small [class.success]="stat.success" [class.warning]="stat.warning">{{ stat.detalle }}</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="inner-card">
+          <div class="content">
+            <div class="panel">
+              <div class="panel-title"><h3>Progreso por proyecto</h3></div>
+              <div class="projects-list">
+                <div class="project" *ngFor="let p of proyectos">
+                  <div class="row">
+                    <span>{{ p.nombre }}</span>
+                    <span>{{ p.porcentaje_avance }}%</span>
+                  </div>
+                  <div class="progress">
+                    <div class="fill" [style.width.%]="p.porcentaje_avance"></div>
+                  </div>
+                </div>
+              </div>
+              <a href="#">Ver todos los proyectos</a>
+            </div>
+
+            <div class="panel">
+              <div class="panel-title"><h3>Progresos recientes</h3></div>
+              <div class="table-wrapper">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Proyecto</th>
+                      <th>Actividad</th>
+                      <th>Avance</th>
+                      <th>Responsable</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let a of avancesFiltrados">
+                      <td>{{ a.fecha }}</td>
+                      <td>{{ a.proyecto_nombre }}</td>
+                      <td>{{ a.actividad }}</td>
+                      <td>{{ a.porcentaje }}%</td>
+                      <td>{{ a.responsable }}</td>
+                      <td class="actions-cell">
+                          <button class="icon-btn edit" (click)="editarAvance(a)" aria-label="Editar">
+                            <span class="material-symbols-outlined">edit</span>
+                          </button>
+                          <button class="icon-btn delete" (click)="eliminarAvance(a.id)" aria-label="Eliminar">
+                            <span class="material-symbols-outlined">delete</span>
+                          </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="avancesFiltrados.length === 0">
+                      <td colspan="6" class="empty-row">No hay avances para este proyecto.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <a href="#">Ver todos los avances</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" *ngIf="mostrarModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ modoEdicion ? 'Editar avance' : 'Nuevo avance' }}</h3>
+        <button class="close" (click)="cerrarModal()">×</button>
+      </div>
+      <form (ngSubmit)="guardarAvance()" class="modal-form">
+        <div class="form-grid">
+          <label>
+            Fecha
+            <input type="date" [(ngModel)]="nuevoAvance.fecha" name="fecha" required />
+          </label>
+          <label>
+            Proyecto
+            <select [(ngModel)]="nuevoAvance.proyecto" name="proyecto" required>
+              <option *ngFor="let proyecto of proyectos" [ngValue]="proyecto.id">{{ proyecto.nombre }}</option>
+            </select>
+          </label>
+          <label>
+            Actividad
+            <input type="text" [(ngModel)]="nuevoAvance.actividad" name="actividad" placeholder="Describe la actividad" required />
+          </label>
+          <label>
+            Avance (%)
+            <input type="number" [(ngModel)]="nuevoAvance.porcentaje" name="porcentaje" min="0" max="100" required />
+          </label>
+          <label>
+            Responsable
+            <input type="text" [(ngModel)]="nuevoAvance.responsable" name="responsable" placeholder="Nombre" required />
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="mostrarEliminar">
+    <div class="confirm-box">
+      <h3>Confirmar eliminación</h3>
+      <p>¿Deseas eliminar este avance?</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmarEliminar()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>

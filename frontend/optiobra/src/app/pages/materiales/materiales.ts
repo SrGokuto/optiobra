@@ -12,11 +12,12 @@ import {
 import { UsuarioAuth } from '../../../Models/usuario';
 import { AuthService } from '../../../Services/auth.service';
 import { CategoriaService, MaterialService } from '../../../Services/servicios';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './materiales.html',
   styleUrl: './materiales.scss',
 })
@@ -64,6 +65,14 @@ export class Materiales implements OnInit {
 
     this.cargarCategorias();
     this.cargarMateriales();
+  }
+
+  crearMaterial(): void {
+    this.abrirFormularioNuevo();
+  }
+
+  editarMaterial(material: Material): void {
+    this.abrirFormularioEdicion(material);
   }
 
   toggleMenu(): void {

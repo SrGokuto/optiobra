@@ -24,16 +24,31 @@ export class Login {
 
   onSubmit(): void {
     this.error = '';
-    this.cargando = true;
 
     const email = this.email.trim().toLowerCase();
     const password = this.password;
 
-    if (!email || !password) {
-      this.error = 'Ingresa tu correo y contraseña';
-      this.cargando = false;
+    if (!email) {
+      alert('El correo electrónico es obligatorio');
       return;
     }
+
+    if (!email.includes('@')) {
+      alert('Ingrese un correo válido');
+      return;
+    }
+
+    if (!password.trim()) {
+      alert('La contraseña es obligatoria');
+      return;
+    }
+
+    if (password.length < 8) {
+      alert('La contraseña debe tener mínimo 8 caracteres');
+      return;
+    }
+
+    this.cargando = true;
 
     this.authService.login(email, password).subscribe({
       next: (response) => {
@@ -41,14 +56,18 @@ export class Login {
 
         if (response.error) {
           this.error = response.mensaje || 'No se pudo iniciar sesión';
+          alert(this.error);
           return;
         }
 
-        this.router.navigate(['/materiales']);
+        alert('Inicio de sesión exitoso');
+
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;
         this.error = AuthService.extraerMensajeError(err);
+        alert(this.error);
       },
     });
   }

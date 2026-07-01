@@ -1,141 +1,22 @@
 <div class="dashboard">
-  <aside class="sidebar" [class.oculto]="!menuAbierto">
-    <div class="logo">
-      <img src="assets/Logo.png" alt="logo">
-      <span>OPTIOBRA</span>
-      <button class="menu-btn" (click)="toggleMenu()">☰</button>
-    </div>
 
-    <ul>
-      <li>🏠 Dashboard</li>
-      <li>📁 Proyectos</li>
-      <li class="activo">📦 Materiales</li>
-      <li>📈 Avance de obra</li>
-      <li>👷 Trabajadores</li>
-      <li>📊 Reportes</li>
-      <li>👤 Usuarios</li>
-      <li>⚙️ Configuración</li>
-    </ul>
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
-    <div class="usuario">
-      <img src="https://i.pravatar.cc/150" alt="usuario">
-      <div class="usuario-info">
-        <h4>{{ nombreUsuario() }}</h4>
-        <small>{{ emailUsuario() }}</small>
-        <button class="btn-logout" (click)="cerrarSesion()">Salir</button>
-      </div>
-    </div>
-  </aside>
-
-  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    ☰
+  </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
     <div class="header">
       <div>
         <h2>Materiales</h2>
         <p>Gestiona los materiales de tus proyectos</p>
       </div>
-      <button class="btn-nuevo" (click)="abrirFormularioNuevo()">+ Nuevo material</button>
+      <button class="btn-nuevo" (click)="crearMaterial()">
+        + Nuevo material
+      </button>
     </div>
-
-    @if (mensaje) {
-      <div class="alert-success">{{ mensaje }}</div>
-    }
-
-    @if (error) {
-      <div class="alert-error">{{ error }}</div>
-    }
-
-    <div class="filtros">
-      <input
-        type="text"
-        placeholder="Buscar materiales..."
-        [(ngModel)]="filtroBusqueda"
-        (keyup.enter)="buscar()">
-
-      <select [(ngModel)]="filtroCategoria" (change)="buscar()">
-        <option value="">Todas las categorías</option>
-        @for (categoria of categorias; track categoria.id) {
-          <option [value]="categoria.id">{{ categoria.nombre }}</option>
-        }
-      </select>
-
-      <button class="btn-filtrar" (click)="buscar()">Buscar</button>
-      <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar</button>
-    </div>
-
-    @if (mostrarFormulario) {
-      <section class="form-panel">
-        <h3>{{ materialEnEdicion ? 'Editar material' : 'Nuevo material' }}</h3>
-
-        <div class="form-grid">
-          <label>
-            Nombre
-            <input type="text" [(ngModel)]="formulario.nombre">
-          </label>
-
-          <label>
-            Código
-            <input type="text" [(ngModel)]="formulario.codigo" [disabled]="!!materialEnEdicion">
-          </label>
-
-          <label>
-            Categoría
-            <select [(ngModel)]="formulario.categoria">
-              <option [ngValue]="0">Selecciona una categoría</option>
-              @for (categoria of categorias; track categoria.id) {
-                <option [ngValue]="categoria.id">{{ categoria.nombre }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Precio
-            <input type="number" min="0" step="0.01" [(ngModel)]="formulario.precio">
-          </label>
-
-          <label>
-            Cantidad
-            <input type="number" min="0" [(ngModel)]="formulario.cantidad">
-          </label>
-
-          <label>
-            Unidad
-            <select [(ngModel)]="formulario.unidad_medida">
-              @for (unidad of unidades; track unidad) {
-                <option [value]="unidad">{{ unidad }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Estado
-            <select [(ngModel)]="formulario.estado">
-              @for (estado of estados; track estado) {
-                <option [value]="estado">{{ estado }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Proveedor
-            <input type="text" [(ngModel)]="formulario.proveedor">
-          </label>
-        </div>
-
-        <label class="full-width">
-          Descripción
-          <textarea rows="3" [(ngModel)]="formulario.descripcion"></textarea>
-        </label>
-
-        <div class="form-actions">
-          <button class="btn-guardar" [disabled]="guardando" (click)="guardarMaterial()">
-            {{ guardando ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
-        </div>
-      </section>
-    }
 
     <div class="tabla-container">
       @if (cargando) {
@@ -188,4 +69,5 @@
       </div>
     </div>
   </main>
+
 </div>

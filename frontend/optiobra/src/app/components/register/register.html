@@ -5,7 +5,7 @@
     <div class="brand">
 
       <div class="logo">
-        <img src="/icono-removebg-preview.png" class="brand-icon" width="150" height="q150 "/>
+        <img src="/icono-removebg-preview.png" class="brand-icon" width="150" height="150"/>
 
         <h1 class="nombre-logo">
           <span class="blanco">Opti</span><span class="amarillo">Obra</span>
@@ -53,7 +53,7 @@
               [class.is-invalid]="isInvalid('firstName')">
 
             @if (isInvalid('firstName')) {
-              <span class="error-msg">El nombre es requerido</span>
+              <span class="error-msg">{{ getErrorMessage('firstName') }}</span>
             }
           </div>
 
@@ -68,7 +68,7 @@
               [class.is-invalid]="isInvalid('lastName')">
 
             @if (isInvalid('lastName')) {
-              <span class="error-msg">El apellido es requerido</span>
+              <span class="error-msg">{{ getErrorMessage('lastName') }}</span>
             }
           </div>
 
@@ -87,7 +87,7 @@
             [class.is-invalid]="isInvalid('email')">
 
           @if (isInvalid('email')) {
-            <span class="error-msg">Ingresa un correo válido</span>
+            <span class="error-msg">{{ getErrorMessage('email') }}</span>
           }
         </div>
 
@@ -114,9 +114,7 @@
             </div>
 
             @if (isInvalid('password')) {
-              <span class="error-msg">
-                La contraseña debe tener mínimo 6 caracteres
-              </span>
+              <span class="error-msg">{{ getErrorMessage('password') }}</span>
             }
           </div>
 
@@ -144,9 +142,13 @@
               </button>
             </div>
 
+            @if (isInvalid('confirmPassword') && !passwordMismatch) {
+              <span class="error-msg">{{ getErrorMessage('confirmPassword') }}</span>
+            }
+
             @if (passwordMismatch) {
               <span class="error-msg">
-                Las contraseñas no coinciden
+                Las contraseñas no coinciden.
               </span>
             }
           </div>
@@ -168,9 +170,7 @@
               [class.is-invalid]="isInvalid('phone')">
 
             @if (isInvalid('phone')) {
-              <span class="error-msg">
-                El teléfono es requerido
-              </span>
+              <span class="error-msg">{{ getErrorMessage('phone') }}</span>
             }
           </div>
 
@@ -195,9 +195,7 @@
           </label>
 
           @if (isInvalid('acceptTerms')) {
-            <span class="error-msg">
-              Debes aceptar los términos
-            </span>
+            <span class="error-msg">{{ getErrorMessage('acceptTerms') }}</span>
           }
 
         </div>

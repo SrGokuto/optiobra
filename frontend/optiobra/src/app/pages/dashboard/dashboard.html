@@ -1,0 +1,112 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button
+    *ngIf="!menuAbierto"
+    class="menu-fijo"
+    (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main
+    class="contenido"
+    [class.menu-cerrado]="!menuAbierto">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Resumen general de tus proyectos</p>
+      </div>
+    </div>
+
+    @if (error) {
+      <div class="alert-error">{{ error }}</div>
+    }
+
+    @if (cargando) {
+      <p class="estado-carga">Cargando estadísticas...</p>
+    }
+
+    @if (!cargando && estadisticas) {
+
+      <!-- TARJETAS -->
+      <div class="cards">
+        <div class="card">
+          <h4>Proyectos activos</h4>
+          <h2>{{ estadisticas.proyectos_en_progreso }}</h2>
+          <small>de {{ estadisticas.total_proyectos }} totales</small>
+        </div>
+        <div class="card">
+          <h4>Materiales</h4>
+          <h2>{{ estadisticas.total_materiales }}</h2>
+          <small>registrados</small>
+        </div>
+        <div class="card">
+          <h4>Trabajadores</h4>
+          <h2>{{ estadisticas.total_trabajadores }}</h2>
+          <small>en la empresa</small>
+        </div>
+        <div class="card">
+          <h4>Avance promedio</h4>
+          <h2>{{ estadisticas.avance_promedio }}%</h2>
+          <small>de todos los proyectos</small>
+        </div>
+      </div>
+
+      <!-- DOS COLUMNAS -->
+      <div class="paneles">
+        <!-- GRAFICO -->
+        <div class="panel">
+          <h3>Avance de proyectos</h3>
+          <div class="grafico">
+            <div class="donut" [style.background]="'conic-gradient(#F29F05 ' + estadisticas.avance_promedio + '%, #e5e7eb ' + estadisticas.avance_promedio + '%)'">
+              <span>{{ estadisticas.avance_promedio }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESUMEN RAPIDO -->
+        <div class="panel">
+          <h3>Resumen rápido</h3>
+          <ul class="actividad">
+            <li>📁 {{ estadisticas.total_proyectos }} proyectos registrados</li>
+            <li>🏗️ {{ estadisticas.proyectos_en_progreso }} en progreso</li>
+            <li>📦 {{ estadisticas.total_materiales }} materiales en inventario</li>
+            <li>👷 {{ estadisticas.total_trabajadores }} trabajadores activos</li>
+            <li>📈 {{ estadisticas.avance_promedio }}% avance promedio</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- PROYECTOS RECIENTES -->
+      <div class="panel" *ngIf="estadisticas.proyectos_recientes.length > 0">
+        <h3>Proyectos recientes</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Proyecto</th>
+              <th>Estado</th>
+              <th>Avance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let proyecto of estadisticas.proyectos_recientes">
+              <td>{{ proyecto.nombre }}</td>
+              <td>
+                <span class="badge-estado" [ngClass]="proyecto.estado.toLowerCase().replace(' ', '-')">
+                  {{ proyecto.estado }}
+                </span>
+              </td>
+              <td>{{ proyecto.porcentaje_avance }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    }
+
+  </main>
+
+</div>
