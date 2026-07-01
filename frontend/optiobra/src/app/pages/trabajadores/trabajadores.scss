@@ -11,7 +11,7 @@
 
 .dashboard {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: #f5f7fa;
   overflow-x: hidden;
 }
@@ -37,7 +37,7 @@
   flex: 1;
   min-width: 0;
   padding: 16px 20px;
-  overflow-x: hidden;
+  overflow: auto;
   background: #f0f4f8;
 }
 
@@ -612,7 +612,7 @@ tbody {
 /* RESPONSIVE MÓVIL */
 
 @media (max-width: 768px) {
-  .dashboard { display: block; min-height: auto; }
+  .dashboard { display: block; height: auto; }
 
   .sidebar {
     position: fixed;

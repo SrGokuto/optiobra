@@ -12,7 +12,7 @@
 
 .dashboard {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: #f5f7fa;
   overflow-x: hidden;
 }
@@ -40,6 +40,7 @@
   padding: 24px 32px;
   max-width: none;
   margin: 0;
+  overflow: auto;
 }
 
 .page {
@@ -422,7 +423,7 @@ tbody tr:hover {
 }
 
 @media (max-width: 768px) {
-  .dashboard { display: block; min-height: auto; }
+  .dashboard { display: block; height: auto; }
 
   .contenido { padding: 80px 15px 20px; margin-left: 0; overflow: visible; }
   .cards { grid-template-columns: 1fr; }
@@ -433,5 +434,5 @@ tbody tr:hover {
 }
 
 @media (min-width: 769px) {
-  .contenido { height: auto; overflow: visible; padding-bottom: 15px; }
+  .contenido { padding-bottom: 15px; }
 }
