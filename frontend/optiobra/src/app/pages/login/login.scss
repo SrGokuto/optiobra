@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :host {
   display: block;
@@ -9,6 +10,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
 }
 
 .login-container {
@@ -17,6 +19,7 @@
   overflow: hidden;
   display: flex;
 }
+
 
 
 .left-panel {
@@ -36,7 +39,7 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(5, 15, 35, 0.80);
+  background: rgba(5, 15, 35, .80);
 }
 
 .content {
@@ -60,6 +63,7 @@
   font-size: 56px;
   font-weight: 700;
   line-height: 1;
+  letter-spacing: 1px;
 }
 
 .blanco {
@@ -74,7 +78,8 @@
   margin-top: 12px;
   color: #e5e7eb;
   font-size: 18px;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 .linea {
@@ -84,6 +89,7 @@
   background: #F29F05;
   margin-top: 20px;
 }
+
 
 
 .right-panel {
@@ -100,6 +106,7 @@
 .login-card {
   width: 100%;
   max-width: 430px;
+  padding: 10px;
 }
 
 .login-card h2 {
@@ -107,12 +114,14 @@
   font-size: 34px;
   color: #1f2937;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .subtitulo {
   text-align: center;
   color: #6b7280;
   margin-bottom: 30px;
+  font-size: 15px;
 }
 
 .input-group {
@@ -123,6 +132,7 @@
   display: block;
   margin-bottom: 8px;
   font-size: 14px;
+  font-weight: 500;
   color: #374151;
 }
 
@@ -135,11 +145,14 @@
 
   padding: 0 15px;
   font-size: 15px;
+
+  transition: .3s;
 }
 
 .input-group input:focus {
   outline: none;
   border-color: #F29F05;
+  box-shadow: 0 0 0 3px rgba(242, 159, 5, .15);
 }
 
 .forgot {
@@ -149,6 +162,11 @@
 
   color: #F29F05;
   text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot:hover {
+  text-decoration: underline;
 }
 
 button {
@@ -163,17 +181,25 @@ button {
 
   font-size: 16px;
   font-weight: 600;
+
   cursor: pointer;
+  transition: .3s;
 }
 
 button:hover {
   background: #d88e04;
 }
 
+button:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
 .register {
   text-align: center;
   margin-top: 20px;
   color: #6b7280;
+  font-size: 15px;
 }
 
 .register a {
@@ -182,19 +208,20 @@ button:hover {
   font-weight: 600;
 }
 
+.register a:hover {
+  text-decoration: underline;
+}
+
 .error-message {
   color: #dc2626;
   font-size: 14px;
   margin-bottom: 12px;
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+  text-align: center;
 }
 
 
-@media (max-width: 768px) {
+
+@media (max-width:768px) {
 
   .login-container {
     flex-direction: column;

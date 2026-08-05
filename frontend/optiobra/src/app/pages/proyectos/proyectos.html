@@ -1,8 +1,6 @@
 <div class="dashboard">
 
-  <aside
-    class="sidebar"
-    [class.oculto]="!menuAbierto">
+  <aside class="sidebar" [class.oculto]="!menuAbierto">
 
     <div class="logo">
 
@@ -10,9 +8,7 @@
 
       <span>OPTIOBRA</span>
 
-      <button
-        class="menu-btn"
-        (click)="toggleMenu()">
+      <button class="menu-btn" (click)="toggleMenu()">
 
         ☰
 
@@ -20,31 +16,49 @@
 
     </div>
 
-    <ul>
+    <li>
+      <i class="bi bi-speedometer2"></i>
+      Dashboard
+    </li>
 
-      <li>🏠 Dashboard</li>
+    <li class="activo">
+      <i class="bi bi-folder2-open"></i>
+      Proyectos
+    </li>
 
-      <li class="activo">📁 Proyectos</li>
+    <li>
+      <i class="bi bi-box-seam"></i>
+      Materiales
+    </li>
 
-      <li>📦 Materiales</li>
+    <li>
+      <i class="bi bi-graph-up-arrow"></i>
+      Avance de obra
+    </li>
 
-      <li>📈 Avance de obra</li>
+    <li>
+      <i class="bi bi-person-workspace"></i>
+      Trabajadores
+    </li>
 
-      <li>👷 Trabajadores</li>
+    <li>
+      <i class="bi bi-bar-chart-line"></i>
+      Reportes
+    </li>
 
-      <li>📊 Reportes</li>
+    <li>
+      <i class="bi bi-people"></i>
+      Usuarios
+    </li>
 
-      <li>👤 Usuarios</li>
-
-      <li>⚙️ Configuración</li>
-
-    </ul>
+    <li>
+      <i class="bi bi-gear"></i>
+      Configuración
+    </li>
 
     <div class="usuario">
 
-      <img
-        src="https://i.pravatar.cc/150"
-        alt="usuario">
+      <img src="https://i.pravatar.cc/150" alt="usuario">
 
       <div>
 
@@ -58,18 +72,13 @@
 
   </aside>
 
-  <button
-    *ngIf="!menuAbierto"
-    class="menu-fijo"
-    (click)="toggleMenu()">
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
 
     ☰
 
   </button>
 
-  <main
-    class="contenido"
-    [class.menu-cerrado]="!menuAbierto">
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
 
     <div class="header">
 
@@ -83,9 +92,7 @@
 
       </div>
 
-      <button
-        class="btn-nuevo"
-        (click)="crearProyecto()">
+      <button class="btn-nuevo" (click)="crearProyecto()">
 
         + Nuevo proyecto
 
@@ -95,9 +102,7 @@
 
     <div class="filtros">
 
-      <input
-        type="text"
-        placeholder="Buscar proyecto...">
+      <input type="text" placeholder="Buscar proyecto...">
 
       <select>
 
@@ -153,17 +158,13 @@
 
             <td class="acciones">
 
-              <button
-                class="editar"
-                (click)="editarProyecto(proyecto)">
+              <button class="editar" (click)="editarProyecto(proyecto)">
 
                 Editar
 
               </button>
 
-              <button
-                class="eliminar"
-                (click)="eliminarProyecto(proyecto)">
+              <button class="eliminar" (click)="eliminarProyecto(proyecto)">
 
                 Eliminar
 

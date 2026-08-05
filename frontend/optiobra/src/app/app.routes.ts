@@ -4,6 +4,8 @@ import { Login } from './pages/login/login';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
+import { Usuarios } from './pages/usuarios/usuarios';
+import { Configuracion } from './pages/configuracion/configuracion';
 
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
@@ -15,10 +17,7 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./components/register/register').then(
-        (m) => m.RegisterComponent
-      ),
+    loadComponent: () => import('./components/register/register').then((m) => m.RegisterComponent),
     canActivate: [guestGuard],
     title: 'Registro',
   },
@@ -45,6 +44,18 @@ export const routes: Routes = [
     component: Proyectos,
     canActivate: [authGuard],
     title: 'Proyectos',
+  },
+  {
+    path: 'usuarios',
+    component: Usuarios,
+    canActivate: [authGuard],
+    title: 'Usuarios',
+  },
+  {
+    path: 'configuracion',
+    component: Configuracion,
+    canActivate: [authGuard],
+    title: 'Configuración',
   },
   {
     path: '**',

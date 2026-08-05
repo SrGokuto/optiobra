@@ -32,41 +32,27 @@
         <div class="input-group">
           <label for="email">Correo electrónico</label>
 
-          <input
-            id="email"
-            type="email"
-            placeholder="ejemplo@correo.com"
-            [(ngModel)]="email"
-            name="email"
-            autocomplete="email"
-            required>
+          <input id="email" type="email" placeholder="ejemplo@correo.com" [(ngModel)]="email" name="email"
+            autocomplete="email" required>
         </div>
 
         <div class="input-group">
           <label for="password">Contraseña</label>
 
-          <input
-            id="password"
-            type="password"
-            placeholder="********"
-            [(ngModel)]="password"
-            name="password"
-            autocomplete="current-password"
-            required>
+          <input id="password" type="password" placeholder="********" [(ngModel)]="password" name="password"
+            autocomplete="current-password" required>
         </div>
 
         @if (error) {
-          <p class="error-message">{{ error }}</p>
+        <p class="error-message">{{ error }}</p>
         }
 
-        <button
-          type="submit"
-          [disabled]="cargando">
+        <button type="submit" [disabled]="cargando">
 
           @if (!cargando) {
-            <span>Iniciar sesión</span>
+          <span>Iniciar sesión</span>
           } @else {
-            <span>Iniciando...</span>
+          <span>Iniciando...</span>
           }
 
         </button>

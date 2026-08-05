@@ -1,0 +1,191 @@
+<div class="dashboard">
+
+  <aside class="sidebar" [class.oculto]="!menuAbierto">
+
+    <div class="logo">
+
+      <img src="assets/Logo.png" alt="logo">
+
+      <span>OPTIOBRA</span>
+
+      <button class="menu-btn" (click)="toggleMenu()">
+        ☰
+      </button>
+
+    </div>
+
+    <ul>
+
+      <li>
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+      </li>
+
+      <li>
+        <i class="bi bi-folder2-open"></i>
+        Proyectos
+      </li>
+
+      <li>
+        <i class="bi bi-box-seam"></i>
+        Materiales
+      </li>
+
+      <li>
+        <i class="bi bi-graph-up-arrow"></i>
+        Avance de obra
+      </li>
+
+      <li>
+        <i class="bi bi-person-workspace"></i>
+        Trabajadores
+      </li>
+
+      <li>
+        <i class="bi bi-bar-chart-line"></i>
+        Reportes
+      </li>
+
+      <li>
+        <i class="bi bi-people"></i>
+        Usuarios
+      </li>
+
+      <li class="activo">
+        <i class="bi bi-gear"></i>
+        Configuración
+      </li>
+
+    </ul>
+
+    <div class="usuario">
+
+      <img src="https://i.pravatar.cc/150" alt="usuario">
+
+      <div>
+
+        <h4>Administrador</h4>
+
+        <small>admin@optiobra.com</small>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+  <button *ngIf="!menuAbierto"
+          class="menu-fijo"
+          (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+
+      <div>
+
+        <h2>Configuración</h2>
+
+        <p>
+          Ajusta la configuración general del sistema
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="configuracion">
+
+      <aside class="menu-config">
+
+        <button class="item activo">
+          <i class="bi bi-sliders"></i>
+          Información general
+        </button>
+
+        <button class="item">
+          <i class="bi bi-building"></i>
+          Perfil de empresa
+        </button>
+
+        <button class="item">
+          <i class="bi bi-bell"></i>
+          Notificaciones
+        </button>
+
+        <button class="item">
+          <i class="bi bi-shield-lock"></i>
+          Seguridad
+        </button>
+
+        <button class="item">
+          <i class="bi bi-database"></i>
+          Respaldo de datos
+        </button>
+
+      </aside>
+
+      <section class="formulario">
+
+        <h3>Información general</h3>
+
+        <div class="grid">
+
+          <div class="campo">
+            <label>Nombre de la empresa</label>
+            <input
+              type="text"
+              value="OptiObra Constructora S.A.C.">
+          </div>
+
+          <div class="campo">
+            <label>Correo electrónico</label>
+            <input
+              type="email"
+              value="contacto@optiobra.com">
+          </div>
+
+          <div class="campo">
+            <label>RUC</label>
+            <input
+              type="text"
+              value="900123456">
+          </div>
+
+          <div class="campo">
+            <label>Teléfono</label>
+            <input
+              type="text"
+              value="(+57) 3001234567">
+          </div>
+
+          <div class="campo">
+            <label>Dirección</label>
+            <input
+              type="text"
+              value="Cra. 15 #80-25 Bogotá">
+          </div>
+
+        </div>
+
+        <div class="acciones">
+
+          <button
+            class="btn-guardar"
+            (click)="guardarConfiguracion()">
+
+            Guardar cambios
+
+          </button>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
