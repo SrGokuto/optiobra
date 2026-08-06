@@ -1,0 +1,102 @@
+<div class="reportes-container">
+
+  <h2>Reportes</h2>
+
+  <!-- Filtros -->
+  <div class="filtros">
+
+    <div class="campo">
+      <label>Tipo de reporte</label>
+      <select>
+        <option selected disabled>Seleccione</option>
+        <option>Proyectos</option>
+        <option>Materiales</option>
+        <option>Trabajadores</option>
+        <option>Avance de obra</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Proyecto</label>
+      <select>
+        <option selected disabled>Seleccione</option>
+        <option>Proyecto A</option>
+        <option>Proyecto B</option>
+        <option>Proyecto C</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Fecha Inicio</label>
+      <input type="date">
+    </div>
+
+    <div class="campo">
+      <label>Fecha Fin</label>
+      <input type="date">
+    </div>
+
+    <div class="boton-generar">
+      <button>Generar Reporte</button>
+    </div>
+
+  </div>
+
+  <!-- Tarjetas -->
+  <div class="cards">
+
+    <div class="card">
+      <h3>15</h3>
+      <p>Proyectos Activos</p>
+    </div>
+
+    <div class="card">
+      <h3>120</h3>
+      <p>Trabajadores</p>
+    </div>
+
+    <div class="card">
+      <h3>$580 M</h3>
+      <p>Presupuesto</p>
+    </div>
+
+    <div class="card">
+      <h3>85%</h3>
+      <p>Avance Promedio</p>
+    </div>
+
+  </div>
+
+  <!-- Gráficas -->
+  <div class="graficas">
+
+    <div class="grafica">
+      <h3>Avance por Proyecto</h3>
+
+      <div class="placeholder">
+        Aquí irá la gráfica de barras
+      </div>
+
+    </div>
+
+    <div class="grafica">
+      <h3>Distribución de Recursos</h3>
+
+      <div class="placeholder">
+        Aquí irá la gráfica circular
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Botones -->
+  <div class="exportar">
+
+    <button>Exportar PDF</button>
+
+    <button>Exportar Excel</button>
+
+  </div>
+
+</div>

@@ -1,6 +1,7 @@
 <div class="dashboard">
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
+
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">

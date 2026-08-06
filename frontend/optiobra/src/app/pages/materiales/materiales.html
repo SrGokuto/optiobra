@@ -110,22 +110,23 @@
     }
 
     <div class="tabla-container">
-      @if (cargando) {
+      <ng-container *ngIf="cargando; else listaMateriales">
         <p class="estado-tabla">Cargando materiales...</p>
-      } @else if (materiales.length === 0) {
-        <p class="estado-tabla">No hay materiales para mostrar.</p>
-      } @else {
-        <table>
+      </ng-container>
+
+      <ng-template #listaMateriales>
+        <p *ngIf="materiales.length === 0" class="estado-tabla">No hay materiales para mostrar.</p>
+
+        <table *ngIf="materiales.length > 0">
           <thead>
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Código</th>
               <th>Categoría</th>
               <th>Unidad</th>
               <th>Cantidad</th>
               <th>Precio</th>
-              <th>Estado</th>
+              <th>Proveedor</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -148,7 +149,7 @@
             }
           </tbody>
         </table>
-      }
+      </ng-template>
     </div>
 
     <div class="paginacion">
