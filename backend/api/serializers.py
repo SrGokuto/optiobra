@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
+from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -108,6 +108,43 @@ class HistorialMaterialSerializer(serializers.ModelSerializer):
             'fecha',
         ]
         read_only_fields = ['id', 'fecha', 'usuario_nombre', 'material_nombre']
+
+
+class ProyectoSerializer(serializers.ModelSerializer):
+    """Serializer para Proyectos"""
+    creado_por_nombre = serializers.CharField(source='creado_por.username', read_only=True)
+
+    class Meta:
+        model = Proyecto
+        fields = [
+            'id',
+            'nombre',
+            'descripcion',
+            'direccion',
+            'responsable',
+            'estado',
+            'avance',
+            'fecha_inicio',
+            'fecha_fin_estimada',
+            'presupuesto',
+            'creado_en',
+            'actualizado_en',
+            'creado_por',
+            'creado_por_nombre',
+        ]
+        read_only_fields = ['creado_en', 'actualizado_en', 'creado_por', 'creado_por_nombre']
+
+    def validate_nombre(self, value):
+        if not value or len(value.strip()) == 0:
+            raise serializers.ValidationError("El nombre del proyecto no puede estar vacío")
+        if len(value) > 255:
+            raise serializers.ValidationError("El nombre no puede exceder 255 caracteres")
+        return value.strip()
+
+    def validate_avance(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("El avance debe estar entre 0 y 100")
+        return value
 
 
 class UsuarioSupabaseSerializer(serializers.ModelSerializer):

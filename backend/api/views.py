@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 import logging
 
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
-from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer
+from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto
+from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer, ProyectoSerializer
 from .services import SupabaseAuthService
 
 logger = logging.getLogger(__name__)
@@ -241,6 +241,60 @@ class MaterialViewSet(viewsets.ModelViewSet):
             'valor_total_inventario': float(total_valor_inventario),
             'distribucion_por_categoria': list(categorias),
         })
+
+
+class ProyectoViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para el CRUD de proyectos
+    Endpoints disponibles:
+    - GET /api/proyectos/ - Listar proyectos
+    - POST /api/proyectos/ - Crear proyecto
+    - GET /api/proyectos/{id}/ - Obtener proyecto
+    - PUT /api/proyectos/{id}/ - Editar proyecto
+    - PATCH /api/proyectos/{id}/ - Editar parcialmente
+    - DELETE /api/proyectos/{id}/ - Eliminar proyecto
+    """
+    queryset = Proyecto.objects.all().select_related('creado_por')
+    serializer_class = ProyectoSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre', 'descripcion', 'responsable', 'direccion']
+    ordering_fields = ['nombre', 'estado', 'avance', 'creado_en', 'fecha_inicio']
+    ordering = ['-creado_en']
+
+    def get_queryset(self):
+        """Obtener proyectos con filtros avanzados"""
+        queryset = super().get_queryset()
+
+        estado = self.request.query_params.get('estado', '')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+
+        search = self.request.query_params.get('search', '')
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search) |
+                Q(descripcion__icontains=search) |
+                Q(responsable__icontains=search)
+            )
+
+        return queryset
+
+    def perform_create(self, serializer):
+        """Crear proyecto y registrar usuario"""
+        proyecto = serializer.save(creado_por=self.request.user)
+        logger.info(f"Proyecto creado: {proyecto.nombre} por {self.request.user.username}")
+
+    def perform_update(self, serializer):
+        """Actualizar proyecto"""
+        proyecto = serializer.save()
+        logger.info(f"Proyecto actualizado: {proyecto.nombre} por {self.request.user.username}")
+
+    def perform_destroy(self, instance):
+        """Eliminar proyecto"""
+        nombre = instance.nombre
+        instance.delete()
+        logger.info(f"Proyecto eliminado: {nombre} por {self.request.user.username}")
 
 
 class AuthViewSet(viewsets.ViewSet):
