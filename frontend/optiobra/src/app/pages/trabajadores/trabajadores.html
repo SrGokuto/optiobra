@@ -17,43 +17,43 @@
     <ul>
 
       <li>
-        <span class="item-icon">🏠</span>
-        <span>Dashboard</span>
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
       </li>
 
       <li>
-        <span class="item-icon">📁</span>
-        <span>Proyectos</span>
+        <i class="bi bi-folder2-open"></i>
+        Proyectos
       </li>
 
       <li>
-        <span class="item-icon">📦</span>
-        <span>Materiales</span>
+        <i class="bi bi-box-seam"></i>
+        Materiales
       </li>
 
       <li>
-        <span class="item-icon">📈</span>
-        <span>Avance de obra</span>
+        <i class="bi bi-graph-up-arrow"></i>
+        Avance de obra
       </li>
 
       <li class="activo">
-        <span class="item-icon">👷</span>
-        <span>Trabajadores</span>
+        <i class="bi bi-person-workspace"></i>
+        Trabajadores
       </li>
 
       <li>
-        <span class="item-icon">📊</span>
-        <span>Reportes</span>
+        <i class="bi bi-bar-chart-line"></i>
+        Reportes
       </li>
 
       <li>
-        <span class="item-icon">👤</span>
-        <span>Usuarios</span>
+        <i class="bi bi-people"></i>
+        Usuarios
       </li>
 
       <li>
-        <span class="item-icon">⚙️</span>
-        <span>Configuración</span>
+        <i class="bi bi-gear"></i>
+        Configuración
       </li>
 
     </ul>
@@ -91,7 +91,7 @@
           <p>Gestiona el personal de tu empresa</p>
         </div>
         <button class="btn-primary" (click)="nuevoTrabajador()">
-          <span class="material-symbols-outlined">add</span>
+          <span class="material-symbols-outlined"></span>
           Nuevo trabajador
         </button>
       </div>
@@ -99,7 +99,7 @@
       <!-- Barra de filtros -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">search</span>
+          <span class="material-symbols-outlined">🔍</span>
           <input
             type="text"
             placeholder="Buscar trabajadores..."
@@ -165,15 +165,13 @@
                       class="btn-icon editar"
                       (click)="editarTrabajador(trabajador)"
                       title="Editar">
-                      <span class="material-symbols-outlined">edit</span>
-                      <span class="btn-label">Editar</span>
+                      <span class="material-symbols-outlined">✏️</span>
                     </button>
                     <button
                       class="btn-icon eliminar"
                       (click)="eliminarTrabajador(trabajador.id)"
                       title="Eliminar">
-                      <span class="material-symbols-outlined">delete</span>
-                      <span class="btn-label">Eliminar</span>
+                      <span class="material-symbols-outlined">⛔</span>
                     </button>
                   </div>
                 </td>
@@ -204,7 +202,7 @@
 
           <div class="pagination">
             <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
-              <span class="material-symbols-outlined">chevron_left</span>
+              <span class="material-symbols-outlined"></span>
             </button>
             <button
               *ngFor="let p of paginasVisible"
@@ -214,7 +212,7 @@
               {{ p }}
             </button>
             <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
-              <span class="material-symbols-outlined">chevron_right</span>
+              <span class="material-symbols-outlined"></span>
             </button>
           </div>
 

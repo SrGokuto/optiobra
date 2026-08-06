@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 /*==============================
 RESET
 ==============================*/
@@ -220,13 +222,13 @@ CONTENIDO
 }
 
 .menu-cerrado {
-  padding-top: 70px;
-  width: 100%;
+  padding-top: 200px;
+  width: 500%;
 }
 
 .page {
-  width: 100%;
-  max-width: 1400px;
+  width: 200%;
+  max-width: 2750px;
 }
 
 /*==============================
@@ -980,24 +982,14 @@ RESPONSIVE MÓVIL
   }
 
   .btn-icon {
-    width: auto;
+    width: 36px;
     height: 36px;
-    padding: 6px 10px;
+    padding: 0;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 600;
+    justify-content: center;
   }
-
-  .btn-icon .btn-label {
-    display: inline-block;
-  }
-}
-
-/* Hide button labels on desktop/tablet by default */
-.btn-icon .btn-label {
-  display: none;
 }
 
 /*==============================

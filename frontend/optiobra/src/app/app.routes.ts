@@ -6,13 +6,15 @@ import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
 import { AvanceObra } from './pages/avance-obra/avance-obra';
 import { Trabajadores } from './pages/trabajadores/trabajadores';
+import { ReportesComponent } from './pages/reportes/reportes';
 
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    // TEMPORAL: iniciar la aplicación en Materiales mientras se desarrolla el frontend sin backend.
+    redirectTo: 'trabajadores',
     pathMatch: 'full',
   },
   {
@@ -21,47 +23,62 @@ export const routes: Routes = [
       import('./components/register/register').then(
         (m) => m.RegisterComponent
       ),
-    canActivate: [guestGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [guestGuard],
     title: 'Registro',
   },
   {
     path: 'login',
     component: Login,
-    canActivate: [guestGuard],
+    // TEMPORAL: guestGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [guestGuard],
     title: 'Login',
   },
   {
     path: 'dashboard',
     component: Dashboard,
-    canActivate: [authGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
     title: 'Dashboard',
   },
   {
     path: 'materiales',
     component: Materiales,
-    canActivate: [authGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
     title: 'Materiales',
   },
   {
     path: 'proyectos',
     component: Proyectos,
-    canActivate: [authGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
     title: 'Proyectos',
   },
   {
     path: 'avance-obra',
     component: AvanceObra,
-    canActivate: [authGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
     title: 'Avance de obra',
   },
   {
     path: 'trabajadores',
     component: Trabajadores,
-    canActivate: [authGuard],
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
     title: 'Trabajadores',
   },
   {
+    path: 'reportes',
+    component: ReportesComponent,
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
+    title: 'Reportes',
+  },
+  {
     path: '**',
-    redirectTo: 'login',
+    // TEMPORAL: redirigir a Materiales mientras se desarrolla el frontend sin backend.
+    redirectTo: 'trabajadore ',
   },
 ];

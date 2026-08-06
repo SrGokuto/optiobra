@@ -1,30 +1,73 @@
 <div class="dashboard">
+
+  <!--==========================
+      SIDEBAR
+  ===========================-->
+
   <aside class="sidebar" [class.oculto]="!menuAbierto">
+
     <div class="logo">
-      <img src="assets/Logo.png" alt="logo">
+      <img src="assets/Logo.png" alt="OPTIOBRA">
       <span>OPTIOBRA</span>
-      <button class="menu-btn" (click)="toggleMenu()">☰</button>
+      <button class="menu-btn" (click)="toggleMenu()">
+        ☰
+      </button>
     </div>
 
     <ul>
-      <li><span class="item-icon">🏠</span><span>Dashboard</span></li>
-      <li><span class="item-icon">📁</span><span>Proyectos</span></li>
-      <li><span class="item-icon">📦</span><span>Materiales</span></li>
-      <li class="activo"><span class="item-icon">📈</span><span>Avance de obra</span></li>
-      <li><span class="item-icon">👷</span><span>Trabajadores</span></li>
-      <li><span class="item-icon">📊</span><span>Reportes</span></li>
-      <li><span class="item-icon">👤</span><span>Usuarios</span></li>
-      <li><span class="item-icon">⚙️</span><span>Configuración</span></li>
+
+      <li>
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+      </li>
+
+      <li>
+        <i class="bi bi-folder2-open"></i>
+        Proyectos
+      </li>
+
+      <li>
+        <i class="bi bi-box-seam"></i>
+        Materiales
+      </li>
+
+      <li>
+        <i class="bi bi-graph-up-arrow"></i>
+        Avance de obra
+      </li>
+
+      <li class="activo">
+        <i class="bi bi-person-workspace"></i>
+        Trabajadores
+      </li>
+
+      <li>
+        <i class="bi bi-bar-chart-line"></i>
+        Reportes
+      </li>
+
+      <li>
+        <i class="bi bi-people"></i>
+        Usuarios
+      </li>
+
+      <li>
+        <i class="bi bi-gear"></i>
+        Configuración
+      </li>
+
     </ul>
 
     <div class="usuario">
-      <img src="https://i.pravatar.cc/150" alt="usuario">
+      <img src="https://i.pravatar.cc/150?img=12" alt="Administrador">
       <div>
         <h4>Administrador</h4>
         <small>admin@optiobra.com</small>
       </div>
     </div>
+
   </aside>
+
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
 

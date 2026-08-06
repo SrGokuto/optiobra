@@ -1,213 +1,114 @@
 <div class="dashboard">
 
-    <aside class="sidebar" [class.oculto]="!menuAbierto">
+  <aside class="sidebar" [class.oculto]="!menuAbierto">
+    <div class="logo">
+      <img src="assets/Logo.png" alt="logo">
+      <span>OPTIOBRA</span>
+      <button class="menu-btn" (click)="toggleMenu()">☰</button>
+    </div>
 
-        <div class="logo">
+    <ul>
+      <li><span class="item-icon">🏠</span><span>Dashboard</span></li>
+      <li><span class="item-icon">📁</span><span>Proyectos</span></li>
+      <li class="activo"><span class="item-icon">📦</span><span>Materiales</span></li>
+      <li><span class="item-icon">📈</span><span>Avance de obra</span></li>
+      <li><span class="item-icon">👷</span><span>Trabajadores</span></li>
+      <li><span class="item-icon">📊</span><span>Reportes</span></li>
+      <li><span class="item-icon">👤</span><span>Usuarios</span></li>
+      <li><span class="item-icon">⚙️</span><span>Configuración</span></li>
+    </ul>
 
-            <img src="assets/Logo.png" alt="logo">
+    <div class="usuario">
+      <img src="https://i.pravatar.cc/150" alt="usuario">
+      <div>
+        <h4>Administrador</h4>
+        <small>admin@optiobra.com</small>
+      </div>
+    </div>
+  </aside>
 
-            <span>OPTIOBRA</span>
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">☰</button>
 
-            <button class="menu-btn" (click)="toggleMenu()">
-                ☰
-            </button>
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+    <div class="header">
+      <div>
+        <h2>Materiales</h2>
+        <p>Gestiona los materiales de tus proyectos</p>
+      </div>
+      <button class="btn-nuevo" (click)="crearMaterial()">+ Nuevo material</button>
+    </div>
 
-        </div>
+    <div class="filtros">
+      <input type="text" placeholder="Buscar materiales..." [(ngModel)]="filtroBusqueda" (input)="buscar()">
 
-        <ul>
+      <select [(ngModel)]="filtroCategoria">
+        <option value="">Todos los proyectos</option>
+        <option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</option>
+      </select>
 
-            <li><span class="item-icon">🏠</span><span>Dashboard</span></li>
+      <label>
+        Estado
+        <select [(ngModel)]="formulario.estado">
+          <option *ngFor="let estado of estados" [value]="estado">{{ estado }}</option>
+        </select>
+      </label>
 
-            <li><span class="item-icon">📁</span><span>Proyectos</span></li>
+      <label>
+        Proveedor
+        <input type="text" [(ngModel)]="formulario.proveedor">
+      </label>
+    </div>
 
-            <li class="activo">
-                <span class="item-icon">📦</span><span>Materiales</span>
-            </li>
+    <div *ngIf="mostrarFormulario" class="formulario">
+      <label class="full-width">
+        Descripción
+        <textarea rows="3" [(ngModel)]="formulario.descripcion"></textarea>
+      </label>
 
-            <li><span class="item-icon">📈</span><span>Avance de obra</span></li>
-
-            <li><span class="item-icon">👷</span><span>Trabajadores</span></li>
-
-            <li><span class="item-icon">📊</span><span>Reportes</span></li>
-
-            <li><span class="item-icon">👤</span><span>Usuarios</span></li>
-
-            <li><span class="item-icon">⚙️</span><span>Configuración</span></li>
-
-        </ul>
-
-        <div class="usuario">
-
-            <img src="https://i.pravatar.cc/150" alt="usuario">
-
-            <div>
-
-                <h4>Administrador</h4>
-
-                <small>admin@optiobra.com</small>
-
-            </div>
-
-        </div>
-
-    </aside>
-
-    <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-        ☰
-    </button>
-
-    <main class="contenido" [class.menu-cerrado]="!menuAbierto">
-
-        <div class="header">
-
-            <div>
-
-                <h2>Materiales</h2>
-
-                <p>
-                    Gestiona los materiales de tus proyectos
-                </p>
-
-            </div>
-
-            <button class="btn-nuevo" (click)="crearMaterial()">
-
-                + Nuevo material
-
-            </button>
-
-        </div>
-
-        <div class="filtros">
-
-            <input type="text" placeholder="Buscar materiales...">
-
-            <select>
-                <option>Todos los proyectos</option>
-            </select>
-          </label>
-
-          <label>
-            Estado
-            <select [(ngModel)]="formulario.estado">
-              @for (estado of estados; track estado) {
-                <option [value]="estado">{{ estado }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Proveedor
-            <input type="text" [(ngModel)]="formulario.proveedor">
-          </label>
-        </div>
-
-        <div class="tabla-container">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Categoría</th>
-                        <th>Unidad</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Proyecto</th>
-                        <th>Acciones</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr *ngFor="let material of materiales">
-
-                        <td>{{ material.id }}</td>
-                        <td>{{ material.nombre }}</td>
-                        <td>{{ material.categoria }}</td>
-                        <td>{{ material.unidad }}</td>
-                        <td>{{ material.cantidad }}</td>
-                        <td>{{ material.precio }}</td>
-                        <td>{{ material.proyecto }}</td>
-
-                        <td class="acciones">
-
-                            <button class="editar" (click)="editarMaterial(material)">
-
-                                Editar
-
-                            </button>
-
-                            <button class="eliminar" (click)="eliminarMaterial(material)">
-
-                                Eliminar
-
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-        <label class="full-width">
-          Descripción
-          <textarea rows="3" [(ngModel)]="formulario.descripcion"></textarea>
-        </label>
-
-        <div class="form-actions">
-          <button class="btn-guardar" [disabled]="guardando" (click)="guardarMaterial()">
-            {{ guardando ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
-        </div>
-      </section>
-    }
+      <div class="form-actions">
+        <button class="btn-guardar" [disabled]="guardando" (click)="guardarMaterial()">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
+        <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
+      </div>
+    </div>
 
     <div class="tabla-container">
-      @if (cargando) {
+      <ng-container *ngIf="cargando; else listaMateriales">
         <p class="estado-tabla">Cargando materiales...</p>
-      } @else if (materiales.length === 0) {
-        <p class="estado-tabla">No hay materiales para mostrar.</p>
-      } @else {
-        <table>
+      </ng-container>
+
+      <ng-template #listaMateriales>
+        <p *ngIf="materiales.length === 0" class="estado-tabla">No hay materiales para mostrar.</p>
+
+        <table *ngIf="materiales.length > 0">
           <thead>
             <tr>
               <th>ID</th>
               <th>Nombre</th>
-              <th>Código</th>
               <th>Categoría</th>
               <th>Unidad</th>
               <th>Cantidad</th>
               <th>Precio</th>
-              <th>Estado</th>
+              <th>Proveedor</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @for (material of materiales; track material.id) {
-              <tr>
-                <td>{{ material.id }}</td>
-                <td>{{ material.nombre }}</td>
-                <td>{{ material.codigo }}</td>
-                <td>{{ material.categoria_nombre }}</td>
-                <td>{{ material.unidad_medida }}</td>
-                <td>{{ material.cantidad }}</td>
-                <td>{{ formatearPrecio(material.precio) }}</td>
-                <td>{{ material.estado }}</td>
-                <td class="acciones">
-                  <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
-                  <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
-                </td>
-              </tr>
-            }
+            <tr *ngFor="let material of materiales">
+              <td>{{ material.id }}</td>
+              <td>{{ material.nombre }}</td>
+              <td>{{ material.categoria_nombre || material.categoria }}</td>
+              <td>{{ material.unidad_medida }}</td>
+              <td>{{ material.cantidad }}</td>
+              <td>{{ formatearPrecio(material.precio) }}</td>
+              <td>{{ material.proveedor || '-' }}</td>
+              <td class="acciones">
+                <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
+                <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+              </td>
+            </tr>
           </tbody>
         </table>
-      }
+      </ng-template>
     </div>
 
     <div class="paginacion">
