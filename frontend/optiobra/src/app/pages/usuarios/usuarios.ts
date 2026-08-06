@@ -1,89 +1,110 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { UsuarioService } from '../../../Services/usuario.service';
+import { Usuario } from '../../../Models/usuario-sistema';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.scss'
 })
-export class Usuarios {
+export class Usuarios implements OnInit {
 
   menuAbierto = true;
+  usuarios: Usuario[] = [];
+  cargando = false;
+  error = '';
+
+  filtroBusqueda = '';
+  filtroRol = '';
+
+  roles = [
+    'Todos los roles',
+    'admin',
+    'supervisor',
+    'ingeniero',
+    'usuario'
+  ];
+
+  constructor(private usuarioService: UsuarioService) {}
+
+  ngOnInit(): void {
+    this.cargarUsuarios();
+  }
 
   toggleMenu() {
     this.menuAbierto = !this.menuAbierto;
   }
 
-  crearUsuario() {
-    alert('Usuario creado correctamente');
+  cargarUsuarios(): void {
+    this.cargando = true;
+    this.error = '';
+
+    const filtros: { search?: string; rol?: string } = {};
+
+    if (this.filtroBusqueda) {
+      filtros.search = this.filtroBusqueda;
+    }
+    if (this.filtroRol && this.filtroRol !== 'Todos los roles') {
+      filtros.rol = this.filtroRol;
+    }
+
+    this.usuarioService.getUsuarios(filtros).subscribe({
+      next: (respuesta) => {
+        this.usuarios = respuesta.results;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los usuarios';
+        this.cargando = false;
+      }
+    });
   }
 
-  editarUsuario(usuario: any) {
-    alert('Editando usuario: ' + usuario.nombre);
+  onFiltroChange(): void {
+    this.cargarUsuarios();
   }
 
-  eliminarUsuario(usuario: any) {
+  crearUsuario(): void {
+    alert('Funcionalidad de crear usuario pendiente de implementación con formulario modal');
+  }
 
+  editarUsuario(usuario: Usuario): void {
+    alert('Editando usuario: ' + usuario.nombre_completo);
+  }
+
+  eliminarUsuario(usuario: Usuario): void {
     const confirmar = confirm(
-      '¿Desea eliminar el usuario ' + usuario.nombre + '?'
+      '¿Desea eliminar el usuario ' + usuario.nombre_completo + '?'
     );
 
     if (confirmar) {
-
-      this.usuarios = this.usuarios.filter(
-        u => u.id !== usuario.id
-      );
-
-      alert('Usuario eliminado correctamente');
-
+      this.usuarioService.eliminarUsuario(usuario.id).subscribe({
+        next: () => {
+          this.cargarUsuarios();
+        },
+        error: () => {
+          alert('Error al eliminar el usuario');
+        }
+      });
     }
-
   }
 
-  usuarios = [
+  formatearRol(rol: string): string {
+    const mapaRoles: Record<string, string> = {
+      'admin': 'Administrador',
+      'supervisor': 'Supervisor',
+      'ingeniero': 'Ingeniero',
+      'usuario': 'Operario'
+    };
+    return mapaRoles[rol] || rol;
+  }
 
-    {
-      id: 1,
-      nombre: 'Carlos Pérez',
-      correo: 'carlos@optiobra.com',
-      rol: 'Administrador',
-      estado: 'Activo'
-    },
-
-    {
-      id: 2,
-      nombre: 'Laura Gómez',
-      correo: 'laura@optiobra.com',
-      rol: 'Supervisor',
-      estado: 'Activo'
-    },
-
-    {
-      id: 3,
-      nombre: 'Juan Díaz',
-      correo: 'juan@optiobra.com',
-      rol: 'Ingeniero',
-      estado: 'Inactivo'
-    },
-
-    {
-      id: 4,
-      nombre: 'Ana Torres',
-      correo: 'ana@optiobra.com',
-      rol: 'Residente',
-      estado: 'Activo'
-    },
-
-    {
-      id: 5,
-      nombre: 'Miguel Rojas',
-      correo: 'miguel@optiobra.com',
-      rol: 'Operario',
-      estado: 'Activo'
-    }
-
-  ];
-
+  formatearEstado(activo: boolean): string {
+    return activo ? 'Activo' : 'Inactivo';
+  }
 }

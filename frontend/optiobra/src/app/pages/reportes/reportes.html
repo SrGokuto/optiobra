@@ -1,102 +1,116 @@
-<div class="reportes-container">
+<div class="dashboard">
 
-  <h2>Reportes</h2>
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
-  <!-- Filtros -->
-  <div class="filtros">
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
 
-    <div class="campo">
-      <label>Tipo de reporte</label>
-      <select>
-        <option selected disabled>Seleccione</option>
-        <option>Proyectos</option>
-        <option>Materiales</option>
-        <option>Trabajadores</option>
-        <option>Avance de obra</option>
-      </select>
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+      <div>
+        <h2>Reportes</h2>
+        <p>Análisis y reportes del sistema</p>
+      </div>
     </div>
 
-    <div class="campo">
-      <label>Proyecto</label>
-      <select>
-        <option selected disabled>Seleccione</option>
-        <option>Proyecto A</option>
-        <option>Proyecto B</option>
-        <option>Proyecto C</option>
-      </select>
-    </div>
+    <!-- Filtros -->
+    <div class="filtros">
 
-    <div class="campo">
-      <label>Fecha Inicio</label>
-      <input type="date">
-    </div>
+      <div class="campo">
+        <label>Tipo de reporte</label>
+        <select [(ngModel)]="tipoReporte">
+          <option selected disabled value="">Seleccione</option>
+          @for (tipo of tiposReporte; track tipo) {
+            <option [value]="tipo">{{ formatearTipoReporte(tipo) }}</option>
+          }
+        </select>
+      </div>
 
-    <div class="campo">
-      <label>Fecha Fin</label>
-      <input type="date">
-    </div>
+      <div class="campo">
+        <label>Proyecto</label>
+        <select [(ngModel)]="proyecto">
+          <option selected disabled value="">Seleccione</option>
+          @for (p of proyectos; track p.id) {
+            <option [value]="p.id">{{ p.nombre }}</option>
+          }
+        </select>
+      </div>
 
-    <div class="boton-generar">
-      <button>Generar Reporte</button>
-    </div>
+      <div class="campo">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="fechaInicio">
+      </div>
 
-  </div>
+      <div class="campo">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="fechaFin">
+      </div>
 
-  <!-- Tarjetas -->
-  <div class="cards">
-
-    <div class="card">
-      <h3>15</h3>
-      <p>Proyectos Activos</p>
-    </div>
-
-    <div class="card">
-      <h3>120</h3>
-      <p>Trabajadores</p>
-    </div>
-
-    <div class="card">
-      <h3>$580 M</h3>
-      <p>Presupuesto</p>
-    </div>
-
-    <div class="card">
-      <h3>85%</h3>
-      <p>Avance Promedio</p>
-    </div>
-
-  </div>
-
-  <!-- Gráficas -->
-  <div class="graficas">
-
-    <div class="grafica">
-      <h3>Avance por Proyecto</h3>
-
-      <div class="placeholder">
-        Aquí irá la gráfica de barras
+      <div class="boton-generar">
+        <button (click)="generarReporte()">Generar Reporte</button>
       </div>
 
     </div>
 
-    <div class="grafica">
-      <h3>Distribución de Recursos</h3>
+    <div *ngIf="cargando" class="cargando">
+      <p>Cargando estadísticas...</p>
+    </div>
 
-      <div class="placeholder">
-        Aquí irá la gráfica circular
+    <!-- Tarjetas -->
+    <div *ngIf="!cargando" class="cards">
+
+      <div class="card">
+        <h3>{{ totalProyectos }}</h3>
+        <p>Proyectos Activos</p>
+      </div>
+
+      <div class="card">
+        <h3>{{ totalTrabajadores }}</h3>
+        <p>Trabajadores</p>
+      </div>
+
+      <div class="card">
+        <h3>{{ formatearPresupuesto(valorInventario) }}</h3>
+        <p>Valor Inventario</p>
+      </div>
+
+      <div class="card">
+        <h3>{{ avancePromedio }}%</h3>
+        <p>Avance Promedio</p>
       </div>
 
     </div>
 
-  </div>
+    <!-- Gráficas -->
+    <div *ngIf="!cargando" class="graficas">
 
-  <!-- Botones -->
-  <div class="exportar">
+      <div class="grafica">
+        <h3>Avance por Proyecto</h3>
+        <div class="chart-container">
+          <canvas #barChartCanvas></canvas>
+        </div>
+      </div>
 
-    <button>Exportar PDF</button>
+      <div class="grafica">
+        <h3>Distribución de Recursos</h3>
+        <div class="chart-container">
+          <canvas #pieChartCanvas></canvas>
+        </div>
+      </div>
 
-    <button>Exportar Excel</button>
+    </div>
 
-  </div>
+    <!-- Botones -->
+    <div class="exportar">
+
+      <button (click)="exportarPDF()">Exportar PDF</button>
+
+      <button (click)="exportarExcel()">Exportar Excel</button>
+
+    </div>
+
+  </main>
 
 </div>

@@ -1,83 +1,11 @@
 <div class="dashboard">
 
-  <aside class="sidebar" [class.oculto]="!menuAbierto">
-
-    <div class="logo">
-
-      <img src="assets/Logo.png" alt="logo">
-
-      <span>OPTIOBRA</span>
-
-      <button class="menu-btn" (click)="toggleMenu()">
-        ☰
-      </button>
-
-    </div>
-
-    <ul>
-
-      <li>
-        <i class="bi bi-speedometer2"></i>
-        Dashboard
-      </li>
-
-      <li>
-        <i class="bi bi-folder2-open"></i>
-        Proyectos
-      </li>
-
-      <li>
-        <i class="bi bi-box-seam"></i>
-        Materiales
-      </li>
-
-      <li>
-        <i class="bi bi-graph-up-arrow"></i>
-        Avance de obra
-      </li>
-
-      <li>
-        <i class="bi bi-person-workspace"></i>
-        Trabajadores
-      </li>
-
-      <li>
-        <i class="bi bi-bar-chart-line"></i>
-        Reportes
-      </li>
-
-      <li>
-        <i class="bi bi-people"></i>
-        Usuarios
-      </li>
-
-      <li class="activo">
-        <i class="bi bi-gear"></i>
-        Configuración
-      </li>
-
-    </ul>
-
-    <div class="usuario">
-
-      <img src="https://i.pravatar.cc/150" alt="usuario">
-
-      <div>
-
-        <h4>Administrador</h4>
-
-        <small>admin@optiobra.com</small>
-
-      </div>
-
-    </div>
-
-  </aside>
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto"
           class="menu-fijo"
           (click)="toggleMenu()">
-    ☰
+    <span class="material-symbols-outlined">menu</span>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -89,14 +17,25 @@
         <h2>Configuración</h2>
 
         <p>
+
           Ajusta la configuración general del sistema
+
         </p>
 
       </div>
 
     </div>
 
-    <div class="configuracion">
+    <div *ngIf="cargando" class="cargando">
+      <p>Cargando configuración...</p>
+    </div>
+
+    <div *ngIf="error" class="error">
+      <p>{{ error }}</p>
+      <button (click)="cargarConfiguracion()">Reintentar</button>
+    </div>
+
+    <div *ngIf="!cargando && !error" class="configuracion">
 
       <aside class="menu-config">
 
@@ -137,35 +76,35 @@
             <label>Nombre de la empresa</label>
             <input
               type="text"
-              value="OptiObra Constructora S.A.C.">
+              [(ngModel)]="empresa.nombre_empresa">
           </div>
 
           <div class="campo">
             <label>Correo electrónico</label>
             <input
               type="email"
-              value="contacto@optiobra.com">
+              [(ngModel)]="empresa.email_contacto">
           </div>
 
           <div class="campo">
             <label>RUC</label>
             <input
               type="text"
-              value="900123456">
+              [(ngModel)]="empresa.nit_runc">
           </div>
 
           <div class="campo">
             <label>Teléfono</label>
             <input
               type="text"
-              value="(+57) 3001234567">
+              [(ngModel)]="empresa.telefono">
           </div>
 
           <div class="campo">
             <label>Dirección</label>
             <input
               type="text"
-              value="Cra. 15 #80-25 Bogotá">
+              [(ngModel)]="empresa.direccion">
           </div>
 
         </div>
@@ -174,9 +113,10 @@
 
           <button
             class="btn-guardar"
-            (click)="guardarConfiguracion()">
+            (click)="guardarConfiguracion()"
+            [disabled]="guardando">
 
-            Guardar cambios
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
 
           </button>
 
