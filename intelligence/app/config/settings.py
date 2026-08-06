@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     LLAMA_CPP_URL: str = "http://localhost:8080"
     MODEL_NAME: str = "Qwen3-8B"
     CACHE_TTL: int = 600
-    REQUEST_TIMEOUT: int = 30
+    REQUEST_TIMEOUT: int = 600
     LOG_LEVEL: str = "INFO"
     USE_MOCK: bool = False
 

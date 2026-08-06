@@ -94,88 +94,54 @@ class PromptService:
             return None
 
     def _format_context(self, context: dict[str, Any]) -> str:
-        """Serialize context as a structured block for the prompt."""
-        lines = ["## Contexto del Proyecto", ""]
+        """Serialize context as a compact block for the prompt."""
+        lines = ["CONTEXTO:", ""]
 
         project = context.get("project", {})
         if project:
-            lines.append("### Proyecto")
-            lines.append(f"- Nombre: {project.get('name', 'N/A')}")
-            lines.append(f"- Ubicacion: {project.get('location', 'N/A')}")
-            lines.append(f"- Estado: {project.get('status', 'N/A')}")
-            lines.append(f"- Avance actual: {project.get('current_progress', 0)}%")
-            lines.append(f"- Avance planificado: {project.get('planned_progress', 0)}%")
-            lines.append("")
+            lines.append(
+                f"Proyecto: {project.get('name', '')} | {project.get('location', '')} | "
+                f"Estado: {project.get('status', '')} | Avance: {project.get('current_progress', 0)}%/{project.get('planned_progress', 0)}%"
+            )
 
         activities = context.get("activities", [])
         if activities:
-            lines.append("### Actividades")
-            for a in activities:
-                date = a.get("date", "")
-                name = a.get("activity", "")
-                desc = a.get("description", "")
-                resp = a.get("responsible", "")
-                before = a.get("progress_before", 0)
-                after = a.get("progress_after", 0)
+            lines.append(f"Actividades ({len(activities)}):")
+            for a in activities[:10]:
                 lines.append(
-                    f"- {date}: {name} - {desc} (Responsable: {resp}, "
-                    f"Avance: {before}% -> {after}%)"
+                    f"- {a.get('date', '')} {a.get('activity', '')}: "
+                    f"{a.get('progress_before', 0)}%->{a.get('progress_after', 0)}%"
                 )
-            lines.append("")
 
         materials = context.get("materials", [])
         if materials:
-            lines.append("### Materiales")
+            lines.append(f"Materiales ({len(materials)}):")
             for m in materials:
-                mat_name = m.get("material", "")
-                prev = m.get("previous_quantity", 0)
-                curr = m.get("current_quantity", 0)
-                diff = m.get("difference", 0)
-                critical = "CRITICO" if m.get("critical", False) else "normal"
+                crit = "CRITICO" if m.get("critical", False) else ""
                 lines.append(
-                    f"- {mat_name}: {prev} -> {curr} (Variacion: {diff}, Estado: {critical})"
+                    f"- {m.get('material', '')}: {m.get('current_quantity', 0)} "
+                    f"(cambio: {m.get('difference', 0)}) {crit}"
                 )
-            lines.append("")
 
         statistics = context.get("statistics", {})
         if statistics:
-            lines.append("### Estadisticas")
-            for k, v in statistics.items():
-                lines.append(f"- {k}: {v}")
-            lines.append("")
+            lines.append(f"Estadisticas: act={statistics.get('activities_count',0)} mat={statistics.get('material_changes',0)} crit={statistics.get('critical_materials',0)} avance={statistics.get('total_progress',0)}%")
 
         alerts = context.get("alerts", [])
         if alerts:
-            lines.append("### Alertas")
-            for alert in alerts:
-                lines.append(
-                    f"- [{alert.get('type', '')}] {alert.get('message', '')} "
-                    f"(Severidad: {alert.get('severity', 'medium')})"
-                )
-            lines.append("")
-
-        timeline = context.get("timeline", [])
-        if timeline:
-            lines.append("### Cronologia")
-            for t in timeline:
-                lines.append(f"- {t.get('date', '')}: {t.get('event', '')}")
-            lines.append("")
+            lines.append("Alertas:")
+            for a in alerts[:5]:
+                lines.append(f"- {a.get('type', '')}: {a.get('message', '')}")
 
         analysis = context.get("analysis", {})
         if analysis:
-            lines.append("### Analisis Previamente Calculado")
-            for name, data in analysis.items():
-                lines.append(f"\n#### {name}")
-                findings = data.get("findings", {})
-                if findings:
-                    lines.append("Hallazgos:")
-                    for fk, fv in findings.items():
-                        lines.append(f"  - {fk}: {fv}")
-                recommendations = data.get("recommendations", [])
-                if recommendations:
-                    lines.append("Recomendaciones:")
-                    for rec in recommendations:
-                        lines.append(f"  - {rec}")
-            lines.append("")
+            recs = []
+            for data in analysis.values():
+                if isinstance(data, dict):
+                    recs.extend(data.get("recommendations", []))
+            if recs:
+                lines.append("Recomendaciones calculadas:")
+                for r in recs[:5]:
+                    lines.append(f"- {r}")
 
         return "\n".join(lines)

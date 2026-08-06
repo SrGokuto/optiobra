@@ -30,7 +30,7 @@ class LLMService:
         self,
         prompt: str,
         temperature: float = 0.2,
-        max_tokens: int = 1200,
+        max_tokens: int = 300,
     ) -> tuple[LLMResponse, dict[str, Any]]:
         """Generate a response with caching and retry logic.
 

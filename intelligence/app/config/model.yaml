@@ -8,7 +8,7 @@ parameters:
   top_p: 0.9
   top_k: 40
   repeat_penalty: 1.1
-  max_tokens: 1200
+  max_tokens: 300
   seed: -1
 
 infrastructure:

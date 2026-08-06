@@ -28,13 +28,13 @@ class LlamaCppProvider(LLMProvider):
         self,
         prompt: str,
         temperature: float = 0.2,
-        max_tokens: int = 1200,
+        max_tokens: int = 300,
     ) -> LLMResponse:
         """Send prompt to llama.cpp server and return response."""
         params = self._config.get("parameters", {})
         payload = {
             "model": self._config.get("model", "default"),
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": prompt + "\n\n/no_think"}],
             "temperature": temperature,
             "top_p": params.get("top_p", 0.9),
             "top_k": params.get("top_k", 40),
