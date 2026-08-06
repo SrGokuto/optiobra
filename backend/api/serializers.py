@@ -1,6 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto, AvanceObra, Trabajador
+from .models import (
+    Material, Categoria, HistorialMaterial, UsuarioSupabase,
+    Proyecto, AvanceObra, Trabajador, PerfilUsuario,
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+)
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -244,3 +248,165 @@ class TrabajadorSerializer(serializers.ModelSerializer):
         if not value or len(value.strip()) == 0:
             raise serializers.ValidationError("El teléfono no puede estar vacío")
         return value.strip()
+
+
+class PerfilUsuarioSerializer(serializers.ModelSerializer):
+    """Serializer para el perfil extendido de usuario"""
+    class Meta:
+        model = PerfilUsuario
+        fields = ['id', 'telefono', 'departamento', 'cargo', 'avatar_url', 'direccion', 'creado_en', 'actualizado_en']
+        read_only_fields = ['creado_en', 'actualizado_en']
+
+
+class UsuarioDetalleSerializer(serializers.ModelSerializer):
+    """Serializer completo para visualizar información de usuario con perfil y Supabase"""
+    perfil = PerfilUsuarioSerializer(read_only=True)
+    nombre_completo = serializers.SerializerMethodField()
+    rol = serializers.SerializerMethodField()
+    activo = serializers.SerializerMethodField()
+    supabase_uid = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'nombre_completo', 'rol', 'activo', 'supabase_uid',
+            'perfil', 'is_staff', 'is_superuser', 'date_joined'
+        ]
+        read_only_fields = ['id', 'date_joined']
+
+    def get_nombre_completo(self, obj):
+        try:
+            return obj.usuariosupabase.nombre_completo or f"{obj.first_name} {obj.last_name}".strip() or obj.username
+        except UsuarioSupabase.DoesNotExist:
+            return f"{obj.first_name} {obj.last_name}".strip() or obj.username
+
+    def get_rol(self, obj):
+        try:
+            return obj.usuariosupabase.rol
+        except UsuarioSupabase.DoesNotExist:
+            return 'admin' if obj.is_staff else 'usuario'
+
+    def get_activo(self, obj):
+        try:
+            return obj.usuariosupabase.activo and obj.is_active
+        except UsuarioSupabase.DoesNotExist:
+            return obj.is_active
+
+    def get_supabase_uid(self, obj):
+        try:
+            return obj.usuariosupabase.supabase_uid
+        except UsuarioSupabase.DoesNotExist:
+            return None
+
+
+class UsuarioCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer para crear y actualizar usuarios"""
+    nombre_completo = serializers.CharField(write_only=True, required=False)
+    rol = serializers.CharField(write_only=True, required=False, default='usuario')
+    telefono = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    departamento = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    cargo = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    direccion = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name',
+            'password', 'nombre_completo', 'rol', 'telefono',
+            'departamento', 'cargo', 'direccion'
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': False},
+            'email': {'required': True}
+        }
+
+    def validate_email(self, value):
+        if not value or len(value.strip()) == 0:
+            raise serializers.ValidationError("El email no puede estar vacío")
+        email_clean = value.strip().lower()
+        query = User.objects.filter(email=email_clean)
+        if self.instance:
+            query = query.exclude(pk=self.instance.pk)
+        if query.exists():
+            raise serializers.ValidationError(f"El email '{email_clean}' ya está registrado")
+        return email_clean
+
+    def validate_username(self, value):
+        if not value or len(value.strip()) == 0:
+            raise serializers.ValidationError("El nombre de usuario no puede estar vacío")
+        username_clean = value.strip()
+        query = User.objects.filter(username=username_clean)
+        if self.instance:
+            query = query.exclude(pk=self.instance.pk)
+        if query.exists():
+            raise serializers.ValidationError(f"El username '{username_clean}' ya existe")
+        return username_clean
+
+
+class ConfiguracionEmpresaSerializer(serializers.ModelSerializer):
+    """Serializer para la configuración de empresa"""
+    class Meta:
+        model = ConfiguracionEmpresa
+        fields = [
+            'id', 'nombre_empresa', 'nit_runc', 'direccion',
+            'telefono', 'email_contacto', 'moneda_principal',
+            'logo_url', 'creado_en', 'actualizado_en'
+        ]
+        read_only_fields = ['creado_en', 'actualizado_en']
+
+    def validate_nombre_empresa(self, value):
+        if not value or len(value.strip()) == 0:
+            raise serializers.ValidationError("El nombre de la empresa no puede estar vacío")
+        return value.strip()
+
+    def validate_email_contacto(self, value):
+        if not value or '@' not in value:
+            raise serializers.ValidationError("Ingrese un email de contacto válido")
+        return value.strip().lower()
+
+
+class ConfiguracionSistemaSerializer(serializers.ModelSerializer):
+    """Serializer para la configuración del sistema"""
+    class Meta:
+        model = ConfiguracionSistema
+        fields = [
+            'id', 'alerta_stock_minimo_defecto', 'dias_notificacion_vencimiento',
+            'modo_mantenimiento', 'formato_fecha', 'notificaciones_email',
+            'creado_en', 'actualizado_en'
+        ]
+        read_only_fields = ['creado_en', 'actualizado_en']
+
+    def validate_alerta_stock_minimo_defecto(self, value):
+        if value < 0:
+            raise serializers.ValidationError("La alerta de stock mínimo no puede ser negativa")
+        return value
+
+
+class ConfiguracionGeneralSerializer(serializers.Serializer):
+    """Serializer compuesto para la configuración general"""
+    empresa = ConfiguracionEmpresaSerializer()
+    sistema = ConfiguracionSistemaSerializer()
+
+
+class ReporteSerializer(serializers.ModelSerializer):
+    """Serializer para historial de reportes"""
+    solicitado_por_nombre = serializers.CharField(source='solicitado_por.username', read_only=True)
+
+    class Meta:
+        model = Reporte
+        fields = [
+            'id', 'titulo', 'tipo_reporte', 'formato', 'parametros',
+            'solicitado_por', 'solicitado_por_nombre', 'fecha_generacion',
+            'estado', 'resumen_datos'
+        ]
+        read_only_fields = ['id', 'solicitado_por', 'solicitado_por_nombre', 'fecha_generacion', 'estado', 'resumen_datos']
+
+
+class GenerarReporteSerializer(serializers.Serializer):
+    """Serializer para recibir la solicitud de generación de un reporte"""
+    titulo = serializers.CharField(max_length=200, required=False, default='Reporte Generado')
+    tipo_reporte = serializers.ChoiceField(choices=Reporte.TIPO_CHOICES)
+    formato = serializers.ChoiceField(choices=Reporte.FORMATO_CHOICES, default='json')
+    parametros = serializers.JSONField(required=False, default=dict)
+
