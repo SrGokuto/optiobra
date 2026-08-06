@@ -10,11 +10,12 @@ import {
 import { UsuarioAuth } from '../../../Models/usuario';
 import { AuthService } from '../../../Services/auth.service';
 import { ProyectoService } from '../../../Services/servicios';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-proyectos',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, SidebarComponent],
   templateUrl: './proyectos.html',
   styleUrl: './proyectos.scss',
 })
@@ -40,7 +41,7 @@ export class Proyectos implements OnInit {
 
   formulario: ProyectoPayload = this.crearFormularioVacio();
 
-  readonly estados = ESTADOS_PROYECTO;
+  readonly estados: Proyecto['estado'][] = ESTADOS_PROYECTO;
 
   constructor(
     private proyectoService: ProyectoService,
@@ -96,6 +97,8 @@ export class Proyectos implements OnInit {
     this.proyectoEnEdicion = null;
     this.formulario = this.crearFormularioVacio();
     this.mostrarFormulario = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   abrirFormularioEdicion(proyecto: Proyecto): void {
@@ -103,15 +106,20 @@ export class Proyectos implements OnInit {
     this.formulario = {
       nombre: proyecto.nombre,
       descripcion: proyecto.descripcion || '',
+      ubicacion: proyecto.ubicacion,
       direccion: proyecto.direccion || '',
       responsable: proyecto.responsable || '',
       estado: proyecto.estado,
       avance: proyecto.avance,
+      porcentaje_avance: proyecto.porcentaje_avance,
       fecha_inicio: proyecto.fecha_inicio || '',
+      fecha_fin: proyecto.fecha_fin || '',
       fecha_fin_estimada: proyecto.fecha_fin_estimada || '',
       presupuesto: proyecto.presupuesto || '',
     };
     this.mostrarFormulario = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   cerrarFormulario(): void {
@@ -220,11 +228,14 @@ export class Proyectos implements OnInit {
     return {
       nombre: '',
       descripcion: '',
+      ubicacion: '',
       direccion: '',
       responsable: '',
-      estado: 'pendiente',
+      estado: 'Pendiente',
       avance: 0,
-      fecha_inicio: '',
+      porcentaje_avance: 0,
+      fecha_inicio: new Date().toISOString().slice(0, 10),
+      fecha_fin: new Date().toISOString().slice(0, 10),
       fecha_fin_estimada: '',
       presupuesto: '',
     };

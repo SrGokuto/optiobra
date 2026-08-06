@@ -1,0 +1,264 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="page">
+
+      <!-- Encabezado -->
+      <div class="header">
+        <div class="header-info">
+          <h2>Trabajadores</h2>
+          <p>Gestiona el personal de tu empresa</p>
+        </div>
+        <button class="btn-primary" (click)="nuevoTrabajador()">
+          <span class="material-symbols-outlined">add</span>
+          Nuevo trabajador
+        </button>
+      </div>
+
+      <!-- Barra de filtros -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="material-symbols-outlined">search</span>
+          <input
+            type="text"
+            placeholder="Buscar trabajadores..."
+            [(ngModel)]="textoBusqueda"
+            (input)="filtrarTrabajadores()">
+        </div>
+        <select [(ngModel)]="rolSeleccionado" (change)="filtrarTrabajadores()">
+          <option value="">Todos los roles</option>
+          <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+        </select>
+      </div>
+
+      <!-- Tarjeta tabla -->
+      <div class="card">
+
+        <div class="table-wrapper">
+          <table>
+
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre completo</th>
+                <th>DNI</th>
+                <th>Rol</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr *ngFor="let trabajador of trabajadoresPaginados">
+
+                <td>{{ trabajador.id }}</td>
+
+                <td>
+                  <div class="trabajador">
+                    <div class="avatar"></div>
+                    <div class="datos">
+                      <strong>{{ trabajador.nombre }}</strong>
+                    </div>
+                  </div>
+                </td>
+
+                <td>{{ trabajador.dni }}</td>
+
+                <td>
+                  <span class="badge-rol">{{ trabajador.rol }}</span>
+                </td>
+
+                <td>{{ trabajador.telefono }}</td>
+
+                <td>
+                  <span class="estado" [ngClass]="trabajador.estado.toLowerCase()">
+                    {{ trabajador.estado }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="acciones">
+                    <button
+                      class="btn-icon editar"
+                      (click)="editarTrabajador(trabajador)"
+                      title="Editar">
+                      <span class="material-symbols-outlined">edit</span>
+                      <span class="btn-label">Editar</span>
+                    </button>
+                    <button
+                      class="btn-icon eliminar"
+                      (click)="eliminarTrabajador(trabajador.id)"
+                      title="Eliminar">
+                      <span class="material-symbols-outlined">delete</span>
+                      <span class="btn-label">Eliminar</span>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+
+              <tr *ngIf="trabajadoresFiltrados.length === 0">
+                <td colspan="7" class="sin-registros">
+                  No hay trabajadores registrados.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+        </div>
+
+        <!-- Footer paginación -->
+        <div class="table-footer">
+
+          <div class="footer-info">
+            Mostrando
+            <strong>{{ (paginaActual - 1) * porPagina + 1 }} a {{ (paginaActual * porPagina) > trabajadoresFiltrados.length ? trabajadoresFiltrados.length : (paginaActual * porPagina) }}</strong>
+            de
+            <strong>{{ trabajadoresFiltrados.length }}</strong>
+            trabajadores
+          </div>
+
+          <div class="pagination">
+            <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button
+              *ngFor="let p of paginasVisible"
+              [class.active]="p === paginaActual"
+              [class.ellipsis]="p === '...'"
+              (click)="onPageClick(p)">
+              {{ p }}
+            </button>
+            <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- MODAL NUEVO TRABAJADOR -->
+<div class="modal-backdrop" *ngIf="mostrarModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Nuevo trabajador</h3>
+      <button class="cerrar" (click)="cerrarModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" [(ngModel)]="nuevo.nombre" placeholder="Ingrese el nombre">
+        </div>
+        <div class="form-group">
+          <label>DNI</label>
+          <input type="text" [(ngModel)]="nuevo.dni" placeholder="Ingrese el DNI">
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select [(ngModel)]="nuevo.rol">
+            <option value="">Seleccione un rol</option>
+            <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="nuevo.telefono" placeholder="Ingrese el teléfono">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="nuevo.estado">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarTrabajador()">Guardar trabajador</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR TRABAJADOR -->
+<div class="modal-backdrop" *ngIf="mostrarEditar">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Editar trabajador</h3>
+      <button class="cerrar" (click)="cerrarEditar()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" [(ngModel)]="trabajadorEditar.nombre">
+        </div>
+        <div class="form-group">
+          <label>DNI</label>
+          <input type="text" [(ngModel)]="trabajadorEditar.dni">
+        </div>
+        <div class="form-group">
+          <label>Rol</label>
+          <select [(ngModel)]="trabajadorEditar.rol">
+            <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="trabajadorEditar.telefono">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="trabajadorEditar.estado">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarEditar()">Cancelar</button>
+      <button class="btn-primary" (click)="actualizarTrabajador()">Actualizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR TRABAJADOR -->
+<div class="modal-backdrop" *ngIf="mostrarEliminar">
+  <div class="modal-confirmacion">
+    <div class="icono-warning">
+      <span class="material-symbols-outlined">warning</span>
+    </div>
+    <h3>Eliminar trabajador</h3>
+    <p>
+      ¿Está seguro de que desea eliminar este trabajador?
+      Esta acción no se puede deshacer.
+    </p>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>

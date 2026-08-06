@@ -1,0 +1,23 @@
+model: Qwen3-8B
+format: GGUF
+quantization: Q4_K_M
+backend: llama.cpp
+
+parameters:
+  temperature: 0.2
+  top_p: 0.9
+  top_k: 40
+  repeat_penalty: 1.1
+  max_tokens: 1200
+  seed: -1
+
+infrastructure:
+  threads: 24
+  context_size: 4096
+  timeout_seconds: 30
+
+report_limits:
+  executive: 600
+  daily: 400
+  weekly: 800
+  monthly: 1200

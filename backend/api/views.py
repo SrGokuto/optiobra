@@ -1,13 +1,13 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Avg
 import logging
 
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto
-from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer, ProyectoSerializer
+from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto, AvanceObra, Trabajador
+from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer, ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer
 from .services import SupabaseAuthService
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     """
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated] # Cambiar a
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion']
     ordering_fields = ['nombre', 'creado_en']
@@ -50,7 +50,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = Material.objects.all().select_related('categoria', 'creado_por')
     serializer_class = MaterialSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated] # Cambiar a IsAuthenticated en produccion
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'codigo', 'descripcion', 'proveedor']
     ordering_fields = ['nombre', 'precio', 'cantidad', 'creado_en']
@@ -80,6 +80,8 @@ class MaterialViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        print("USER:", self.request.user)
+        print("AUTH:", self.request.auth)
         """Crear material y registrar en historial"""
         material = serializer.save(creado_por=self.request.user)
         
@@ -149,7 +151,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         instance.delete()
         logger.info(f"Material eliminado: {material_nombre} (ID: {material_id}) por {self.request.user.username}")
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def actualizar_cantidad(self, request, pk=None):
         """
         Actualizar cantidad de un material
@@ -198,7 +200,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
             'material': serializer.data
         })
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def historial(self, request, pk=None):
         """
         Obtener historial de cambios de un material
@@ -215,7 +217,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         serializer = HistorialMaterialSerializer(historial, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def estadisticas(self, request):
         """
         Obtener estadísticas de materiales
@@ -243,6 +245,38 @@ class MaterialViewSet(viewsets.ModelViewSet):
         })
 
 
+class DashboardViewSet(viewsets.ViewSet):
+    """ViewSet para estadísticas del dashboard"""
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['get'])
+    def estadisticas(self, request):
+        """
+        GET /api/dashboard/estadisticas/
+        Retorna resumen general para el dashboard.
+        """
+        total_proyectos = Proyecto.objects.count()
+        proyectos_en_progreso = Proyecto.objects.filter(estado='en_proceso').count()
+        total_materiales = Material.objects.count()
+        total_trabajadores = Trabajador.objects.count()
+
+        avance = Proyecto.objects.aggregate(promedio=Avg('porcentaje_avance'))
+        avance_promedio = round(avance['promedio'] or 0)
+
+        proyectos_recientes = Proyecto.objects.all()[:5].values(
+            'id', 'nombre', 'estado', 'porcentaje_avance'
+        )
+
+        return Response({
+            'total_proyectos': total_proyectos,
+            'proyectos_en_progreso': proyectos_en_progreso,
+            'total_materiales': total_materiales,
+            'total_trabajadores': total_trabajadores,
+            'avance_promedio': avance_promedio,
+            'proyectos_recientes': list(proyectos_recientes),
+        })
+
+
 class ProyectoViewSet(viewsets.ModelViewSet):
     """
     ViewSet para el CRUD de proyectos
@@ -258,8 +292,8 @@ class ProyectoViewSet(viewsets.ModelViewSet):
     serializer_class = ProyectoSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['nombre', 'descripcion', 'responsable', 'direccion']
-    ordering_fields = ['nombre', 'estado', 'avance', 'creado_en', 'fecha_inicio']
+    search_fields = ['nombre', 'descripcion', 'responsable', 'direccion', 'ubicacion']
+    ordering_fields = ['nombre', 'estado', 'avance', 'porcentaje_avance', 'creado_en', 'fecha_inicio']
     ordering = ['-creado_en']
 
     def get_queryset(self):
@@ -295,6 +329,73 @@ class ProyectoViewSet(viewsets.ModelViewSet):
         nombre = instance.nombre
         instance.delete()
         logger.info(f"Proyecto eliminado: {nombre} por {self.request.user.username}")
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def estimaciones(self, request, pk=None):
+        """
+        Generar reporte ejecutivo IA para un proyecto
+        POST /api/proyectos/{id}/estimaciones/
+        """
+        from services.ai.context_builder import ContextBuilder
+        from services.ai.intelligence_client import IntelligenceClient
+
+        proyecto = self.get_object()
+        context_builder = ContextBuilder()
+        client = IntelligenceClient()
+
+        try:
+            context = context_builder.build_project_context(proyecto.id)
+            result = client.generate_executive_report_sync(context)
+            return Response(result)
+        except Exception as e:
+            logger.error("Error generando estimaciones para proyecto %d: %s", pk, str(e))
+            return Response(
+                {
+                    'success': False,
+                    'error': 'GENERATION_ERROR',
+                    'message': 'Error al generar el reporte de inteligencia',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AvanceObraViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar avances de obra"""
+    queryset = AvanceObra.objects.all().select_related('proyecto')
+    serializer_class = AvanceObraSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['actividad', 'responsable', 'proyecto__nombre']
+    ordering_fields = ['fecha', 'porcentaje', 'creado_en']
+    ordering = ['-fecha']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        proyecto_id = self.request.query_params.get('proyecto', '')
+        if proyecto_id:
+            queryset = queryset.filter(proyecto_id=proyecto_id)
+        return queryset
+
+
+class TrabajadorViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar trabajadores"""
+    queryset = Trabajador.objects.all()
+    serializer_class = TrabajadorSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['nombre', 'dni', 'rol', 'telefono']
+    ordering_fields = ['nombre', 'rol', 'estado', 'creado_en']
+    ordering = ['-creado_en']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        rol = self.request.query_params.get('rol', '')
+        if rol:
+            queryset = queryset.filter(rol=rol)
+        estado = self.request.query_params.get('estado', '')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        return queryset
 
 
 class AuthViewSet(viewsets.ViewSet):
@@ -383,7 +484,7 @@ class AuthViewSet(viewsets.ViewSet):
         
         return Response(result, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def logout(self, request):
         """
         Cerrar sesión
@@ -401,7 +502,7 @@ class AuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def me(self, request):
         """
         Obtener información del usuario autenticado

@@ -22,38 +22,43 @@ export class Login {
     private router: Router,
   ) {}
 
-  iniciarSesion() {
+  onSubmit(): void {
     this.error = '';
 
-    if (!this.email.trim()) {
+    const email = this.email.trim().toLowerCase();
+    const password = this.password;
+
+    if (!email) {
       this.error = 'El correo electrónico es obligatorio';
       return;
     }
 
-    if (!this.email.includes('@')) {
+    if (!email.includes('@')) {
       this.error = 'Ingrese un correo válido';
       return;
     }
 
-    if (!this.password.trim()) {
+    if (!password.trim()) {
       this.error = 'La contraseña es obligatoria';
       return;
     }
 
-    if (this.password.length < 6) {
-      this.error = 'La contraseña debe tener mínimo 6 caracteres';
+    if (password.length < 8) {
+      this.error = 'La contraseña debe tener mínimo 8 caracteres';
       return;
     }
 
     this.cargando = true;
 
-    this.authService.login(this.email.trim(), this.password).subscribe({
+    this.authService.login(email, password).subscribe({
       next: (response) => {
         this.cargando = false;
+
         if (response.error) {
-          this.error = response.mensaje || 'Error al iniciar sesión';
+          this.error = response.mensaje || 'No se pudo iniciar sesión';
           return;
         }
+
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

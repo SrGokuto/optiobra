@@ -1,11 +1,15 @@
-from django.test import TestCase, Client
+from datetime import datetime, timedelta, timezone
+
+import jwt
 from django.contrib.auth.models import User
-from rest_framework.test import APITestCase, APIClient
+from django.test import TestCase, override_settings
 from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
 from decimal import Decimal
-import json
 
 from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
+
+TEST_JWT_SECRET = 'test-jwt-secret-optiobra'
 
 
 class CategoriaTestCase(TestCase):
@@ -220,6 +224,83 @@ class CategoriaAPITestCase(APITestCase):
         response = self.client.post('/api/categorias/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Categoria.objects.filter(nombre='Carpintería').exists())
+
+
+@override_settings(SUPABASE_JWT_SECRET=TEST_JWT_SECRET)
+class SupabaseJWTAuthenticationTestCase(APITestCase):
+    """Pruebas del flujo real de autenticación con JWT de Supabase"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='jwtuser',
+            email='jwt@example.com',
+            password='testpass123',
+        )
+        self.supabase_uid = '11111111-2222-3333-4444-555555555555'
+        UsuarioSupabase.objects.create(
+            usuario_django=self.user,
+            supabase_uid=self.supabase_uid,
+            email='jwt@example.com',
+            nombre_completo='Usuario JWT',
+            rol='usuario',
+        )
+        self.categoria = Categoria.objects.create(nombre='JWT Test')
+        Material.objects.create(
+            nombre='Material JWT',
+            codigo='JWT-001',
+            categoria=self.categoria,
+            precio=Decimal('10.00'),
+            cantidad=5,
+            creado_por=self.user,
+        )
+
+    def _make_token(self, supabase_uid=None, expired=False):
+        exp = datetime.now(timezone.utc) + (
+            timedelta(seconds=-10) if expired else timedelta(hours=1)
+        )
+        payload = {
+            'sub': supabase_uid or self.supabase_uid,
+            'aud': 'authenticated',
+            'exp': exp,
+        }
+        return jwt.encode(payload, TEST_JWT_SECRET, algorithm='HS256')
+
+    def test_materiales_con_bearer_token(self):
+        token = self._make_token()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get('/api/materiales/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_materiales_con_token_prefix_compatibilidad(self):
+        token = self._make_token()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
+        response = self.client.get('/api/materiales/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_materiales_sin_token(self):
+        response = self.client.get('/api/materiales/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_materiales_con_token_expirado(self):
+        token = self._make_token(expired=True)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get('/api/materiales/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_materiales_con_usuario_no_registrado(self):
+        token = self._make_token(supabase_uid='99999999-9999-9999-9999-999999999999')
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get('/api/materiales/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_auth_me_con_bearer_token(self):
+        token = self._make_token()
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        response = self.client.get('/api/auth/me/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['email'], 'jwt@example.com')
+        self.assertEqual(response.data['nombre_completo'], 'Usuario JWT')
 
 
 class AuthAPITestCase(APITestCase):

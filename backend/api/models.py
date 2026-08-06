@@ -92,11 +92,14 @@ class Proyecto(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
+    ubicacion = models.CharField(max_length=150, blank=True, null=True)
     responsable = models.CharField(max_length=255, blank=True, null=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     avance = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+    porcentaje_avance = models.IntegerField(default=0)
     fecha_inicio = models.DateField(null=True, blank=True)
     fecha_fin_estimada = models.DateField(null=True, blank=True)
+    fecha_fin = models.DateField(null=True, blank=True)
     presupuesto = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)])
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
@@ -108,6 +111,43 @@ class Proyecto(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.get_estado_display()})"
+
+
+class AvanceObra(models.Model):
+    """Avances de obra asociados a un proyecto"""
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='avances')
+    actividad = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    porcentaje = models.IntegerField()
+    responsable = models.CharField(max_length=100)
+    fecha = models.DateField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Avances de Obra"
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.actividad} - {self.proyecto.nombre}"
+
+
+class Trabajador(models.Model):
+    """Modelo de trabajadores de la empresa"""
+    nombre = models.CharField(max_length=255)
+    dni = models.CharField(max_length=20, unique=True)
+    rol = models.CharField(max_length=100)
+    telefono = models.CharField(max_length=50)
+    estado = models.CharField(max_length=20, choices=[('Activo', 'Activo'), ('Inactivo', 'Inactivo')], default='Activo')
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Trabajadores"
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        return self.nombre
 
 
 class UsuarioSupabase(models.Model):

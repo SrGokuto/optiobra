@@ -4,17 +4,23 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../Services/auth.service';
 import { MaterialService, ProyectoService } from '../../../Services/servicios';
 import { UsuarioAuth } from '../../../Models/usuario';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { DashboardService } from '../../../Services/dashboard.service';
+import { DashboardEstadisticas } from '../../../Models/dashboard';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SidebarComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
   menuAbierto = true;
   usuario: UsuarioAuth | null = null;
+  estadisticas: DashboardEstadisticas | null = null;
+  cargando = false;
+  error = '';
 
   totalMateriales = 0;
   materialesDisponibles = 0;
@@ -25,6 +31,7 @@ export class Dashboard implements OnInit {
     private authService: AuthService,
     private materialService: MaterialService,
     private proyectoService: ProyectoService,
+    private dashboardService: DashboardService,
     private router: Router,
   ) {}
 
@@ -45,6 +52,19 @@ export class Dashboard implements OnInit {
   }
 
   cargarEstadisticas(): void {
+    this.cargando = true;
+    this.error = '';
+    this.dashboardService.getEstadisticas().subscribe({
+      next: (data) => {
+        this.estadisticas = data;
+        this.cargando = false;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar las estadísticas';
+        this.cargando = false;
+      },
+    });
+
     this.materialService.getMateriales().subscribe({
       next: (respuesta) => {
         this.totalMateriales = respuesta.count;

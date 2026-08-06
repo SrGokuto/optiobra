@@ -12,11 +12,12 @@ import {
 import { UsuarioAuth } from '../../../Models/usuario';
 import { AuthService } from '../../../Services/auth.service';
 import { CategoriaService, MaterialService } from '../../../Services/servicios';
+import { SidebarComponent } from '../../components/sidebar/sidebar';
 
 @Component({
   selector: 'app-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, SidebarComponent],
   templateUrl: './materiales.html',
   styleUrl: './materiales.scss',
 })
@@ -76,6 +77,7 @@ export class Materiales implements OnInit {
         this.categorias = categorias;
       },
       error: (err) => {
+        this.error = 'No se pudieron cargar las categorías';
         console.error('Error al cargar categorías', err);
       },
     });
@@ -109,10 +111,31 @@ export class Materiales implements OnInit {
     });
   }
 
+  buscar(): void {
+    this.paginaActual = 1;
+    this.cargarMateriales();
+  }
+
+  paginaAnterior(): void {
+    if (this.hayAnterior && this.paginaActual > 1) {
+      this.paginaActual--;
+      this.cargarMateriales();
+    }
+  }
+
+  paginaSiguiente(): void {
+    if (this.haySiguiente) {
+      this.paginaActual++;
+      this.cargarMateriales();
+    }
+  }
+
   abrirFormularioCrear(): void {
     this.materialEnEdicion = null;
     this.formulario = this.crearFormularioVacio();
     this.mostrarFormulario = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   abrirFormularioEdicion(material: Material): void {
@@ -129,6 +152,8 @@ export class Materiales implements OnInit {
       proveedor: material.proveedor || '',
     };
     this.mostrarFormulario = true;
+    this.mensaje = '';
+    this.error = '';
   }
 
   cerrarFormulario(): void {
@@ -183,25 +208,6 @@ export class Materiales implements OnInit {
         this.error = AuthService.extraerMensajeError(err);
       },
     });
-  }
-
-  paginaAnterior(): void {
-    if (this.hayAnterior && this.paginaActual > 1) {
-      this.paginaActual--;
-      this.cargarMateriales();
-    }
-  }
-
-  paginaSiguiente(): void {
-    if (this.haySiguiente) {
-      this.paginaActual++;
-      this.cargarMateriales();
-    }
-  }
-
-  buscar(): void {
-    this.paginaActual = 1;
-    this.cargarMateriales();
   }
 
   cerrarSesion(): void {
