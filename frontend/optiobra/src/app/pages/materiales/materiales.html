@@ -131,20 +131,20 @@
           </thead>
           <tbody>
             @for (material of materiales; track material.id) {
-              <tr>
-                <td>{{ material.id }}</td>
-                <td>{{ material.nombre }}</td>
-                <td>{{ material.codigo }}</td>
-                <td>{{ material.categoria_nombre }}</td>
-                <td>{{ material.unidad_medida }}</td>
-                <td>{{ material.cantidad }}</td>
-                <td>{{ formatearPrecio(material.precio) }}</td>
-                <td>{{ material.estado }}</td>
-                <td class="acciones">
-                  <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
-                  <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
-                </td>
-              </tr>
+            <tr>
+              <td>{{ material.id }}</td>
+              <td>{{ material.nombre }}</td>
+              <td>{{ material.codigo }}</td>
+              <td>{{ material.categoria_nombre }}</td>
+              <td>{{ material.unidad_medida }}</td>
+              <td>{{ material.cantidad }}</td>
+              <td>{{ formatearPrecio(material.precio) }}</td>
+              <td>{{ material.estado }}</td>
+              <td class="acciones">
+                <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
+                <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+              </td>
+            </tr>
             }
           </tbody>
         </table>

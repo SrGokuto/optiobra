@@ -9,15 +9,14 @@
     ☰
   </button>
 
-  <main
-    class="contenido"
-    [class.menu-cerrado]="!menuAbierto">
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
 
     <div class="header">
       <div>
         <h2>Proyectos</h2>
         <p>Gestiona todos los proyectos registrados</p>
       </div>
+
       <button class="btn-nuevo" (click)="abrirFormularioCrear()">
         + Nuevo proyecto
       </button>

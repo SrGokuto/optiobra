@@ -1,0 +1,183 @@
+<div class="dashboard">
+
+  <aside class="sidebar" [class.oculto]="!menuAbierto">
+
+    <div class="logo">
+
+      <img src="assets/Logo.png" alt="logo">
+
+      <span>OPTIOBRA</span>
+
+      <button class="menu-btn" (click)="toggleMenu()">
+        ☰
+      </button>
+
+    </div>
+
+    <ul>
+
+      <li>
+        <i class="bi bi-speedometer2"></i>
+        Dashboard
+      </li>
+
+      <li>
+        <i class="bi bi-folder2-open"></i>
+        Proyectos
+      </li>
+
+      <li>
+        <i class="bi bi-box-seam"></i>
+        Materiales
+      </li>
+
+      <li>
+        <i class="bi bi-graph-up-arrow"></i>
+        Avance de obra
+      </li>
+
+      <li>
+        <i class="bi bi-person-workspace"></i>
+        Trabajadores
+      </li>
+
+      <li>
+        <i class="bi bi-bar-chart-line"></i>
+        Reportes
+      </li>
+
+      <li class="activo">
+        <i class="bi bi-people"></i>
+        Usuarios
+      </li>
+
+      <li>
+        <i class="bi bi-gear"></i>
+        Configuración
+      </li>
+
+    </ul>
+
+    <div class="usuario">
+
+      <img src="https://i.pravatar.cc/150" alt="usuario">
+
+      <div>
+
+        <h4>Administrador</h4>
+
+        <small>admin@optiobra.com</small>
+
+      </div>
+
+    </div>
+
+  </aside>
+
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+
+      <div>
+
+        <h2>Usuarios</h2>
+
+        <p>Gestiona los usuarios del sistema</p>
+
+      </div>
+
+      <button class="btn-nuevo" (click)="crearUsuario()">
+
+        + Nuevo usuario
+
+      </button>
+
+    </div>
+
+    <div class="filtros">
+
+      <input type="text" placeholder="Buscar usuarios...">
+
+      <select>
+
+        <option>Todos los roles</option>
+        <option>Administrador</option>
+        <option>Ingeniero</option>
+        <option>Supervisor</option>
+        <option>Operario</option>
+
+      </select>
+
+    </div>
+
+    <div class="tabla-container">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo electrónico</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let usuario of usuarios">
+
+            <td>{{usuario.id}}</td>
+
+            <td>{{usuario.nombre}}</td>
+
+            <td>{{usuario.correo}}</td>
+
+            <td>{{usuario.rol}}</td>
+
+            <td>
+
+              <span
+                class="estado"
+                [class.activo]="usuario.estado=='Activo'"
+                [class.inactivo]="usuario.estado=='Inactivo'">
+
+                {{usuario.estado}}
+
+              </span>
+
+            </td>
+
+            <td class="acciones">
+
+              <button class="editar" (click)="editarUsuario(usuario)">
+                Editar
+              </button>
+
+              <button class="eliminar" (click)="eliminarUsuario(usuario)">
+                Eliminar
+              </button>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </main>
+
+</div>

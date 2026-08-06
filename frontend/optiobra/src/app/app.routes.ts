@@ -6,6 +6,8 @@ import { Proyectos } from './pages/proyectos/proyectos';
 import { AvanceObraComponent } from './pages/avance-obra/avance-obra';
 import { Trabajadores } from './pages/trabajadores/trabajadores';
 import { RegisterComponent } from './components/register/register';
+import { Usuarios } from './pages/usuarios/usuarios';
+import { Configuracion } from './pages/configuracion/configuracion';
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
@@ -16,10 +18,7 @@ export const routes: Routes = [
   },
   {
     path: 'register',
-    loadComponent: () =>
-      import('./components/register/register').then(
-        (m) => m.RegisterComponent
-      ),
+    loadComponent: () => import('./components/register/register').then((m) => m.RegisterComponent),
     canActivate: [guestGuard],
     title: 'Registro',
   },
@@ -58,6 +57,18 @@ export const routes: Routes = [
     component: Trabajadores,
     canActivate: [authGuard],
     title: 'Trabajadores',
+  },
+  {
+    path: 'usuarios',
+    component: Usuarios,
+    canActivate: [authGuard],
+    title: 'Usuarios',
+  },
+  {
+    path: 'configuracion',
+    component: Configuracion,
+    canActivate: [authGuard],
+    title: 'Configuración',
   },
   {
     path: '**',
