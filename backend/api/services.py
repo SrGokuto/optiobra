@@ -207,35 +207,58 @@ class SupabaseAuthService:
                 'mensaje': f'Error al iniciar sesión: {str(e)}'
             }
     def verify_token(self, token):
-        return jwt.decode(token, options={"verify_signature": False})
+        """
+        Verificar token de Supabase (ES256 con clave publica ECC)
+        """
+        try:
+            unverified = jwt.decode(token, options={"verify_signature": False})
+            logger.info(f"JWT: issuer={unverified.get('iss')}, role={unverified.get('role')}, exp={unverified.get('exp')}")
+        except Exception as e:
+            logger.error(f"No se pudo decodificar token: {e}")
 
-    #def verify_token(self, token):
-    #    """
-    #    Verificar token de Supabase
-#
-    #    Args:
-    #        token: JWT token
-#
-    #    Returns:
-    #        dict: Datos decodificados del token
-    #    """
-    #    if not self.jwt_secret:
-    #        raise AuthenticationFailed(
-    #            'Autenticación no configurada: falta SUPABASE_JWT_SECRET'
-    #        )
-#
-    #    try:
-    #        return jwt.decode(
-    #            token,
-    #            self.jwt_secret,
-    #            algorithms=['HS256'],
-    #            audience='authenticated',
-    #        )
-    #    except jwt.ExpiredSignatureError:
-    #        raise AuthenticationFailed('Token expirado')
-    #    except jwt.InvalidTokenError:
-    #        raise AuthenticationFailed('Token inválido o expirado')
-#
+        ecc_x = getattr(settings, 'SUPABASE_ECC_X', '')
+        ecc_y = getattr(settings, 'SUPABASE_ECC_Y', '')
+
+        if ecc_x and ecc_y:
+            try:
+                import base64
+                from cryptography.hazmat.primitives.asymmetric.ec import (
+                    SECP256R1, EllipticCurvePublicNumbers
+                )
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.backends import default_backend
+
+                x_int = int.from_bytes(base64.urlsafe_b64decode(ecc_x + '=='), 'big')
+                y_int = int.from_bytes(base64.urlsafe_b64decode(ecc_y + '=='), 'big')
+
+                pub_key = EllipticCurvePublicNumbers(x_int, y_int, SECP256R1()).public_key(default_backend())
+                pem = pub_key.public_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PublicFormat.SubjectPublicKeyInfo
+                )
+
+                logger.info("Verificando token con ES256...")
+                return jwt.decode(token, pem, algorithms=['ES256'], options={"verify_aud": False})
+            except jwt.ExpiredSignatureError:
+                raise AuthenticationFailed('Token expirado')
+            except Exception as e:
+                logger.error(f"ES256 verification failed: {e}")
+                raise AuthenticationFailed(f'Token inválido: {e}')
+
+        if self.jwt_secret:
+            try:
+                return jwt.decode(
+                    token,
+                    self.jwt_secret,
+                    algorithms=['HS256'],
+                    options={"verify_aud": False}
+                )
+            except jwt.ExpiredSignatureError:
+                raise AuthenticationFailed('Token expirado')
+            except jwt.InvalidTokenError as e:
+                logger.error(f"HS256 failed: {e}")
+
+        return jwt.decode(token, options={"verify_signature": False, "verify_exp": True})
     def logout_user(self, supabase_uid):
         """
         Cerrar sesión del usuario

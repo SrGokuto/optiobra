@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
+from .models import (
+    Material, Categoria, HistorialMaterial, UsuarioSupabase,
+    PerfilUsuario, ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+)
 
 
 @admin.register(Categoria)
@@ -76,3 +79,31 @@ class UsuarioSupabaseAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(PerfilUsuario)
+class PerfilUsuarioAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'telefono', 'departamento', 'cargo', 'creado_en')
+    search_fields = ('usuario__username', 'usuario__email', 'telefono', 'departamento', 'cargo')
+    readonly_fields = ('creado_en', 'actualizado_en')
+
+
+@admin.register(ConfiguracionEmpresa)
+class ConfiguracionEmpresaAdmin(admin.ModelAdmin):
+    list_display = ('nombre_empresa', 'nit_runc', 'email_contacto', 'telefono', 'moneda_principal')
+    readonly_fields = ('creado_en', 'actualizado_en')
+
+
+@admin.register(ConfiguracionSistema)
+class ConfiguracionSistemaAdmin(admin.ModelAdmin):
+    list_display = ('alerta_stock_minimo_defecto', 'dias_notificacion_vencimiento', 'modo_mantenimiento', 'formato_fecha')
+    readonly_fields = ('creado_en', 'actualizado_en')
+
+
+@admin.register(Reporte)
+class ReporteAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'tipo_reporte', 'formato', 'solicitado_por', 'fecha_generacion', 'estado')
+    list_filter = ('tipo_reporte', 'formato', 'estado', 'fecha_generacion')
+    search_fields = ('titulo', 'solicitado_por__username')
+    readonly_fields = ('fecha_generacion',)
+

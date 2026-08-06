@@ -365,3 +365,151 @@ class HistorialMaterialTestCase(TestCase):
         )
         self.assertEqual(historial.accion, 'edicion')
         self.assertEqual(historial.material.id, self.material.id)
+
+
+class UsuarioAPITestCase(APITestCase):
+    """Pruebas para los endpoints del módulo Usuarios"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.admin_user = User.objects.create_superuser(
+            username='admin_test',
+            email='admin@test.local',
+            password='password123'
+        )
+        self.normal_user = User.objects.create_user(
+            username='user_test',
+            email='user@test.local',
+            password='password123'
+        )
+        self.client.force_authenticate(user=self.admin_user)
+
+    def test_listar_usuarios(self):
+        """Probar GET /api/usuarios/"""
+        response = self.client.get('/api/usuarios/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_crear_usuario(self):
+        """Probar POST /api/usuarios/"""
+        data = {
+            'username': 'nuevo_usuario',
+            'email': 'nuevo@test.local',
+            'password': 'Password123!',
+            'nombre_completo': 'Nuevo Usuario Test',
+            'rol': 'supervisor',
+            'telefono': '3001234567',
+            'departamento': 'Ingeniería'
+        }
+        response = self.client.post('/api/usuarios/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(User.objects.filter(username='nuevo_usuario').exists())
+
+    def test_perfil_usuario_autenticado(self):
+        """Probar GET /api/usuarios/perfil/"""
+        response = self.client.get('/api/usuarios/perfil/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], 'admin_test')
+
+    def test_cambiar_estado_usuario(self):
+        """Probar POST /api/usuarios/{id}/cambiar_estado/"""
+        response = self.client.post(
+            f'/api/usuarios/{self.normal_user.id}/cambiar_estado/',
+            {'activo': False},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.normal_user.refresh_from_db()
+        self.assertFalse(self.normal_user.is_active)
+
+    def test_cambiar_rol_usuario(self):
+        """Probar POST /api/usuarios/{id}/cambiar_rol/"""
+        response = self.client.post(
+            f'/api/usuarios/{self.normal_user.id}/cambiar_rol/',
+            {'rol': 'bodeguero'},
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class ConfiguracionAPITestCase(APITestCase):
+    """Pruebas para los endpoints del módulo Configuración"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='config_user',
+            password='password123'
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_obtener_configuracion_general(self):
+        """Probar GET /api/configuracion/"""
+        response = self.client.get('/api/configuracion/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('empresa', response.data)
+        self.assertIn('sistema', response.data)
+
+    def test_actualizar_configuracion_empresa(self):
+        """Probar PUT /api/configuracion/empresa/"""
+        data = {
+            'nombre_empresa': 'OptiObra Constructora S.A.S.',
+            'nit_runc': '901.123.456-7',
+            'direccion': 'Av. Central #45-67',
+            'telefono': '+57 311 999 8888',
+            'email_contacto': 'contacto@constructora.local',
+            'moneda_principal': 'COP'
+        }
+        response = self.client.put('/api/configuracion/empresa/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nombre_empresa'], 'OptiObra Constructora S.A.S.')
+
+    def test_actualizar_configuracion_sistema(self):
+        """Probar PUT /api/configuracion/sistema/"""
+        data = {
+            'alerta_stock_minimo_defecto': 15,
+            'dias_notificacion_vencimiento': 15,
+            'modo_mantenimiento': False,
+            'formato_fecha': 'DD/MM/YYYY',
+            'notificaciones_email': True
+        }
+        response = self.client.put('/api/configuracion/sistema/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['alerta_stock_minimo_defecto'], 15)
+
+
+class ReporteAPITestCase(APITestCase):
+    """Pruebas para los endpoints del módulo Reportes"""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='report_user',
+            password='password123'
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_reporte_inventario(self):
+        """Probar GET /api/reportes/inventario/"""
+        response = self.client.get('/api/reportes/inventario/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('total_materiales', response.data)
+        self.assertIn('valor_total_inventario', response.data)
+
+    def test_reporte_stock_bajo(self):
+        """Probar GET /api/reportes/stock_bajo/"""
+        response = self.client.get('/api/reportes/stock_bajo/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('total_criticos', response.data)
+
+    def test_reporte_proyectos(self):
+        """Probar GET /api/reportes/proyectos/"""
+        response = self.client.get('/api/reportes/proyectos/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('total_proyectos', response.data)
+
+    def test_reporte_trabajadores(self):
+        """Probar GET /api/reportes/trabajadores/"""
+        response = self.client.get('/api/reportes/trabajadores/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('total_trabajadores', response.data)
+

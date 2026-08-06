@@ -3,11 +3,22 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Avg
+from django.contrib.auth.models import User
+from django.db.models import Q, Avg, Sum, Count, F
 import logging
 
-from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase, Proyecto, AvanceObra, Trabajador
-from .serializers import MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer, ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer
+from .models import (
+    Material, Categoria, HistorialMaterial, UsuarioSupabase,
+    Proyecto, AvanceObra, Trabajador, PerfilUsuario,
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+)
+from .serializers import (
+    MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
+    ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer,
+    PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
+    ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
+    ReporteSerializer, GenerarReporteSerializer
+)
 from .services import SupabaseAuthService
 
 logger = logging.getLogger(__name__)
@@ -418,6 +429,11 @@ class AuthViewSet(viewsets.ViewSet):
         if result['error']:
             return Response(result, status=status.HTTP_401_UNAUTHORIZED)
         
+        token = result.get('access_token', '')
+        print(f"\n{'='*60}")
+        print(f"ACCESS TOKEN: {token}")
+        print(f"{'='*60}\n")
+        
         return Response(result, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
@@ -462,3 +478,372 @@ class AuthViewSet(viewsets.ViewSet):
                 'username': request.user.username,
                 'email': request.user.email,
             })
+
+
+class UsuarioViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestión completa de usuarios del sistema (CRUD)
+    Endpoints:
+    - GET /api/usuarios/ : Listar usuarios
+    - POST /api/usuarios/ : Crear usuario
+    - GET /api/usuarios/{id}/ : Consultar usuario
+    - PUT/PATCH /api/usuarios/{id}/ : Actualizar usuario
+    - DELETE /api/usuarios/{id}/ : Desactivar usuario
+    - GET /api/usuarios/perfil/ : Consultar perfil actual
+    - POST /api/usuarios/{id}/cambiar_estado/ : Activar/desactivar usuario
+    - POST /api/usuarios/{id}/cambiar_rol/ : Asignar nuevo rol
+    """
+    queryset = User.objects.all().select_related('usuariosupabase', 'perfil')
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['username', 'email', 'first_name', 'last_name', 'usuariosupabase__nombre_completo']
+    ordering_fields = ['username', 'email', 'date_joined']
+    ordering = ['-date_joined']
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return UsuarioCreateUpdateSerializer
+        return UsuarioDetalleSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        rol = self.request.query_params.get('rol', '')
+        if rol:
+            queryset = queryset.filter(usuariosupabase__rol=rol)
+        activo = self.request.query_params.get('activo', '')
+        if activo.lower() == 'true':
+            queryset = queryset.filter(is_active=True, usuariosupabase__activo=True)
+        elif activo.lower() == 'false':
+            queryset = queryset.filter(Q(is_active=False) | Q(usuariosupabase__activo=False))
+        return queryset
+
+    def perform_create(self, serializer):
+        data = serializer.validated_data
+        nombre_completo = data.pop('nombre_completo', f"{data.get('first_name', '')} {data.get('last_name', '')}".strip())
+        rol = data.pop('rol', 'usuario')
+        telefono = data.pop('telefono', '')
+        departamento = data.pop('departamento', '')
+        cargo = data.pop('cargo', '')
+        direccion = data.pop('direccion', '')
+
+        password = data.pop('password', None)
+        user = User.objects.create(**data)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+
+        # Crear relación de Supabase
+        UsuarioSupabase.objects.create(
+            usuario_django=user,
+            supabase_uid=f"local-{user.id}",
+            email=user.email,
+            nombre_completo=nombre_completo or user.username,
+            rol=rol,
+            activo=True
+        )
+
+        # Crear Perfil
+        PerfilUsuario.objects.create(
+            usuario=user,
+            telefono=telefono,
+            departamento=departamento,
+            cargo=cargo,
+            direccion=direccion
+        )
+
+    def perform_update(self, serializer):
+        data = serializer.validated_data
+        nombre_completo = data.pop('nombre_completo', None)
+        rol = data.pop('rol', None)
+        telefono = data.pop('telefono', None)
+        departamento = data.pop('departamento', None)
+        cargo = data.pop('cargo', None)
+        direccion = data.pop('direccion', None)
+        password = data.pop('password', None)
+
+        user = serializer.save()
+        if password:
+            user.set_password(password)
+            user.save()
+
+        if hasattr(user, 'usuariosupabase'):
+            if nombre_completo is not None:
+                user.usuariosupabase.nombre_completo = nombre_completo
+            if rol is not None:
+                user.usuariosupabase.rol = rol
+            user.usuariosupabase.save()
+
+        perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
+        if telefono is not None:
+            perfil.telefono = telefono
+        if departamento is not None:
+            perfil.departamento = departamento
+        if cargo is not None:
+            perfil.cargo = cargo
+        if direccion is not None:
+            perfil.direccion = direccion
+        perfil.save()
+
+    def perform_destroy(self, instance):
+        """Desactivación lógica de usuario"""
+        instance.is_active = False
+        instance.save()
+        if hasattr(instance, 'usuariosupabase'):
+            instance.usuariosupabase.activo = False
+            instance.usuariosupabase.save()
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def perfil(self, request):
+        """GET /api/usuarios/perfil/ - Obtener perfil del usuario autenticado"""
+        serializer = UsuarioDetalleSerializer(request.user)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def cambiar_estado(self, request, pk=None):
+        """POST /api/usuarios/{id}/cambiar_estado/ Body: {"activo": true/false}"""
+        user = self.get_object()
+        nuevo_estado = request.data.get('activo')
+        if nuevo_estado is None:
+            return Response({'error': 'El campo activo es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.is_active = bool(nuevo_estado)
+        user.save()
+        if hasattr(user, 'usuariosupabase'):
+            user.usuariosupabase.activo = bool(nuevo_estado)
+            user.usuariosupabase.save()
+
+        return Response({
+            'mensaje': f'Estado del usuario actualizado a: {"Activo" if user.is_active else "Inactivo"}',
+            'usuario': UsuarioDetalleSerializer(user).data
+        })
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def cambiar_rol(self, request, pk=None):
+        """POST /api/usuarios/{id}/cambiar_rol/ Body: {"rol": "admin"/"supervisor"/"usuario"}"""
+        user = self.get_object()
+        nuevo_rol = request.data.get('rol')
+        if not nuevo_rol:
+            return Response({'error': 'El campo rol es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        usuario_sb, _ = UsuarioSupabase.objects.get_or_create(
+            usuario_django=user,
+            defaults={'supabase_uid': f"local-{user.id}", 'email': user.email}
+        )
+        usuario_sb.rol = nuevo_rol
+        usuario_sb.save()
+
+        return Response({
+            'mensaje': f'Rol actualizado exitosamente a: {nuevo_rol}',
+            'usuario': UsuarioDetalleSerializer(user).data
+        })
+
+
+class ConfiguracionViewSet(viewsets.ViewSet):
+    """
+    ViewSet para parámetros de configuración del sistema y empresa
+    Endpoints:
+    - GET /api/configuracion/ : Obtener toda la configuración
+    - GET /api/configuracion/empresa/ : Obtener datos de la empresa
+    - PUT /api/configuracion/empresa/ : Actualizar datos de la empresa
+    - GET /api/configuracion/sistema/ : Obtener parámetros del sistema
+    - PUT /api/configuracion/sistema/ : Actualizar parámetros del sistema
+    """
+    permission_classes = [IsAuthenticated]
+
+    def _get_empresa(self):
+        empresa, _ = ConfiguracionEmpresa.objects.get_or_create(id=1)
+        return empresa
+
+    def _get_sistema(self):
+        sistema, _ = ConfiguracionSistema.objects.get_or_create(id=1)
+        return sistema
+
+    def list(self, request):
+        """GET /api/configuracion/"""
+        empresa = self._get_empresa()
+        sistema = self._get_sistema()
+        return Response({
+            'empresa': ConfiguracionEmpresaSerializer(empresa).data,
+            'sistema': ConfiguracionSistemaSerializer(sistema).data,
+        })
+
+    @action(detail=False, methods=['get', 'put', 'patch'])
+    def empresa(self, request):
+        empresa = self._get_empresa()
+        if request.method == 'GET':
+            serializer = ConfiguracionEmpresaSerializer(empresa)
+            return Response(serializer.data)
+        
+        serializer = ConfiguracionEmpresaSerializer(empresa, data=request.data, partial=(request.method == 'PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get', 'put', 'patch'])
+    def sistema(self, request):
+        sistema = self._get_sistema()
+        if request.method == 'GET':
+            serializer = ConfiguracionSistemaSerializer(sistema)
+            return Response(serializer.data)
+
+        serializer = ConfiguracionSistemaSerializer(sistema, data=request.data, partial=(request.method == 'PATCH'))
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReporteViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para generación y consulta de reportes analíticos del sistema
+    Endpoints:
+    - GET /api/reportes/ : Historial de reportes
+    - POST /api/reportes/ : Generar/registrar reporte
+    - GET /api/reportes/inventario/ : Reporte de inventario en tiempo real
+    - GET /api/reportes/stock_bajo/ : Reporte de materiales con stock bajo
+    - GET /api/reportes/proyectos/ : Reporte de avances de proyectos
+    - GET /api/reportes/trabajadores/ : Reporte de personal
+    """
+    queryset = Reporte.objects.all().select_related('solicitado_por')
+    serializer_class = ReporteSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['titulo', 'tipo_reporte', 'formato']
+    ordering_fields = ['fecha_generacion', 'tipo_reporte']
+    ordering = ['-fecha_generacion']
+
+    def perform_create(self, serializer):
+        serializer.save(solicitado_por=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def inventario(self, request):
+        """GET /api/reportes/inventario/"""
+        total_materiales = Material.objects.count()
+        materiales = Material.objects.select_related('categoria').all()
+        valor_total = sum(m.precio * m.cantidad for m in materiales)
+        por_categoria = Categoria.objects.annotate(
+            total_items=Count('materiales'),
+            valor_categoria=Sum(F('materiales__precio') * F('materiales__cantidad'))
+        ).values('id', 'nombre', 'total_items', 'valor_categoria')
+
+        desglose = [{
+            'id': cat['id'],
+            'nombre': cat['nombre'],
+            'total_items': cat['total_items'],
+            'valor_categoria': float(cat['valor_categoria'] or 0)
+        } for cat in por_categoria]
+
+        resumen = {
+            'total_materiales': total_materiales,
+            'valor_total_inventario': float(valor_total),
+            'desglose_categorias': desglose
+        }
+
+        Reporte.objects.create(
+            titulo='Reporte Analítico de Inventario',
+            tipo_reporte='inventario',
+            formato='json',
+            solicitado_por=request.user if request.user.is_authenticated else None,
+            resumen_datos=resumen
+        )
+
+        return Response(resumen)
+
+    @action(detail=False, methods=['get'])
+    def stock_bajo(self, request):
+        """GET /api/reportes/stock_bajo/"""
+        sistema = ConfiguracionSistema.objects.first()
+        limite = sistema.alerta_stock_minimo_defecto if sistema else 10
+
+        materiales_criticos = Material.objects.filter(cantidad__lte=limite).select_related('categoria')
+        data = [{
+            'id': m.id,
+            'nombre': m.nombre,
+            'codigo': m.codigo,
+            'categoria': m.categoria.nombre if m.categoria else 'Sin Categoría',
+            'cantidad': m.cantidad,
+            'precio': float(m.precio),
+            'estado': m.estado
+        } for m in materiales_criticos]
+
+        resumen = {
+            'umbral_alerta': limite,
+            'total_criticos': len(data),
+            'materiales': data
+        }
+
+        Reporte.objects.create(
+            titulo='Reporte de Materiales con Stock Bajo',
+            tipo_reporte='stock_bajo',
+            formato='json',
+            solicitado_por=request.user if request.user.is_authenticated else None,
+            resumen_datos=resumen
+        )
+
+        return Response(resumen)
+
+    @action(detail=False, methods=['get'])
+    def proyectos(self, request):
+        """GET /api/reportes/proyectos/"""
+        total_proyectos = Proyecto.objects.count()
+        proyectos = Proyecto.objects.annotate(total_avances=Count('avances')).values(
+            'id', 'nombre', 'ubicacion', 'estado', 'porcentaje_avance', 'total_avances', 'fecha_inicio', 'fecha_fin'
+        )
+
+        promedio = Proyecto.objects.aggregate(prom=Avg('porcentaje_avance'))['prom'] or 0
+
+        proyectos_list = [{
+            'id': p['id'],
+            'nombre': p['nombre'],
+            'ubicacion': p['ubicacion'],
+            'estado': p['estado'],
+            'porcentaje_avance': p['porcentaje_avance'],
+            'total_avances': p['total_avances'],
+            'fecha_inicio': str(p['fecha_inicio']) if p['fecha_inicio'] else None,
+            'fecha_fin': str(p['fecha_fin']) if p['fecha_fin'] else None,
+        } for p in proyectos]
+
+        resumen = {
+            'total_proyectos': total_proyectos,
+            'promedio_avance_general': round(promedio, 2),
+            'proyectos': proyectos_list
+        }
+
+        Reporte.objects.create(
+            titulo='Reporte General de Proyectos',
+            tipo_reporte='proyectos_avances',
+            formato='json',
+            solicitado_por=request.user if request.user.is_authenticated else None,
+            resumen_datos=resumen
+        )
+
+        return Response(resumen)
+
+    @action(detail=False, methods=['get'])
+    def trabajadores(self, request):
+        """GET /api/reportes/trabajadores/"""
+        total_trabajadores = Trabajador.objects.count()
+        activos = Trabajador.objects.filter(estado='Activo').count()
+        inactivos = Trabajador.objects.filter(estado='Inactivo').count()
+        por_rol = Trabajador.objects.values('rol').annotate(total=Count('id'))
+
+        resumen = {
+            'total_trabajadores': total_trabajadores,
+            'activos': activos,
+            'inactivos': inactivos,
+            'distribucion_por_rol': list(por_rol)
+        }
+
+        Reporte.objects.create(
+            titulo='Reporte de Personal y Trabajadores',
+            tipo_reporte='trabajadores',
+            formato='json',
+            solicitado_por=request.user if request.user.is_authenticated else None,
+            resumen_datos=resumen
+        )
+
+        return Response(resumen)
+

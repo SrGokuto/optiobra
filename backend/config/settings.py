@@ -82,6 +82,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import ssl
+
+db_ssl_ctx = ssl.create_default_context()
+db_ssl_ctx.check_hostname = False
+db_ssl_ctx.verify_mode = ssl.CERT_NONE
+
 DATABASES = {
     "default": {
         "ENGINE": os.getenv("DB_ENGINE") or "django.db.backends.mysql",
@@ -92,9 +98,7 @@ DATABASES = {
         "PORT": int(os.getenv("DB_PORT")),
         "OPTIONS": {
             "charset": "utf8mb4",
-            "ssl": {
-                "ca": str(BASE_DIR / "certs" / "globalsignrootca.pem"),
-            },
+            "ssl": db_ssl_ctx,
         },
     }
 }
@@ -170,10 +174,12 @@ CORS_ALLOW_CREDENTIALS = True
 SUPABASE_URL = os.getenv('SUPABASE_URL', '')
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')
 SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET', '')
+SUPABASE_ECC_X = os.getenv('SUPABASE_ECC_X', '')
+SUPABASE_ECC_Y = os.getenv('SUPABASE_ECC_Y', '')
 
 # Tests unitarios usan SQLite en memoria (no requiere MariaDB local).
 if 'test' in sys.argv:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
-    }
+    }

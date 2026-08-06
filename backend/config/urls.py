@@ -17,7 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from api.views import MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet, AvanceObraViewSet, TrabajadorViewSet, DashboardViewSet
+from api.views import (
+    MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet,
+    AvanceObraViewSet, TrabajadorViewSet, DashboardViewSet,
+    UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet
+)
 
 # Crear router para ViewSets
 router = DefaultRouter()
@@ -28,6 +32,9 @@ router.register(r'avances', AvanceObraViewSet, basename='avance')
 router.register(r'trabajadores', TrabajadorViewSet, basename='trabajador')
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 router.register(r'auth', AuthViewSet, basename='auth')
+router.register(r'usuarios', UsuarioViewSet, basename='usuario')
+router.register(r'configuracion', ConfiguracionViewSet, basename='configuracion')
+router.register(r'reportes', ReporteViewSet, basename='reporte')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
