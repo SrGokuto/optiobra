@@ -294,6 +294,34 @@ class ProyectoViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(estado=estado)
         return queryset
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def estimaciones(self, request, pk=None):
+        """
+        Generar reporte ejecutivo IA para un proyecto
+        POST /api/proyectos/{id}/estimaciones/
+        """
+        from services.ai.context_builder import ContextBuilder
+        from services.ai.intelligence_client import IntelligenceClient
+
+        proyecto = self.get_object()
+        context_builder = ContextBuilder()
+        client = IntelligenceClient()
+
+        try:
+            context = context_builder.build_project_context(proyecto.id)
+            result = client.generate_executive_report_sync(context)
+            return Response(result)
+        except Exception as e:
+            logger.error("Error generando estimaciones para proyecto %d: %s", pk, str(e))
+            return Response(
+                {
+                    'success': False,
+                    'error': 'GENERATION_ERROR',
+                    'message': 'Error al generar el reporte de inteligencia',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 
 class AvanceObraViewSet(viewsets.ModelViewSet):
     """ViewSet para gestionar avances de obra"""
