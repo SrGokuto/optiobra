@@ -6,6 +6,9 @@ import { ReporteService } from '../../../Services/reporte.service';
 import { ReporteProyectos, ReporteInventario, ReporteTrabajadores } from '../../../Models/reporte';
 import { Proyecto } from '../../../Models/proyecto';
 import { Chart, registerables } from 'chart.js';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 Chart.register(...registerables);
 
@@ -16,7 +19,7 @@ Chart.register(...registerables);
   templateUrl: './reportes.html',
   styleUrls: ['./reportes.scss']
 })
-export class ReportesComponent implements OnInit, OnDestroy {
+export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('barChartCanvas') barChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('pieChartCanvas') pieChartRef!: ElementRef<HTMLCanvasElement>;
@@ -41,7 +44,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
 
   totalProyectos: number = 0;
   totalTrabajadores: number = 0;
-  valorInventario: number = 0;
+  valorInventario: number | null = null;
   avancePromedio: number = 0;
 
   private barChart: Chart | null = null;
@@ -56,11 +59,23 @@ export class ReportesComponent implements OnInit, OnDestroy {
   private datosProyectos: ReporteProyectos | null = null;
   private datosInventario: ReporteInventario | null = null;
 
+  get hayDatosProyectos(): boolean {
+    return !!(this.datosProyectos?.proyectos?.length);
+  }
+
+  get hayDatosCategorias(): boolean {
+    return !!(this.datosInventario?.desglose_categorias?.some((c) => c.total_items > 0));
+  }
+
   constructor(private reporteService: ReporteService) {}
 
   ngOnInit(): void {
     this.cargarEstadisticas();
     this.cargarProyectos();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => this.renderizarGraficas(), 0);
   }
 
   ngOnDestroy(): void {
@@ -74,6 +89,14 @@ export class ReportesComponent implements OnInit, OnDestroy {
 
   cargarEstadisticas(): void {
     this.cargando = true;
+    this.error = '';
+    this.valorInventario = null;
+    this.totalProyectos = 0;
+    this.totalTrabajadores = 0;
+    this.avancePromedio = 0;
+    this.reportesCargados = { inventario: false, trabajadores: false, proyectos: false };
+    this.datosInventario = null;
+    this.datosProyectos = null;
 
     this.reporteService.getInventario().subscribe({
       next: (data) => {
@@ -82,7 +105,9 @@ export class ReportesComponent implements OnInit, OnDestroy {
         this.reportesCargados.inventario = true;
         this.verificarCargaCompleta();
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'No se pudo cargar el valor del inventario desde la base de datos';
+        console.error('Error inventario:', err);
         this.reportesCargados.inventario = true;
         this.verificarCargaCompleta();
       }
@@ -94,7 +119,9 @@ export class ReportesComponent implements OnInit, OnDestroy {
         this.reportesCargados.trabajadores = true;
         this.verificarCargaCompleta();
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'No se pudieron cargar los trabajadores';
+        console.error('Error trabajadores:', err);
         this.reportesCargados.trabajadores = true;
         this.verificarCargaCompleta();
       }
@@ -108,7 +135,9 @@ export class ReportesComponent implements OnInit, OnDestroy {
         this.reportesCargados.proyectos = true;
         this.verificarCargaCompleta();
       },
-      error: () => {
+      error: (err) => {
+        this.error = 'No se pudieron cargar los proyectos';
+        console.error('Error proyectos:', err);
         this.reportesCargados.proyectos = true;
         this.verificarCargaCompleta();
       }
@@ -128,11 +157,14 @@ export class ReportesComponent implements OnInit, OnDestroy {
   }
 
   private renderizarGraficaBarras(): void {
-    if (!this.barChartRef?.nativeElement || !this.datosProyectos?.proyectos?.length) return;
+    if (!this.barChartRef?.nativeElement) return;
 
     this.barChart?.destroy();
+    this.barChart = null;
 
-    const proyectos = this.datosProyectos.proyectos;
+    const proyectos = this.datosProyectos?.proyectos || [];
+    if (!proyectos.length) return;
+
     const labels = proyectos.map(p => p.nombre);
     const datos = proyectos.map(p => p.porcentaje_avance);
 
@@ -180,11 +212,14 @@ export class ReportesComponent implements OnInit, OnDestroy {
   }
 
   private renderizarGraficaCircular(): void {
-    if (!this.pieChartRef?.nativeElement || !this.datosInventario?.desglose_categorias?.length) return;
+    if (!this.pieChartRef?.nativeElement) return;
 
     this.pieChart?.destroy();
+    this.pieChart = null;
 
-    const categorias = this.datosInventario.desglose_categorias;
+    const categorias = (this.datosInventario?.desglose_categorias || []).filter(c => c.total_items > 0);
+    if (!categorias.length) return;
+
     const labels = categorias.map(c => c.nombre);
     const datos = categorias.map(c => c.total_items);
 
@@ -238,6 +273,21 @@ export class ReportesComponent implements OnInit, OnDestroy {
     });
   }
 
+  onCambiarTipoReporte(): void {
+    if (this.tipoReporte === 'inventario') {
+      this.reporteService.getInventario().subscribe({
+        next: (data) => {
+          this.valorInventario = data.valor_total_inventario;
+          this.datosInventario = data;
+        },
+        error: (err) => {
+          this.error = 'No se pudo cargar el valor del inventario desde la base de datos';
+          console.error('Error al cargar inventario:', err);
+        }
+      });
+    }
+  }
+
   formatearTipoReporte(tipo: string): string {
     const mapa: Record<string, string> = {
       'inventario': 'Inventario',
@@ -248,11 +298,14 @@ export class ReportesComponent implements OnInit, OnDestroy {
     return mapa[tipo] || tipo;
   }
 
-  formatearPresupuesto(valor: number): string {
-    if (valor >= 1000000) {
-      return `$${(valor / 1000000).toFixed(0)} M`;
+  formatearPresupuesto(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined) return '-';
+    const numero = Number(valor);
+    if (Number.isNaN(numero)) return '-';
+    if (numero >= 1000000) {
+      return `$${(numero / 1000000).toFixed(0)} M`;
     }
-    return `$${valor.toLocaleString()}`;
+    return `$${numero.toLocaleString('es-CO')}`;
   }
 
   generarReporte(): void {
@@ -267,11 +320,115 @@ export class ReportesComponent implements OnInit, OnDestroy {
   }
 
   exportarPDF(): void {
-    alert('Exportando reporte en PDF...');
+    const doc = new jsPDF();
+    const yFinal = (): number => (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+
+    doc.setFillColor(13, 27, 42);
+    doc.rect(0, 0, 210, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('OPTIOBRA', 14, 14);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Reporte General del Sistema', 14, 22);
+    doc.text(`Generado: ${new Date().toLocaleString('es-CO')}`, 14, 27);
+
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Resumen', 14, 42);
+
+    autoTable(doc, {
+      startY: 47,
+      head: [['Métrica', 'Valor']],
+      body: [
+        ['Proyectos', String(this.totalProyectos)],
+        ['Trabajadores', String(this.totalTrabajadores)],
+        ['Valor del inventario', this.formatearPresupuesto(this.valorInventario)],
+        ['Avance promedio', `${this.avancePromedio}%`],
+      ],
+      theme: 'grid',
+      headStyles: { fillColor: [242, 159, 5], textColor: [0, 0, 0] },
+    });
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Avance por Proyecto', 14, yFinal() + 12);
+
+    const proyectos = this.datosProyectos?.proyectos || [];
+    if (proyectos.length) {
+      autoTable(doc, {
+        startY: yFinal() + 17,
+        head: [['Nombre', 'Ubicación', 'Estado', 'Avance (%)']],
+        body: proyectos.map((p) => [
+          p.nombre,
+          p.ubicacion || '-',
+          p.estado,
+          String(p.porcentaje_avance),
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [242, 159, 5], textColor: [0, 0, 0] },
+      });
+    } else {
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(120, 120, 120);
+      doc.text('No hay proyectos registrados', 14, yFinal() + 17);
+    }
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(40, 40, 40);
+    doc.text('Distribución de Recursos', 14, yFinal() + 12);
+
+    const categorias = (this.datosInventario?.desglose_categorias || []).filter((c) => c.total_items > 0);
+    if (categorias.length) {
+      autoTable(doc, {
+        startY: yFinal() + 17,
+        head: [['Categoría', 'Items', 'Valor']],
+        body: categorias.map((c) => [c.nombre, String(c.total_items), this.formatearPresupuesto(c.valor_categoria)]),
+        theme: 'striped',
+        headStyles: { fillColor: [242, 159, 5], textColor: [0, 0, 0] },
+      });
+    } else {
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(120, 120, 120);
+      doc.text('No hay materiales con stock', 14, yFinal() + 17);
+    }
+
+    doc.save('reporte-optiobra.pdf');
   }
 
   exportarExcel(): void {
-    alert('Exportando reporte en Excel...');
+    const resumen = [
+      { Metrica: 'Proyectos', Valor: this.totalProyectos },
+      { Metrica: 'Trabajadores', Valor: this.totalTrabajadores },
+      { Metrica: 'Valor del inventario', Valor: this.valorInventario ?? 0 },
+      { Metrica: 'Avance promedio (%)', Valor: this.avancePromedio },
+    ];
+
+    const proyectos = (this.datosProyectos?.proyectos || []).map((p) => ({
+      Nombre: p.nombre,
+      Ubicacion: p.ubicacion || '-',
+      Estado: p.estado,
+      'Avance (%)': p.porcentaje_avance,
+      'Total avances': p.total_avances,
+      'Fecha inicio': p.fecha_inicio || '-',
+      'Fecha fin': p.fecha_fin || '-',
+    }));
+
+    const categorias = (this.datosInventario?.desglose_categorias || []).map((c) => ({
+      Categoria: c.nombre,
+      Items: c.total_items,
+      Valor: c.valor_categoria,
+    }));
+
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(resumen), 'Resumen');
+    XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(proyectos), 'Avance por Proyecto');
+    XLSX.utils.book_append_sheet(libro, XLSX.utils.json_to_sheet(categorias), 'Distribución Recursos');
+
+    XLSX.writeFile(libro, 'reporte-optiobra.xlsx');
   }
 
 }

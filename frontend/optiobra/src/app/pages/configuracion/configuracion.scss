@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
 
 * {
   margin: 0;
@@ -160,6 +160,9 @@
   border-radius: 15px;
   padding: 15px;
   box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .menu-config .item {
@@ -170,11 +173,13 @@
   align-items: center;
   gap: 10px;
   padding: 14px;
-  margin-bottom: 8px;
   border-radius: 8px;
   cursor: pointer;
   transition: .3s;
   text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
 }
 
 .menu-config .item:hover {
@@ -185,6 +190,7 @@
   background: #fff7e6;
   color: #F29F05;
   border: 1px solid #F29F05;
+  font-weight: 600;
 }
 
 .formulario {
@@ -198,6 +204,8 @@
   font-size: 20px;
   color: #111827;
   margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .grid {
@@ -211,6 +219,10 @@
   flex-direction: column;
 }
 
+.campo.full {
+  grid-column: 1 / -1;
+}
+
 .campo label {
   font-size: 14px;
   font-weight: 600;
@@ -218,25 +230,37 @@
   margin-bottom: 8px;
 }
 
-.campo input {
+.campo input,
+.campo select,
+.campo textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
   transition: .3s;
+  background: #f9fafb;
 }
 
-.campo input:focus {
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
   outline: none;
   border-color: #F29F05;
   box-shadow: 0 0 0 3px rgba(242,159,5,.15);
+  background: white;
+}
+
+.campo textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
 .acciones {
   display: flex;
   justify-content: flex-end;
   margin-top: 30px;
+  gap: 12px;
 }
 
 .btn-guardar {
@@ -249,10 +273,37 @@
   font-weight: 600;
   cursor: pointer;
   transition: .3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-guardar:hover {
   background: #d88e04;
+  transform: translateY(-1px);
+}
+
+.btn-guardar:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #fecaca;
+}
+
+.cargando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #6b7280;
 }
 
 @media (max-width: 900px) {
@@ -276,6 +327,9 @@
     grid-template-columns: 1fr;
   }
 
+  .campo.full {
+    grid-column: 1;
+  }
 }
 
 @media (max-width:768px) {
@@ -313,8 +367,8 @@
 
   .btn-guardar {
     width: 100%;
+    justify-content: center;
   }
-
 }
 
 @media (min-width:769px) {
@@ -328,7 +382,6 @@
     overflow: auto;
     padding-bottom: 15px;
   }
-
 }
 
 .dashboard {
@@ -341,4 +394,50 @@ body {
 
 * {
   max-width: 100%;
+}
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 400px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 10px 25px rgba(0,0,0,.15);
+  animation: toastIn .3s ease, toastOut .3s ease 9.7s forwards;
+  pointer-events: auto;
+}
+
+.toast.info {
+  background: #2563eb;
+}
+
+.toast.exito {
+  background: #16a34a;
+}
+
+.toast.error {
+  background: #dc2626;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
 }

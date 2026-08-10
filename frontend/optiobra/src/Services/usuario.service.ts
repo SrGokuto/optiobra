@@ -44,4 +44,8 @@ export class UsuarioService {
   cambiarRol(id: number, rol: string): Observable<Usuario> {
     return this.http.post<Usuario>(`${this.apiUrl}/${id}/cambiar_rol/`, { rol });
   }
+
+  actualizarAvatar(id: number, avatar_url: string): Observable<Usuario> {
+    return this.http.patch<Usuario>(`${this.apiUrl}/${id}/`, { avatar_url });
+  }
 }

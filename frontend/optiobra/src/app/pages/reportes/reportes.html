@@ -16,11 +16,15 @@
     </div>
 
     <!-- Filtros -->
-    <div class="filtros">
+      @if (error) {
+        <div class="alert-error">{{ error }}</div>
+      }
+
+      <div class="filtros">
 
       <div class="campo">
         <label>Tipo de reporte</label>
-        <select [(ngModel)]="tipoReporte">
+        <select [(ngModel)]="tipoReporte" (change)="onCambiarTipoReporte()">
           <option selected disabled value="">Seleccione</option>
           @for (tipo of tiposReporte; track tipo) {
             <option [value]="tipo">{{ formatearTipoReporte(tipo) }}</option>
@@ -74,6 +78,7 @@
       <div class="card">
         <h3>{{ formatearPresupuesto(valorInventario) }}</h3>
         <p>Valor Inventario</p>
+        <small title="{{ valorInventario !== null ? valorInventario : '' }}">BD: {{ valorInventario !== null ? valorInventario : '-' }}</small>
       </div>
 
       <div class="card">
@@ -84,12 +89,15 @@
     </div>
 
     <!-- Gráficas -->
-    <div *ngIf="!cargando" class="graficas">
+    <div class="graficas">
 
       <div class="grafica">
         <h3>Avance por Proyecto</h3>
         <div class="chart-container">
           <canvas #barChartCanvas></canvas>
+          @if (!hayDatosProyectos) {
+            <div class="sin-datos">No hay proyectos registrados</div>
+          }
         </div>
       </div>
 
@@ -97,6 +105,9 @@
         <h3>Distribución de Recursos</h3>
         <div class="chart-container">
           <canvas #pieChartCanvas></canvas>
+          @if (!hayDatosCategorias) {
+            <div class="sin-datos">No hay materiales con stock</div>
+          }
         </div>
       </div>
 

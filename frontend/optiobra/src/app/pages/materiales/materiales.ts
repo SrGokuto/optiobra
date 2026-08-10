@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   Categoria,
   ESTADOS_MATERIAL,
@@ -17,7 +17,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 @Component({
   selector: 'app-materiales',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './materiales.html',
   styleUrl: './materiales.scss',
 })

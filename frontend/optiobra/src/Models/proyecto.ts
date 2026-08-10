@@ -5,7 +5,7 @@ export interface Proyecto {
   direccion?: string;
   ubicacion: string;
   responsable?: string;
-  estado: 'Pendiente' | 'En progreso' | 'Completado' | 'pendiente' | 'en_proceso' | 'finalizado' | 'cancelado';
+  estado: 'pendiente' | 'en_proceso' | 'finalizado' | 'cancelado';
   avance: number;
   porcentaje_avance: number;
   avances_count: number;
@@ -21,17 +21,17 @@ export interface Proyecto {
 
 export interface ProyectoPayload {
   nombre: string;
-  descripcion?: string;
+  descripcion?: string | null;
   ubicacion: string;
-  direccion?: string;
-  responsable?: string;
+  direccion?: string | null;
+  responsable?: string | null;
   estado: Proyecto['estado'];
   avance: number;
   porcentaje_avance: number;
-  fecha_inicio: string;
-  fecha_fin: string;
-  fecha_fin_estimada?: string;
-  presupuesto?: string;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  fecha_fin_estimada?: string | null;
+  presupuesto?: number | null;
 }
 
 export interface ProyectoPaginado {
@@ -48,11 +48,15 @@ export interface FiltroProyecto {
 }
 
 export const ESTADOS_PROYECTO: Proyecto['estado'][] = [
-  'Pendiente',
-  'En progreso',
-  'Completado',
   'pendiente',
   'en_proceso',
   'finalizado',
   'cancelado',
 ];
+
+export const ESTADOS_PROYECTO_ETIQUETAS: Record<Proyecto['estado'], string> = {
+  pendiente: 'Pendiente',
+  en_proceso: 'En Proceso',
+  finalizado: 'Finalizado',
+  cancelado: 'Cancelado',
+};

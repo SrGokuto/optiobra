@@ -31,12 +31,12 @@
 
     <div class="filtros">
       <input type="text" placeholder="Buscar proyecto..." [(ngModel)]="filtroBusqueda" (keyup.enter)="buscar()">
-      <select [(ngModel)]="filtroEstado" (change)="buscar()">
-        <option value="">Todos los estados</option>
-        @for (estado of estados; track estado) {
-          <option [value]="estado">{{ estado }}</option>
-        }
-      </select>
+        <select [(ngModel)]="filtroEstado" (change)="buscar()">
+          <option value="">Todos los estados</option>
+          @for (estado of estadosVisuales; track estado.valor) {
+            <option [value]="estado.valor">{{ estado.etiqueta }}</option>
+          }
+        </select>
       <button class="btn-buscar" (click)="buscar()">Buscar</button>
     </div>
 
@@ -66,12 +66,12 @@
           </label>
 
           <label>
-            Estado
-            <select [(ngModel)]="formulario.estado">
-              @for (estado of estados; track estado) {
-                <option [value]="estado">{{ estado }}</option>
-              }
-            </select>
+          Estado
+          <select [(ngModel)]="formulario.estado">
+            @for (estado of estadosVisuales; track estado.valor) {
+              <option [value]="estado.valor">{{ estado.etiqueta }}</option>
+            }
+          </select>
           </label>
 
           <label>
@@ -137,7 +137,7 @@
                 <td>{{ proyecto.responsable || '-' }}</td>
                 <td>
                   <span class="badge-estado" [ngClass]="proyecto.estado.toLowerCase().replace(' ', '-')">
-                    {{ proyecto.estado }}
+                    {{ etiquetaEstado(proyecto.estado) }}
                   </span>
                 </td>
                 <td>{{ proyecto.porcentaje_avance }}%</td>

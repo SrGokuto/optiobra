@@ -5,6 +5,7 @@ export interface UsuarioAuth {
   nombre_completo?: string;
   rol?: string;
   activo?: boolean;
+  avatar_url?: string;
 }
 
 export interface LoginResponse {

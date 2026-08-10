@@ -11,55 +11,48 @@
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
 
     <div class="header">
-
       <div>
-
         <h2>Configuración</h2>
-
-        <p>
-
-          Ajusta la configuración general del sistema
-
-        </p>
-
+        <p>Ajusta la configuración general del sistema</p>
       </div>
-
     </div>
+
+    @if (error) {
+      <div class="alert-error">{{ error }}</div>
+    }
 
     <div *ngIf="cargando" class="cargando">
       <p>Cargando configuración...</p>
-    </div>
-
-    <div *ngIf="error" class="error">
-      <p>{{ error }}</p>
-      <button (click)="cargarConfiguracion()">Reintentar</button>
     </div>
 
     <div *ngIf="!cargando && !error" class="configuracion">
 
       <aside class="menu-config">
 
-        <button class="item activo">
+        <button class="item" 
+                [class.activo]="seccion === 'general'"
+                (click)="seccion = 'general'">
           <i class="bi bi-sliders"></i>
           Información general
         </button>
 
-        <button class="item">
+        <button class="item" 
+                [class.activo]="seccion === 'empresa'"
+                (click)="seccion = 'empresa'">
           <i class="bi bi-building"></i>
           Perfil de empresa
         </button>
 
-        <button class="item">
-          <i class="bi bi-bell"></i>
-          Notificaciones
-        </button>
-
-        <button class="item">
+        <button class="item" 
+                [class.activo]="seccion === 'seguridad'"
+                (click)="seccion = 'seguridad'">
           <i class="bi bi-shield-lock"></i>
           Seguridad
         </button>
 
-        <button class="item">
+        <button class="item" 
+                [class.activo]="seccion === 'respaldo'"
+                (click)="seccion = 'respaldo'">
           <i class="bi bi-database"></i>
           Respaldo de datos
         </button>
@@ -68,62 +61,104 @@
 
       <section class="formulario">
 
-        <h3>Información general</h3>
-
-        <div class="grid">
-
-          <div class="campo">
-            <label>Nombre de la empresa</label>
-            <input
-              type="text"
-              [(ngModel)]="empresa.nombre_empresa">
+        @if (seccion === 'general') {
+          <h3>Información general</h3>
+          <div class="grid">
+            <div class="campo">
+              <label>Nombre de la empresa</label>
+              <input type="text" [(ngModel)]="empresa.nombre_empresa">
+            </div>
+            <div class="campo">
+              <label>Correo electrónico</label>
+              <input type="email" [(ngModel)]="empresa.email_contacto">
+            </div>
+            <div class="campo">
+              <label>RUC</label>
+              <input type="text" [(ngModel)]="empresa.nit_runc">
+            </div>
+            <div class="campo">
+              <label>Teléfono</label>
+              <input type="text" [(ngModel)]="empresa.telefono">
+            </div>
+            <div class="campo full">
+              <label>Dirección</label>
+              <input type="text" [(ngModel)]="empresa.direccion">
+            </div>
           </div>
+        }
 
-          <div class="campo">
-            <label>Correo electrónico</label>
-            <input
-              type="email"
-              [(ngModel)]="empresa.email_contacto">
+        @if (seccion === 'empresa') {
+          <h3>Perfil de empresa</h3>
+          <div class="grid">
+            <div class="campo full">
+              <label>Moneda principal</label>
+              <select [(ngModel)]="empresa.moneda_principal">
+                <option value="COP">COP - Peso colombiano</option>
+                <option value="PEN">PEN - Sol peruano</option>
+                <option value="USD">USD - Dólar estadounidense</option>
+              </select>
+            </div>
+            <div class="campo full">
+              <label>Logo URL</label>
+              <input type="text" [(ngModel)]="empresa.logo_url">
+            </div>
           </div>
+        }
 
-          <div class="campo">
-            <label>RUC</label>
-            <input
-              type="text"
-              [(ngModel)]="empresa.nit_runc">
+        @if (seccion === 'seguridad') {
+          <h3>Seguridad</h3>
+          <div class="grid">
+            <div class="campo full">
+              <label>Política de contraseñas</label>
+              <select [(ngModel)]="politicaContrasena">
+                <option value=""></option>
+                <option value="estandar">Estándar</option>
+                <option value="alta">Alta</option>
+                <option value="personalizada">Personalizada</option>
+              </select>
+            </div>
+            <div class="campo full">
+              <label>Tiempo de sesión (minutos)</label>
+              <input type="number" [(ngModel)]="tiempoSesion" placeholder="">
+            </div>
           </div>
+        }
 
-          <div class="campo">
-            <label>Teléfono</label>
-            <input
-              type="text"
-              [(ngModel)]="empresa.telefono">
+        @if (seccion === 'respaldo') {
+          <h3>Respaldo de datos</h3>
+          <div class="grid">
+            <div class="campo full">
+              <label>Último respaldo</label>
+              <input type="text" [(ngModel)]="ultimoRespaldo" disabled placeholder="">
+            </div>
+            <div class="campo full">
+              <label>Frecuencia</label>
+              <select [(ngModel)]="frecuenciaRespaldo">
+                <option value=""></option>
+                <option value="diario">Diario</option>
+                <option value="semanal">Semanal</option>
+                <option value="mensual">Mensual</option>
+              </select>
+            </div>
           </div>
-
-          <div class="campo">
-            <label>Dirección</label>
-            <input
-              type="text"
-              [(ngModel)]="empresa.direccion">
-          </div>
-
-        </div>
+        }
 
         <div class="acciones">
-
-          <button
-            class="btn-guardar"
-            (click)="guardarConfiguracion()"
-            [disabled]="guardando">
-
+          <button class="btn-guardar"
+                  (click)="guardarConfiguracion()"
+                  [disabled]="guardando">
             {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
-
           </button>
-
         </div>
 
       </section>
 
+    </div>
+
+    <div class="toast-container">
+      @for (toast of toasts; track toast.id) {
+        <div class="toast {{ toast.tipo }}">{{ toast.mensaje }}</div>
+      }
     </div>
 
   </main>

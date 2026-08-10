@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../Services/auth.service';
 import { MaterialService, ProyectoService } from '../../../Services/servicios';
 import { UsuarioAuth } from '../../../Models/usuario';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { DashboardService } from '../../../Services/dashboard.service';
 import { DashboardEstadisticas } from '../../../Models/dashboard';
+import { ReporteService } from '../../../Services/reporte.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SidebarComponent],
+  imports: [CommonModule, SidebarComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -32,6 +33,7 @@ export class Dashboard implements OnInit {
     private materialService: MaterialService,
     private proyectoService: ProyectoService,
     private dashboardService: DashboardService,
+    private reporteService: ReporteService,
     private router: Router,
   ) {}
 
@@ -54,6 +56,8 @@ export class Dashboard implements OnInit {
   cargarEstadisticas(): void {
     this.cargando = true;
     this.error = '';
+    this.valorInventario = 0;
+
     this.dashboardService.getEstadisticas().subscribe({
       next: (data) => {
         this.estadisticas = data;
@@ -77,6 +81,15 @@ export class Dashboard implements OnInit {
         this.totalProyectos = respuesta.count;
       },
       error: () => {},
+    });
+
+    this.reporteService.getInventario().subscribe({
+      next: (data) => {
+        this.valorInventario = data.valor_total_inventario;
+      },
+      error: () => {
+        this.error = 'No se pudo cargar el valor del inventario desde la base de datos';
+      },
     });
   }
 

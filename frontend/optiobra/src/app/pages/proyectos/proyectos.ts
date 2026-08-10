@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   Proyecto,
   ProyectoPayload,
   ESTADOS_PROYECTO,
+  ESTADOS_PROYECTO_ETIQUETAS,
 } from '../../../Models/proyecto';
 import { UsuarioAuth } from '../../../Models/usuario';
 import { AuthService } from '../../../Services/auth.service';
@@ -15,7 +16,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 @Component({
   selector: 'app-proyectos',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent],
   templateUrl: './proyectos.html',
   styleUrl: './proyectos.scss',
 })
@@ -41,7 +42,21 @@ export class Proyectos implements OnInit {
 
   formulario: ProyectoPayload = this.crearFormularioVacio();
 
-  readonly estados: Proyecto['estado'][] = ESTADOS_PROYECTO;
+  readonly estadosVisuales: { valor: Proyecto['estado']; etiqueta: string }[] = [
+    { valor: 'pendiente', etiqueta: ESTADOS_PROYECTO_ETIQUETAS['pendiente'] },
+    { valor: 'en_proceso', etiqueta: ESTADOS_PROYECTO_ETIQUETAS['en_proceso'] },
+    { valor: 'finalizado', etiqueta: ESTADOS_PROYECTO_ETIQUETAS['finalizado'] },
+    { valor: 'cancelado', etiqueta: ESTADOS_PROYECTO_ETIQUETAS['cancelado'] },
+  ];
+
+  // Estados visibles SOLO en el filtro de la tabla. Se usan los valores
+  // reales del backend para que la búsqueda por estado funcione.
+  readonly estadosFiltro: Proyecto['estado'][] = [
+    'pendiente',
+    'en_proceso',
+    'finalizado',
+    'cancelado',
+  ];
 
   constructor(
     private proyectoService: ProyectoService,
@@ -105,17 +120,17 @@ export class Proyectos implements OnInit {
     this.proyectoEnEdicion = proyecto;
     this.formulario = {
       nombre: proyecto.nombre,
-      descripcion: proyecto.descripcion || '',
+      descripcion: proyecto.descripcion || null,
       ubicacion: proyecto.ubicacion,
-      direccion: proyecto.direccion || '',
-      responsable: proyecto.responsable || '',
+      direccion: proyecto.direccion || null,
+      responsable: proyecto.responsable || null,
       estado: proyecto.estado,
       avance: proyecto.avance,
       porcentaje_avance: proyecto.porcentaje_avance,
-      fecha_inicio: proyecto.fecha_inicio || '',
-      fecha_fin: proyecto.fecha_fin || '',
-      fecha_fin_estimada: proyecto.fecha_fin_estimada || '',
-      presupuesto: proyecto.presupuesto || '',
+      fecha_inicio: proyecto.fecha_inicio || null,
+      fecha_fin: proyecto.fecha_fin || null,
+      fecha_fin_estimada: proyecto.fecha_fin_estimada || null,
+      presupuesto: proyecto.presupuesto ? Number(proyecto.presupuesto) : null,
     };
     this.mostrarFormulario = true;
     this.mensaje = '';
@@ -132,8 +147,16 @@ export class Proyectos implements OnInit {
     this.guardando = true;
     this.error = '';
 
+    const payload: ProyectoPayload = {
+      ...this.formulario,
+      fecha_inicio: this.formulario.fecha_inicio || null,
+      fecha_fin: this.formulario.fecha_fin || null,
+      fecha_fin_estimada: this.formulario.fecha_fin_estimada || null,
+      presupuesto: this.formulario.presupuesto ? Number(this.formulario.presupuesto) : null,
+    };
+
     if (this.proyectoEnEdicion) {
-      this.proyectoService.editarProyecto(this.proyectoEnEdicion.id, this.formulario).subscribe({
+      this.proyectoService.editarProyecto(this.proyectoEnEdicion.id, payload).subscribe({
         next: () => {
           this.mensaje = 'Proyecto actualizado correctamente';
           this.guardando = false;
@@ -146,7 +169,7 @@ export class Proyectos implements OnInit {
         },
       });
     } else {
-      this.proyectoService.crearProyecto(this.formulario).subscribe({
+      this.proyectoService.crearProyecto(payload).subscribe({
         next: () => {
           this.mensaje = 'Proyecto creado correctamente';
           this.guardando = false;
@@ -213,10 +236,14 @@ export class Proyectos implements OnInit {
     return this.usuario?.email || '';
   }
 
-  formatearPresupuesto(presupuesto: string | undefined): string {
+  etiquetaEstado(estado: Proyecto['estado']): string {
+    return ESTADOS_PROYECTO_ETIQUETAS[estado] || estado;
+  }
+
+  formatearPresupuesto(presupuesto: string | number | null | undefined): string {
     if (!presupuesto) return '-';
-    const valor = Number(presupuesto);
-    if (Number.isNaN(valor)) return presupuesto;
+    const valor = typeof presupuesto === 'number' ? presupuesto : Number(presupuesto);
+    if (Number.isNaN(valor)) return typeof presupuesto === 'string' ? presupuesto : '-';
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
@@ -227,17 +254,17 @@ export class Proyectos implements OnInit {
   private crearFormularioVacio(): ProyectoPayload {
     return {
       nombre: '',
-      descripcion: '',
+      descripcion: null,
       ubicacion: '',
-      direccion: '',
-      responsable: '',
-      estado: 'Pendiente',
+      direccion: null,
+      responsable: null,
+      estado: 'pendiente',
       avance: 0,
       porcentaje_avance: 0,
-      fecha_inicio: new Date().toISOString().slice(0, 10),
-      fecha_fin: new Date().toISOString().slice(0, 10),
-      fecha_fin_estimada: '',
-      presupuesto: '',
+      fecha_inicio: null,
+      fecha_fin: null,
+      fecha_fin_estimada: null,
+      presupuesto: null,
     };
   }
 }

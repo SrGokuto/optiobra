@@ -11,5 +11,6 @@ export interface DashboardEstadisticas {
   total_materiales: number;
   total_trabajadores: number;
   avance_promedio: number;
+  valor_total_inventario: number;
   proyectos_recientes: ProyectoResumen[];
 }

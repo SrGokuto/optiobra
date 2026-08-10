@@ -22,6 +22,24 @@ export class Usuarios implements OnInit {
   filtroBusqueda = '';
   filtroRol = '';
 
+  modalAbierto = false;
+  editando = false;
+  guardando = false;
+  errorModal = '';
+  usuarioId: number | null = null;
+
+  formulario = {
+    nombre_completo: '',
+    username: '',
+    email: '',
+    rol: 'usuario',
+    password: '',
+    telefono: '',
+    departamento: '',
+    cargo: '',
+    direccion: ''
+  };
+
   roles = [
     'Todos los roles',
     'admin',
@@ -69,12 +87,116 @@ export class Usuarios implements OnInit {
     this.cargarUsuarios();
   }
 
-  crearUsuario(): void {
-    alert('Funcionalidad de crear usuario pendiente de implementación con formulario modal');
+  abrirModalNuevo(): void {
+    this.editando = false;
+    this.usuarioId = null;
+    this.errorModal = '';
+    this.formulario = {
+      nombre_completo: '',
+      username: '',
+      email: '',
+      rol: 'usuario',
+      password: '',
+      telefono: '',
+      departamento: '',
+      cargo: '',
+      direccion: ''
+    };
+    this.modalAbierto = true;
   }
 
-  editarUsuario(usuario: Usuario): void {
-    alert('Editando usuario: ' + usuario.nombre_completo);
+  abrirModalEditar(usuario: Usuario): void {
+    this.editando = true;
+    this.usuarioId = usuario.id;
+    this.errorModal = '';
+    this.formulario = {
+      nombre_completo: usuario.nombre_completo || '',
+      username: usuario.username || '',
+      email: usuario.email || '',
+      rol: usuario.rol || 'usuario',
+      password: '',
+      telefono: usuario.perfil?.telefono || '',
+      departamento: usuario.perfil?.departamento || '',
+      cargo: usuario.perfil?.cargo || '',
+      direccion: usuario.perfil?.direccion || ''
+    };
+    this.modalAbierto = true;
+  }
+
+  cerrarModal(): void {
+    if (this.guardando) {
+      return;
+    }
+    this.modalAbierto = false;
+  }
+
+  guardarUsuario(): void {
+    if (!this.formulario.nombre_completo.trim()) {
+      this.errorModal = 'El nombre completo es obligatorio';
+      return;
+    }
+    if (!this.formulario.username.trim()) {
+      this.errorModal = 'El nombre de usuario es obligatorio';
+      return;
+    }
+    if (!this.formulario.email.trim()) {
+      this.errorModal = 'El correo electrónico es obligatorio';
+      return;
+    }
+
+    this.guardando = true;
+    this.errorModal = '';
+
+    const payload = {
+      nombre_completo: this.formulario.nombre_completo,
+      username: this.formulario.username,
+      email: this.formulario.email,
+      rol: this.formulario.rol,
+      telefono: this.formulario.telefono,
+      departamento: this.formulario.departamento,
+      cargo: this.formulario.cargo,
+      direccion: this.formulario.direccion
+    };
+
+    const accion = this.editando && this.usuarioId !== null
+      ? this.usuarioService.editarUsuario(this.usuarioId, payload)
+      : this.usuarioService.crearUsuario({ ...payload, password: this.formulario.password || undefined });
+
+    accion.subscribe({
+      next: () => {
+        this.guardando = false;
+        this.modalAbierto = false;
+        this.cargarUsuarios();
+      },
+      error: (err) => {
+        this.guardando = false;
+        this.errorModal = this.extraerMensajeError(err) || 'No se pudo guardar el usuario';
+      }
+    });
+  }
+
+  private extraerMensajeError(err: unknown): string {
+    const body = (err as { error?: Record<string, unknown> })?.error;
+    if (!body) {
+      return '';
+    }
+    if (typeof body['mensaje'] === 'string') {
+      return body['mensaje'];
+    }
+    if (typeof body['error'] === 'string') {
+      return body['error'];
+    }
+    const claves = ['email', 'username', 'password', 'nombre_completo'];
+    for (const clave of claves) {
+      const valor = body[clave];
+      if (Array.isArray(valor) && valor.length) {
+        return `${clave}: ${valor[0]}`;
+      }
+      if (typeof valor === 'string') {
+        return `${clave}: ${valor}`;
+      }
+    }
+    return '';
   }
 
   eliminarUsuario(usuario: Usuario): void {

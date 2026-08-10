@@ -18,7 +18,7 @@
 
       </div>
 
-      <button class="btn-nuevo" (click)="crearUsuario()">
+      <button class="btn-nuevo" (click)="abrirModalNuevo()">
 
         + Nuevo usuario
 
@@ -101,7 +101,7 @@
 
             <td class="acciones">
 
-              <button class="editar" (click)="editarUsuario(usuario)">
+              <button class="editar" (click)="abrirModalEditar(usuario)">
 
                 Editar
 
@@ -124,5 +124,91 @@
     </div>
 
   </main>
+
+</div>
+
+<!-- Modal Crear/Editar usuario -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()">
+
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+
+      <h3>{{ editando ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
+
+      <button class="modal-cerrar" (click)="cerrarModal()">×</button>
+
+    </div>
+
+    <div class="modal-body">
+
+      @if (errorModal) {
+        <div class="error-modal">{{ errorModal }}</div>
+      }
+
+      <div class="campo">
+        <label>Nombre completo *</label>
+        <input type="text" [(ngModel)]="formulario.nombre_completo" placeholder="Nombre completo">
+      </div>
+
+      <div class="campo">
+        <label>Nombre de usuario *</label>
+        <input type="text" [(ngModel)]="formulario.username" placeholder="Nombre de usuario">
+      </div>
+
+      <div class="campo">
+        <label>Correo electrónico *</label>
+        <input type="email" [(ngModel)]="formulario.email" placeholder="correo@ejemplo.com">
+      </div>
+
+      <div class="campo">
+        <label>Rol</label>
+        <select [(ngModel)]="formulario.rol">
+          @for (rol of ['admin', 'supervisor', 'ingeniero', 'usuario']; track rol) {
+            <option [value]="rol">{{ formatearRol(rol) }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo" *ngIf="!editando">
+        <label>Contraseña</label>
+        <input type="password" [(ngModel)]="formulario.password" placeholder="Contraseña">
+      </div>
+
+      <div class="campo">
+        <label>Teléfono</label>
+        <input type="text" [(ngModel)]="formulario.telefono" placeholder="Teléfono">
+      </div>
+
+      <div class="campo">
+        <label>Departamento</label>
+        <input type="text" [(ngModel)]="formulario.departamento" placeholder="Departamento">
+      </div>
+
+      <div class="campo">
+        <label>Cargo</label>
+        <input type="text" [(ngModel)]="formulario.cargo" placeholder="Cargo">
+      </div>
+
+      <div class="campo">
+        <label>Dirección</label>
+        <input type="text" [(ngModel)]="formulario.direccion" placeholder="Dirección">
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+
+      <button class="btn-guardar" [disabled]="guardando" (click)="guardarUsuario()">
+
+        {{ guardando ? 'Guardando...' : (editando ? 'Guardar cambios' : 'Crear usuario') }}
+
+      </button>
+
+    </div>
+
+  </div>
 
 </div>

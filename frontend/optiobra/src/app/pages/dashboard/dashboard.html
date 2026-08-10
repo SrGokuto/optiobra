@@ -44,6 +44,11 @@
           <small>registrados</small>
         </div>
         <div class="card">
+          <h4>Valor del inventario</h4>
+          <h2>{{ valorInventario | currency:'COP':'symbol':'1.0-0' }}</h2>
+          <small>precio × cantidad</small>
+        </div>
+        <div class="card">
           <h4>Trabajadores</h4>
           <h2>{{ estadisticas.total_trabajadores }}</h2>
           <small>en la empresa</small>

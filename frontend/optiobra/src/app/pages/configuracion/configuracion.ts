@@ -5,6 +5,12 @@ import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ConfiguracionService } from '../../../Services/configuracion.service';
 import { ConfiguracionEmpresa } from '../../../Models/configuracion';
 
+interface Toast {
+  id: number;
+  mensaje: string;
+  tipo: 'exito' | 'error' | 'info';
+}
+
 @Component({
   selector: 'app-configuracion',
   standalone: true,
@@ -18,6 +24,7 @@ export class Configuracion implements OnInit {
   cargando = false;
   error = '';
   guardando = false;
+  seccion: string = 'general';
 
   empresa: ConfiguracionEmpresa = {
     id: 0,
@@ -32,10 +39,32 @@ export class Configuracion implements OnInit {
     actualizado_en: ''
   };
 
+  plantillaNotificacion: string = '';
+  politicaContrasena: string = '';
+  tiempoSesion: number | null = null;
+  ultimoRespaldo: string = '';
+  frecuenciaRespaldo: string = '';
+
+  toasts: Toast[] = [];
+  private toastId = 0;
+
   constructor(private configuracionService: ConfiguracionService) {}
 
   ngOnInit(): void {
-    this.cargarConfiguracion();
+    this.empresa = {
+      id: 0,
+      nombre_empresa: '',
+      email_contacto: '',
+      nit_runc: '',
+      telefono: '',
+      direccion: '',
+      moneda_principal: 'PEN',
+      logo_url: '',
+      creado_en: '',
+      actualizado_en: ''
+    };
+
+    this.mostrarToast('Bienvenido a Configuración. Los cambios se guardan desde el backend.', 'info');
   }
 
   toggleMenu() {
@@ -62,16 +91,23 @@ export class Configuracion implements OnInit {
     this.guardando = true;
 
     this.configuracionService.actualizarEmpresa(this.empresa).subscribe({
-      next: (data) => {
-        this.empresa = data;
+      next: () => {
         this.guardando = false;
-        alert('Configuración guardada correctamente');
+        this.mostrarToast('Configuración guardada correctamente', 'exito');
       },
       error: () => {
         this.guardando = false;
-        alert('Error al guardar la configuración');
+        this.mostrarToast('Error al guardar la configuración', 'error');
       }
     });
+  }
+
+  private mostrarToast(mensaje: string, tipo: 'exito' | 'error' | 'info') {
+    const id = ++this.toastId;
+    this.toasts = [...this.toasts, { id, mensaje, tipo }];
+    setTimeout(() => {
+      this.toasts = this.toasts.filter(t => t.id !== id);
+    }, 10000);
   }
 
 }

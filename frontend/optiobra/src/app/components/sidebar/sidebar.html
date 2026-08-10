@@ -9,7 +9,7 @@
   <ul>
     @for (item of menuItems; track item.ruta) {
       <li routerLink="{{ item.ruta }}" routerLinkActive="activo">
-        <span class="item-icon">{{ item.icono }}</span>
+        <i class="item-icon {{ item.icono }}"></i>
         <span>{{ item.label }}</span>
       </li>
     }
@@ -17,11 +17,42 @@
 
   <div class="usuario">
     @if (usuario$ | async; as usuario) {
-      <img src="https://i.pravatar.cc/150" alt="usuario">
+      <button
+        class="avatar-btn"
+        [disabled]="subiendoAvatar"
+        title="Cambiar imagen de perfil"
+        (click)="onAvatarClick(avatarInput)"
+      >
+        @if (usuario.avatar_url) {
+          <img [src]="usuario.avatar_url" alt="usuario">
+        } @else {
+          <img src="https://i.pravatar.cc/150" alt="usuario">
+        }
+        @if (!subiendoAvatar) {
+          <span class="avatar-overlay">✎</span>
+        } @else {
+          <span class="avatar-spinner"></span>
+        }
+      </button>
+      <input
+        #avatarInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onAvatarSelected($event)"
+      >
       <div>
         <h4>{{ usuario.nombre_completo || usuario.username }}</h4>
         <small>{{ usuario.email }}</small>
       </div>
+      <button
+        class="logout-btn"
+        [disabled]="cerrandoSesion"
+        title="Cerrar sesión"
+        (click)="cerrarSesion()"
+      >
+        <i class="bi bi-box-arrow-right"></i>
+      </button>
     } @else {
       <img src="https://i.pravatar.cc/150" alt="usuario">
       <div>
