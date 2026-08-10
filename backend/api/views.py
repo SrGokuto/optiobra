@@ -10,14 +10,14 @@ import logging
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
     Proyecto, AvanceObra, Trabajador, PerfilUsuario,
-    ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 from .serializers import (
     MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
     ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer,
     PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
     ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
-    ReporteSerializer, GenerarReporteSerializer
+    ReporteSerializer, GenerarReporteSerializer, TareaSerializer
 )
 from .services import SupabaseAuthService
 
@@ -406,6 +406,30 @@ class TrabajadorViewSet(viewsets.ModelViewSet):
         estado = self.request.query_params.get('estado', '')
         if estado:
             queryset = queryset.filter(estado=estado)
+        return queryset
+
+
+class TareaViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar tareas asignadas a trabajadores"""
+    queryset = Tarea.objects.select_related('proyecto', 'trabajador_asignado').all()
+    serializer_class = TareaSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['titulo', 'descripcion', 'trabajador_asignado__nombre', 'proyecto__nombre']
+    ordering_fields = ['titulo', 'estado', 'prioridad', 'fecha_limite', 'creado_en']
+    ordering = ['-creado_en']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        trabajador = self.request.query_params.get('trabajador', '')
+        if trabajador:
+            queryset = queryset.filter(trabajador_asignado_id=trabajador)
+        estado = self.request.query_params.get('estado', '')
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        proyecto = self.request.query_params.get('proyecto', '')
+        if proyecto:
+            queryset = queryset.filter(proyecto_id=proyecto)
         return queryset
 
 
