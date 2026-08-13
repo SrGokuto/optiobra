@@ -20,7 +20,7 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet,
     AvanceObraViewSet, TrabajadorViewSet, DashboardViewSet,
-    UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet
+    UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet, TareaViewSet
 )
 
 # Crear router para ViewSets
@@ -35,6 +35,7 @@ router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 router.register(r'configuracion', ConfiguracionViewSet, basename='configuracion')
 router.register(r'reportes', ReporteViewSet, basename='reporte')
+router.register(r'tareas', TareaViewSet, basename='tarea')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

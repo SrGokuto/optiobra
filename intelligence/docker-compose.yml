@@ -3,7 +3,7 @@ services:
     image: ghcr.io/ggml-org/llama.cpp:server
     command:
       - --model
-      - /models/qwen3-8b-q4_k_m.gguf
+      - /models/Qwen3-0.6B-Q4_K_M.gguf
       - --threads
       - "24"
       - --ctx-size
@@ -27,7 +27,7 @@ services:
     build: .
     environment:
       - LLAMA_CPP_URL=http://llama-server:8080
-      - MODEL_NAME=Qwen3-8B
+      - MODEL_NAME=Qwen3-0.6B
       - CACHE_TTL=600
       - REQUEST_TIMEOUT=30
       - LOG_LEVEL=INFO

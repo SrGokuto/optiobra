@@ -268,3 +268,36 @@ class Reporte(models.Model):
     def __str__(self):
         return f"Reporte: {self.titulo} ({self.tipo_reporte}) - {self.fecha_generacion.strftime('%Y-%m-%d %H:%M')}"
 
+
+class Tarea(models.Model):
+    """Tareas asignadas a trabajadores dentro de un proyecto"""
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('en_progreso', 'En progreso'),
+        ('completada', 'Completada'),
+        ('cancelada', 'Cancelada'),
+    ]
+    PRIORIDAD_CHOICES = [
+        ('baja', 'Baja'),
+        ('media', 'Media'),
+        ('alta', 'Alta'),
+        ('urgente', 'Urgente'),
+    ]
+
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
+    trabajador_asignado = models.ForeignKey(Trabajador, on_delete=models.CASCADE, related_name='tareas')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='media')
+    fecha_limite = models.DateField(blank=True, null=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Tareas"
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        return self.titulo
+

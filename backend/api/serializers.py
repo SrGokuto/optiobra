@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
     Proyecto, AvanceObra, Trabajador, PerfilUsuario,
-    ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 
 
@@ -409,4 +409,19 @@ class GenerarReporteSerializer(serializers.Serializer):
     tipo_reporte = serializers.ChoiceField(choices=Reporte.TIPO_CHOICES)
     formato = serializers.ChoiceField(choices=Reporte.FORMATO_CHOICES, default='json')
     parametros = serializers.JSONField(required=False, default=dict)
+
+
+class TareaSerializer(serializers.ModelSerializer):
+    """Serializer para Tareas"""
+    proyecto_nombre = serializers.CharField(source='proyecto.nombre', read_only=True)
+    trabajador_nombre = serializers.CharField(source='trabajador_asignado.nombre', read_only=True)
+
+    class Meta:
+        model = Tarea
+        fields = [
+            'id', 'titulo', 'descripcion', 'proyecto', 'proyecto_nombre',
+            'trabajador_asignado', 'trabajador_nombre', 'estado', 'prioridad',
+            'fecha_limite', 'creado_en', 'actualizado_en',
+        ]
+        read_only_fields = ['creado_en', 'actualizado_en']
 
