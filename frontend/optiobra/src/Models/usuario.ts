@@ -1,5 +1,6 @@
 export interface UsuarioPerfil {
   id?: number;
+  dni?: string;
   telefono?: string;
   departamento?: string;
   cargo?: string;

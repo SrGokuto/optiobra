@@ -67,6 +67,10 @@ export class Materiales implements OnInit {
     this.cargarMateriales();
   }
 
+  get esObrero(): boolean {
+    return this.usuario?.rol === 'obrero';
+  }
+
   toggleMenu(): void {
     this.menuAbierto = !this.menuAbierto;
   }

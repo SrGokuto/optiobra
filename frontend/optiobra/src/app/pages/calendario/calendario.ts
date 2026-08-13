@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { TareaService } from '../../../Services/tarea.service';
-import { TrabajadorService } from '../../../Services/trabajador.service';
+import { UsuarioService } from '../../../Services/usuario.service';
 import { ProyectoService } from '../../../Services/proyecto.service';
 import { AuthService } from '../../../Services/auth.service';
 import { Tarea, TareaPayload, ESTADOS_TAREA, PRIORIDADES_TAREA } from '../../../Models/tarea';
-import { Trabajador } from '../../../Models/trabajador';
+import { Usuario } from '../../../Models/usuario-sistema';
 import { Proyecto } from '../../../Models/proyecto';
 
 type VistaCalendario = 'mes' | 'semana' | 'dia';
@@ -45,7 +45,7 @@ export class Calendario implements OnInit {
 
   tareas: Tarea[] = [];
   tareasFiltradas: Tarea[] = [];
-  trabajadores: Trabajador[] = [];
+  trabajadores: Usuario[] = [];
   proyectos: Proyecto[] = [];
 
   trabajadorSeleccionado = '';
@@ -60,6 +60,8 @@ export class Calendario implements OnInit {
   mostrarModal = false;
   guardando = false;
 
+  esObrero = false;
+
   tareaArrastrada: Tarea | null = null;
   fechaObjetivo: string | null = null;
 
@@ -67,7 +69,7 @@ export class Calendario implements OnInit {
     titulo: '',
     descripcion: '',
     proyecto: 0,
-    trabajador_asignado: 0,
+    obrero: 0,
     estado: 'pendiente',
     prioridad: 'media',
     fecha_limite: null,
@@ -80,13 +82,17 @@ export class Calendario implements OnInit {
 
   constructor(
     private tareaService: TareaService,
-    private trabajadorService: TrabajadorService,
+    private usuarioService: UsuarioService,
     private proyectoService: ProyectoService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.cargarTrabajadores();
-    this.cargarProyectos();
+    this.esObrero = this.authService.esRol('obrero');
+    if (!this.esObrero) {
+      this.cargarTrabajadores();
+      this.cargarProyectos();
+    }
     this.cargarTareas();
     this.fechaReferencia = this.inicioPeriodo(this.fechaReferencia, this.vista);
     this.construirVista();
@@ -97,7 +103,7 @@ export class Calendario implements OnInit {
   }
 
   cargarTrabajadores(): void {
-    this.trabajadorService.getTrabajadores({ estado: 'Activo' }).subscribe({
+    this.usuarioService.getUsuarios({ rol: 'obrero' }).subscribe({
       next: (response) => {
         this.trabajadores = response.results;
       },
@@ -118,8 +124,8 @@ export class Calendario implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    const filtros: { trabajador?: number; estado?: string; proyecto?: number } = {};
-    if (this.trabajadorSeleccionado) filtros.trabajador = Number(this.trabajadorSeleccionado);
+    const filtros: { obrero?: number; estado?: string; proyecto?: number } = {};
+    if (this.trabajadorSeleccionado) filtros.obrero = Number(this.trabajadorSeleccionado);
     if (this.estadoSeleccionado) filtros.estado = this.estadoSeleccionado;
     if (this.proyectoSeleccionado) filtros.proyecto = Number(this.proyectoSeleccionado);
 
@@ -414,7 +420,7 @@ export class Calendario implements OnInit {
       titulo: '',
       descripcion: '',
       proyecto: 0,
-      trabajador_asignado: 0,
+      obrero: 0,
       estado: 'pendiente',
       prioridad: 'media',
       fecha_limite: fecha ? this.aCadena(fecha) : null,
@@ -440,8 +446,8 @@ export class Calendario implements OnInit {
       this.error = 'Selecciona un proyecto';
       return;
     }
-    if (!this.nueva.trabajador_asignado) {
-      this.error = 'Selecciona un trabajador';
+    if (!this.nueva.obrero) {
+      this.error = 'Selecciona un obrero';
       return;
     }
 
@@ -451,7 +457,7 @@ export class Calendario implements OnInit {
       titulo: this.nueva.titulo.trim(),
       descripcion: this.nueva.descripcion || '',
       proyecto: Number(this.nueva.proyecto),
-      trabajador_asignado: Number(this.nueva.trabajador_asignado),
+      obrero: Number(this.nueva.obrero),
       estado: this.nueva.estado,
       prioridad: this.nueva.prioridad,
       fecha_limite: this.nueva.fecha_limite || null,

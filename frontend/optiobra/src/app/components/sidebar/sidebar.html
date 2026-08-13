@@ -7,7 +7,7 @@
   </div>
 
   <ul>
-    @for (item of menuItems; track item.ruta) {
+    @for (item of menuVisibles; track item.ruta) {
       <li routerLink="{{ item.ruta }}" routerLinkActive="activo">
         <i class="item-icon {{ item.icono }}"></i>
         <span>{{ item.label }}</span>

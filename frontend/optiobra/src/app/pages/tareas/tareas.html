@@ -16,7 +16,7 @@
           <h2>Tareas</h2>
           <p>Tareas asignadas a los trabajadores</p>
         </div>
-        <button class="btn-nueva" (click)="abrirNuevaTarea()">
+        <button *ngIf="!esObrero" class="btn-nueva" (click)="abrirNuevaTarea()">
           <i class="bi bi-plus"></i>
           Nueva tarea
         </button>
@@ -76,9 +76,9 @@
             [(ngModel)]="textoBusqueda"
             (input)="filtrarPorBusqueda()">
         </div>
-        <select [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador(trabajadorSeleccionado)">
+        <select *ngIf="!esObrero" [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador(trabajadorSeleccionado)">
           <option value="">Todos los trabajadores</option>
-          <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+          <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre_completo || t.username }}</option>
         </select>
         <select [(ngModel)]="proyectoSeleccionado" (change)="seleccionarProyecto(proyectoSeleccionado)">
           <option value="">Todos los proyectos</option>
@@ -111,7 +111,7 @@
               <tr>
                 <th>Tarea</th>
                 <th>Proyecto</th>
-                <th>Trabajador</th>
+                <th>Obrero</th>
                 <th>Estado</th>
                 <th>Prioridad</th>
                 <th>Fecha limite</th>
@@ -135,7 +135,7 @@
                 <td>
                   <div class="trabajador">
                     <div class="datos">
-                      <strong>{{ tarea.trabajador_nombre }}</strong>
+                      <strong>{{ tarea.obrero_nombre }}</strong>
                     </div>
                   </div>
                 </td>
@@ -245,10 +245,10 @@
         </div>
 
         <div class="campo">
-          <label>Trabajador *</label>
-          <select [(ngModel)]="nueva.trabajador_asignado">
-            <option [value]="0">Selecciona un trabajador</option>
-            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+          <label>Obrero *</label>
+          <select [(ngModel)]="nueva.obrero">
+            <option [value]="0">Selecciona un obrero</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre_completo || t.username }}</option>
           </select>
         </div>
 
@@ -309,8 +309,8 @@
           <span>{{ tareaSeleccionada.proyecto_nombre }}</span>
         </div>
         <div class="detalle-item">
-          <label>Trabajador</label>
-          <span>{{ tareaSeleccionada.trabajador_nombre }}</span>
+          <label>Obrero</label>
+          <span>{{ tareaSeleccionada.obrero_nombre }}</span>
         </div>
         <div class="detalle-item">
           <label>Estado</label>

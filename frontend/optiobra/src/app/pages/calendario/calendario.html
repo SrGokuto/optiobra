@@ -15,7 +15,7 @@
           <h2>Calendario</h2>
           <p>Tareas de los trabajadores por fecha</p>
         </div>
-        <button class="btn-nueva" (click)="abrirNuevaTarea()">
+        <button *ngIf="!esObrero" class="btn-nueva" (click)="abrirNuevaTarea()">
           <i class="bi bi-plus"></i>
           Nueva tarea
         </button>
@@ -94,9 +94,9 @@
         <h3 class="titulo-periodo">{{ tituloPeriodo }}</h3>
 
         <div class="filtros">
-          <select [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador()">
+          <select *ngIf="!esObrero" [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador()">
             <option value="">Todos los trabajadores</option>
-            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre_completo || t.username }}</option>
           </select>
           <select [(ngModel)]="proyectoSeleccionado" (change)="seleccionarProyecto()">
             <option value="">Todos los proyectos</option>
@@ -150,17 +150,17 @@
                       <div
                         class="chip-tarea"
                         [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
-                        draggable="true"
+                        [attr.draggable]="esObrero ? null : true"
                         (dragstart)="onDragStart($event, tarea)"
                         (dragend)="onDragEnd()"
                         (click)="verDetalle(tarea)">
                         <strong>{{ tarea.titulo }}</strong>
-                        <span>{{ tarea.trabajador_nombre }} · {{ tarea.proyecto_nombre }}</span>
+                        <span>{{ tarea.obrero_nombre }} · {{ tarea.proyecto_nombre }}</span>
                       </div>
                     } @empty {
-                      <p class="sin-tareas">No hay tareas para este día. Haz clic para crear una.</p>
+                      <p class="sin-tareas">No hay tareas para este día.</p>
                     }
-                    <button class="btn-agregar-dia" (click)="abrirNuevaTarea(dia.fecha)">
+                    <button *ngIf="!esObrero" class="btn-agregar-dia" (click)="abrirNuevaTarea(dia.fecha)">
                       <i class="bi bi-plus"></i>
                       Agregar tarea
                     </button>
@@ -189,12 +189,12 @@
                       <div
                         class="chip-tarea"
                         [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
-                        draggable="true"
+                        [attr.draggable]="esObrero ? null : true"
                         (dragstart)="onDragStart($event, tarea)"
                         (dragend)="onDragEnd()"
                         (click)="verDetalle(tarea)">
                         <strong>{{ tarea.titulo }}</strong>
-                        <span>{{ tarea.trabajador_nombre }}</span>
+                        <span>{{ tarea.obrero_nombre }}</span>
                       </div>
                     }
                     @if (extrasDe(dia) > 0) {
@@ -224,12 +224,12 @@
                 <div
                   class="chip-tarea"
                   [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
-                  draggable="true"
+                  [attr.draggable]="esObrero ? null : true"
                   (dragstart)="onDragStart($event, tarea)"
                   (dragend)="onDragEnd()"
                   (click)="verDetalle(tarea)">
                   <strong>{{ tarea.titulo }}</strong>
-                  <span>{{ tarea.trabajador_nombre }} · {{ tarea.proyecto_nombre }}</span>
+                  <span>{{ tarea.obrero_nombre }} · {{ tarea.proyecto_nombre }}</span>
                 </div>
               } @empty {
                 <p class="sin-tareas">No hay tareas sin fecha.</p>
@@ -276,10 +276,10 @@
         </div>
 
         <div class="campo">
-          <label>Trabajador *</label>
-          <select [(ngModel)]="nueva.trabajador_asignado">
-            <option [value]="0">Selecciona un trabajador</option>
-            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+          <label>Obrero *</label>
+          <select [(ngModel)]="nueva.obrero">
+            <option [value]="0">Selecciona un obrero</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre_completo || t.username }}</option>
           </select>
         </div>
 
@@ -340,7 +340,7 @@
         </div>
         <div class="detalle-item">
           <label>Trabajador</label>
-          <span>{{ tareaSeleccionada.trabajador_nombre }}</span>
+          <span>{{ tareaSeleccionada.obrero_nombre }}</span>
         </div>
         <div class="detalle-item">
           <label>Estado</label>

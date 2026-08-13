@@ -13,7 +13,7 @@
         <h2>Materiales</h2>
         <p>Gestiona los materiales de tus proyectos</p>
       </div>
-      <button class="btn-nuevo" (click)="abrirFormularioCrear()">
+      <button *ngIf="!esObrero" class="btn-nuevo" (click)="abrirFormularioCrear()">
         + Nuevo material
       </button>
     </div>
@@ -152,8 +152,13 @@
               <td>{{ formatearPrecio(material.precio) }}</td>
               <td>{{ material.estado }}</td>
               <td class="acciones">
-                <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
-                <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+                <ng-container *ngIf="!esObrero; else soloLectura">
+                  <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
+                  <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+                </ng-container>
+                <ng-template #soloLectura>
+                  <span class="solo-lectura">Solo lectura</span>
+                </ng-template>
               </td>
             </tr>
             }

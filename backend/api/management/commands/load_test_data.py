@@ -51,6 +51,17 @@ class Command(BaseCommand):
         else:
             self.stdout.write("• Usuario admin ya existe")
 
+        UsuarioSupabase.objects.get_or_create(
+            usuario_django=admin_user,
+            defaults={
+                'supabase_uid': f'local-{admin_user.id}',
+                'email': admin_user.email,
+                'nombre_completo': 'Administrador',
+                'rol': 'admin',
+                'activo': True
+            }
+        )
+
         # Crear usuario de prueba
         test_user, created = User.objects.get_or_create(
             username='usuario_prueba',
@@ -66,6 +77,44 @@ class Command(BaseCommand):
             self.stdout.write("✓ Usuario de prueba creado (contraseña: prueba123)")
         else:
             self.stdout.write("• Usuario de prueba ya existe")
+
+        UsuarioSupabase.objects.get_or_create(
+            usuario_django=test_user,
+            defaults={
+                'supabase_uid': f'local-{test_user.id}',
+                'email': test_user.email,
+                'nombre_completo': 'Usuario Prueba',
+                'rol': 'usuario',
+                'activo': True
+            }
+        )
+
+        # Crear obrero de prueba
+        obrero_user, created = User.objects.get_or_create(
+            username='obrero_prueba',
+            defaults={
+                'email': 'obrero@optiobra.local',
+                'first_name': 'Obrero',
+                'last_name': 'Prueba'
+            }
+        )
+        if created:
+            obrero_user.set_password('obrero123')
+            obrero_user.save()
+            self.stdout.write("✓ Obrero de prueba creado (contraseña: obrero123)")
+        else:
+            self.stdout.write("• Obrero de prueba ya existe")
+
+        UsuarioSupabase.objects.get_or_create(
+            usuario_django=obrero_user,
+            defaults={
+                'supabase_uid': f'local-{obrero_user.id}',
+                'email': obrero_user.email,
+                'nombre_completo': 'Obrero Prueba',
+                'rol': 'obrero',
+                'activo': True
+            }
+        )
 
         # Crear materiales de prueba
         materiales_data = [
@@ -173,3 +222,6 @@ class Command(BaseCommand):
         self.stdout.write('\nUsuario de prueba para API:')
         self.stdout.write('  Email: usuario@optiobra.local')
         self.stdout.write('  Contraseña: prueba123')
+        self.stdout.write('\nObrero de prueba para API:')
+        self.stdout.write('  Email: obrero@optiobra.local')
+        self.stdout.write('  Contraseña: obrero123')

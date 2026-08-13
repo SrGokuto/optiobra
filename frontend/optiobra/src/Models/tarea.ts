@@ -4,8 +4,8 @@ export interface Tarea {
   descripcion?: string;
   proyecto: number;
   proyecto_nombre: string;
-  trabajador_asignado: number;
-  trabajador_nombre: string;
+  obrero: number;
+  obrero_nombre: string;
   estado: 'pendiente' | 'en_progreso' | 'completada' | 'cancelada';
   prioridad: 'baja' | 'media' | 'alta' | 'urgente';
   fecha_limite?: string;
@@ -24,7 +24,7 @@ export interface TareaPayload {
   titulo: string;
   descripcion?: string;
   proyecto: number;
-  trabajador_asignado: number;
+  obrero: number;
   estado?: Tarea['estado'];
   prioridad?: Tarea['prioridad'];
   fecha_limite?: string | null;

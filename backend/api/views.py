@@ -9,15 +9,21 @@ import logging
 
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
-    Proyecto, AvanceObra, Trabajador, PerfilUsuario,
+    Proyecto, AvanceObra, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 from .serializers import (
     MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
-    ProyectoSerializer, AvanceObraSerializer, TrabajadorSerializer,
+    ProyectoSerializer, AvanceObraSerializer,
     PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
     ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
     ReporteSerializer, GenerarReporteSerializer, TareaSerializer
+)
+from .roles import (
+    EsAdmin, EsGestion, EsObreroOMas, MaterialesPermiso, TareasPermiso,
+    UsuariosPermiso, obtener_rol, es_rol, rol_minimo, nivel_rol, ADMIN, OBRERO, USUARIO,
+    ARQUITECTO, MAESTRO_OBRA, SUPERVISOR, INGENIERO,
+    ROLES_ADMIN,
 )
 from .services import SupabaseAuthService
 
@@ -31,7 +37,7 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     """
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
-    permission_classes = [IsAuthenticated] # Cambiar a
+    permission_classes = [MaterialesPermiso]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion']
     ordering_fields = ['nombre', 'creado_en']
@@ -61,7 +67,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     """
     queryset = Material.objects.all().select_related('categoria', 'creado_por')
     serializer_class = MaterialSerializer
-    permission_classes = [IsAuthenticated] # Cambiar a IsAuthenticated en produccion
+    permission_classes = [MaterialesPermiso]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'codigo', 'descripcion', 'proveedor']
     ordering_fields = ['nombre', 'precio', 'cantidad', 'creado_en']
@@ -162,7 +168,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         instance.delete()
         logger.info(f"Material eliminado: {material_nombre} (ID: {material_id}) por {self.request.user.username}")
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
+    @action(detail=True, methods=['post'], permission_classes=[MaterialesPermiso])
     def actualizar_cantidad(self, request, pk=None):
         """
         Actualizar cantidad de un material
@@ -211,7 +217,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
             'material': serializer.data
         })
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
+    @action(detail=True, methods=['get'], permission_classes=[MaterialesPermiso])
     def historial(self, request, pk=None):
         """
         Obtener historial de cambios de un material
@@ -228,7 +234,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
         serializer = HistorialMaterialSerializer(historial, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
+    @action(detail=False, methods=['get'], permission_classes=[MaterialesPermiso])
     def estadisticas(self, request):
         """
         Obtener estadísticas de materiales
@@ -266,10 +272,28 @@ class DashboardViewSet(viewsets.ViewSet):
         GET /api/dashboard/estadisticas/
         Retorna resumen general para el dashboard.
         """
+        rol = obtener_rol(request.user)
+        if es_rol(request.user, USUARIO):
+            return Response({
+                'rol': rol,
+                'mensaje': 'Bienvenido a OptiObra. Tu cuenta no tiene permisos de gestión aún.',
+                'dashboard_basico': True,
+            })
+
+        if es_rol(request.user, OBRERO):
+            return Response({
+                'rol': rol,
+                'mensaje': 'Dashboard del obrero',
+                'total_tareas_pendientes': Tarea.objects.filter(obrero=request.user, estado='pendiente').count(),
+                'total_tareas_en_progreso': Tarea.objects.filter(obrero=request.user, estado='en_progreso').count(),
+                'total_tareas_completadas': Tarea.objects.filter(obrero=request.user, estado='completada').count(),
+                'total_materiales': Material.objects.count(),
+            })
+
         total_proyectos = Proyecto.objects.count()
         proyectos_en_progreso = Proyecto.objects.filter(estado='en_proceso').count()
         total_materiales = Material.objects.count()
-        total_trabajadores = Trabajador.objects.count()
+        total_obreros = User.objects.filter(usuariosupabase__rol=OBRERO).count()
 
         avance = Proyecto.objects.aggregate(promedio=Avg('porcentaje_avance'))
         avance_promedio = round(avance['promedio'] or 0)
@@ -279,10 +303,11 @@ class DashboardViewSet(viewsets.ViewSet):
         )
 
         return Response({
+            'rol': rol,
             'total_proyectos': total_proyectos,
             'proyectos_en_progreso': proyectos_en_progreso,
             'total_materiales': total_materiales,
-            'total_trabajadores': total_trabajadores,
+            'total_obreros': total_obreros,
             'avance_promedio': avance_promedio,
             'proyectos_recientes': list(proyectos_recientes),
         })
@@ -301,7 +326,7 @@ class ProyectoViewSet(viewsets.ModelViewSet):
     """
     queryset = Proyecto.objects.all().select_related('creado_por')
     serializer_class = ProyectoSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [EsGestion]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['nombre', 'descripcion', 'responsable', 'direccion', 'ubicacion']
     ordering_fields = ['nombre', 'estado', 'avance', 'porcentaje_avance', 'creado_en', 'fecha_inicio']
@@ -341,7 +366,7 @@ class ProyectoViewSet(viewsets.ModelViewSet):
         instance.delete()
         logger.info(f"Proyecto eliminado: {nombre} por {self.request.user.username}")
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[EsGestion])
     def estimaciones(self, request, pk=None):
         """
         Generar reporte ejecutivo IA para un proyecto
@@ -374,7 +399,7 @@ class AvanceObraViewSet(viewsets.ModelViewSet):
     """ViewSet para gestionar avances de obra"""
     queryset = AvanceObra.objects.all().select_related('proyecto')
     serializer_class = AvanceObraSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [EsGestion]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['actividad', 'responsable', 'proyecto__nombre']
     ordering_fields = ['fecha', 'porcentaje', 'creado_en']
@@ -388,42 +413,25 @@ class AvanceObraViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class TrabajadorViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestionar trabajadores"""
-    queryset = Trabajador.objects.all()
-    serializer_class = TrabajadorSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['nombre', 'dni', 'rol', 'telefono']
-    ordering_fields = ['nombre', 'rol', 'estado', 'creado_en']
-    ordering = ['-creado_en']
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        rol = self.request.query_params.get('rol', '')
-        if rol:
-            queryset = queryset.filter(rol=rol)
-        estado = self.request.query_params.get('estado', '')
-        if estado:
-            queryset = queryset.filter(estado=estado)
-        return queryset
-
-
 class TareaViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestionar tareas asignadas a trabajadores"""
-    queryset = Tarea.objects.select_related('proyecto', 'trabajador_asignado').all()
+    """ViewSet para gestionar tareas asignadas a obreros (usuarios)"""
+    queryset = Tarea.objects.select_related('proyecto', 'obrero').all()
     serializer_class = TareaSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [TareasPermiso]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['titulo', 'descripcion', 'trabajador_asignado__nombre', 'proyecto__nombre']
+    search_fields = ['titulo', 'descripcion', 'obrero__username', 'obrero__usuariosupabase__nombre_completo', 'proyecto__nombre']
     ordering_fields = ['titulo', 'estado', 'prioridad', 'fecha_limite', 'creado_en']
     ordering = ['-creado_en']
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        trabajador = self.request.query_params.get('trabajador', '')
-        if trabajador:
-            queryset = queryset.filter(trabajador_asignado_id=trabajador)
+
+        if es_rol(self.request.user, OBRERO):
+            queryset = queryset.filter(obrero=self.request.user)
+
+        obrero = self.request.query_params.get('obrero', '')
+        if obrero:
+            queryset = queryset.filter(obrero_id=obrero)
         estado = self.request.query_params.get('estado', '')
         if estado:
             queryset = queryset.filter(estado=estado)
@@ -431,6 +439,9 @@ class TareaViewSet(viewsets.ModelViewSet):
         if proyecto:
             queryset = queryset.filter(proyecto_id=proyecto)
         return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(creado_por=self.request.user)
 
 
 class AuthViewSet(viewsets.ViewSet):
@@ -566,7 +577,7 @@ class AuthViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
         """
         Obtener información del usuario autenticado
@@ -613,7 +624,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     - POST /api/usuarios/{id}/cambiar_rol/ : Asignar nuevo rol
     """
     queryset = User.objects.all().select_related('usuariosupabase', 'perfil')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [UsuariosPermiso]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['username', 'email', 'first_name', 'last_name', 'usuariosupabase__nombre_completo']
     ordering_fields = ['username', 'email', 'date_joined']
@@ -626,9 +637,17 @@ class UsuarioViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        rol = self.request.query_params.get('rol', '')
-        if rol:
-            queryset = queryset.filter(usuariosupabase__rol=rol)
+
+        rol = obtener_rol(self.request.user)
+        if not es_rol(self.request.user, *ROLES_ADMIN):
+            queryset = queryset.filter(
+                Q(id=self.request.user.id) |
+                Q(usuariosupabase__creado_por=self.request.user)
+            )
+
+        rol_filtro = self.request.query_params.get('rol', '')
+        if rol_filtro:
+            queryset = queryset.filter(usuariosupabase__rol=rol_filtro)
         activo = self.request.query_params.get('activo', '')
         if activo.lower() == 'true':
             queryset = queryset.filter(is_active=True, usuariosupabase__activo=True)
@@ -640,10 +659,18 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         data = serializer.validated_data
         nombre_completo = data.pop('nombre_completo', f"{data.get('first_name', '')} {data.get('last_name', '')}".strip())
         rol = data.pop('rol', 'usuario')
+        dni = data.pop('dni', '')
         telefono = data.pop('telefono', '')
         departamento = data.pop('departamento', '')
         cargo = data.pop('cargo', '')
         direccion = data.pop('direccion', '')
+
+        if not rol_minimo(self.request.user, ADMIN):
+            # Quien no es admin solo puede asignar roles de nivel inferior o igual al suyo
+            if rol in ROLES_ADMIN:
+                raise PermissionError('No puedes asignar el rol de administrador')
+            if nivel_rol(rol) > nivel_rol(obtener_rol(self.request.user)):
+                raise PermissionError('No puedes asignar un rol superior al tuyo')
 
         password = data.pop('password', None)
         user = User.objects.create(**data)
@@ -660,12 +687,14 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             email=user.email,
             nombre_completo=nombre_completo or user.username,
             rol=rol,
-            activo=True
+            activo=True,
+            creado_por=self.request.user
         )
 
         # Crear Perfil
         PerfilUsuario.objects.create(
             usuario=user,
+            dni=dni,
             telefono=telefono,
             departamento=departamento,
             cargo=cargo,
@@ -676,12 +705,19 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         data = serializer.validated_data
         nombre_completo = data.pop('nombre_completo', None)
         rol = data.pop('rol', None)
+        dni = data.pop('dni', None)
         telefono = data.pop('telefono', None)
         departamento = data.pop('departamento', None)
         cargo = data.pop('cargo', None)
         direccion = data.pop('direccion', None)
         avatar_url = data.pop('avatar_url', None)
         password = data.pop('password', None)
+
+        if not rol_minimo(self.request.user, ADMIN) and rol is not None:
+            if rol in ROLES_ADMIN:
+                raise PermissionError('No puedes asignar el rol de administrador')
+            if nivel_rol(rol) > nivel_rol(obtener_rol(self.request.user)):
+                raise PermissionError('No puedes asignar un rol superior al tuyo')
 
         user = serializer.save()
         if password:
@@ -696,6 +732,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             user.usuariosupabase.save()
 
         perfil, _ = PerfilUsuario.objects.get_or_create(usuario=user)
+        if dni is not None:
+            perfil.dni = dni
         if telefono is not None:
             perfil.telefono = telefono
         if departamento is not None:
@@ -722,9 +760,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         serializer = UsuarioDetalleSerializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[EsAdmin])
     def cambiar_estado(self, request, pk=None):
-        """POST /api/usuarios/{id}/cambiar_estado/ Body: {"activo": true/false}"""
+        """POST /api/usuarios/{id}/cambiar_estado/ Body: {"activo": true/false} (solo admin)"""
         user = self.get_object()
         nuevo_estado = request.data.get('activo')
         if nuevo_estado is None:
@@ -741,9 +779,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             'usuario': UsuarioDetalleSerializer(user).data
         })
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[EsAdmin])
     def cambiar_rol(self, request, pk=None):
-        """POST /api/usuarios/{id}/cambiar_rol/ Body: {"rol": "admin"/"supervisor"/"usuario"}"""
+        """POST /api/usuarios/{id}/cambiar_rol/ Body: {"rol": "..."} (solo admin)"""
         user = self.get_object()
         nuevo_rol = request.data.get('rol')
         if not nuevo_rol:
@@ -772,7 +810,7 @@ class ConfiguracionViewSet(viewsets.ViewSet):
     - GET /api/configuracion/sistema/ : Obtener parámetros del sistema
     - PUT /api/configuracion/sistema/ : Actualizar parámetros del sistema
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [EsGestion]
 
     def _get_empresa(self):
         empresa, _ = ConfiguracionEmpresa.objects.get_or_create(id=1)
@@ -838,7 +876,7 @@ class ReporteViewSet(viewsets.ModelViewSet):
     """
     queryset = Reporte.objects.all().select_related('solicitado_por')
     serializer_class = ReporteSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [EsGestion]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['titulo', 'tipo_reporte', 'formato']
     ordering_fields = ['fecha_generacion', 'tipo_reporte']
@@ -953,17 +991,29 @@ class ReporteViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def trabajadores(self, request):
-        """GET /api/reportes/trabajadores/"""
-        total_trabajadores = Trabajador.objects.count()
-        activos = Trabajador.objects.filter(estado='Activo').count()
-        inactivos = Trabajador.objects.filter(estado='Inactivo').count()
-        por_rol = Trabajador.objects.values('rol').annotate(total=Count('id'))
+        """GET /api/reportes/trabajadores/ (personal = usuarios con rol obrero)"""
+        obreros = User.objects.filter(
+            usuario_django__isnull=False,
+            usuariosupabase__rol=OBRERO
+        )
+        total_trabajadores = obreros.count()
+        activos = obreros.filter(is_active=True).count()
+        inactivos = obreros.filter(is_active=False).count()
+        por_rol = User.objects.filter(
+            usuario_django__isnull=False,
+            usuariosupabase__rol__in=[OBRERO, ARQUITECTO, MAESTRO_OBRA, SUPERVISOR, INGENIERO]
+        ).values('usuariosupabase__rol').annotate(total=Count('id'))
 
         resumen = {
             'total_trabajadores': total_trabajadores,
             'activos': activos,
             'inactivos': inactivos,
-            'distribucion_por_rol': list(por_rol)
+            'distribucion_por_rol': [
+                {
+                    'rol': p['usuariosupabase__rol'],
+                    'total': p['total']
+                } for p in por_rol
+            ]
         }
 
         Reporte.objects.create(

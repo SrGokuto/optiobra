@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
-    Proyecto, AvanceObra, Trabajador, PerfilUsuario,
+    Proyecto, AvanceObra, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 
@@ -220,41 +220,11 @@ class AvanceObraSerializer(serializers.ModelSerializer):
         return value.strip()
 
 
-class TrabajadorSerializer(serializers.ModelSerializer):
-    """Serializer para Trabajadores"""
-    class Meta:
-        model = Trabajador
-        fields = [
-            'id', 'nombre', 'dni', 'rol', 'telefono', 'estado',
-            'creado_en', 'actualizado_en',
-        ]
-        read_only_fields = ['creado_en', 'actualizado_en']
-
-    def validate_nombre(self, value):
-        if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError("El nombre no puede estar vacío")
-        return value.strip()
-
-    def validate_dni(self, value):
-        if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError("El DNI no puede estar vacío")
-        if self.instance and self.instance.dni == value:
-            return value
-        if Trabajador.objects.filter(dni=value).exists():
-            raise serializers.ValidationError(f"El DNI '{value}' ya está registrado")
-        return value.strip()
-
-    def validate_telefono(self, value):
-        if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError("El teléfono no puede estar vacío")
-        return value.strip()
-
-
 class PerfilUsuarioSerializer(serializers.ModelSerializer):
     """Serializer para el perfil extendido de usuario"""
     class Meta:
         model = PerfilUsuario
-        fields = ['id', 'telefono', 'departamento', 'cargo', 'avatar_url', 'direccion', 'creado_en', 'actualizado_en']
+        fields = ['id', 'dni', 'telefono', 'departamento', 'cargo', 'avatar_url', 'direccion', 'creado_en', 'actualizado_en']
         read_only_fields = ['creado_en', 'actualizado_en']
 
 
@@ -265,13 +235,16 @@ class UsuarioDetalleSerializer(serializers.ModelSerializer):
     rol = serializers.SerializerMethodField()
     activo = serializers.SerializerMethodField()
     supabase_uid = serializers.SerializerMethodField()
+    creado_por_id = serializers.SerializerMethodField()
+    creado_por_nombre = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'nombre_completo', 'rol', 'activo', 'supabase_uid',
-            'perfil', 'is_staff', 'is_superuser', 'date_joined'
+            'perfil', 'is_staff', 'is_superuser', 'date_joined',
+            'creado_por_id', 'creado_por_nombre',
         ]
         read_only_fields = ['id', 'date_joined']
 
@@ -299,11 +272,27 @@ class UsuarioDetalleSerializer(serializers.ModelSerializer):
         except UsuarioSupabase.DoesNotExist:
             return None
 
+    def get_creado_por_id(self, obj):
+        try:
+            return obj.usuariosupabase.creado_por_id
+        except UsuarioSupabase.DoesNotExist:
+            return None
+
+    def get_creado_por_nombre(self, obj):
+        try:
+            creador = obj.usuariosupabase.creado_por
+            if creador:
+                return creador.usuariosupabase.nombre_completo or creador.username
+        except Exception:
+            pass
+        return None
+
 
 class UsuarioCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer para crear y actualizar usuarios"""
     nombre_completo = serializers.CharField(write_only=True, required=False)
     rol = serializers.CharField(write_only=True, required=False, default='usuario')
+    dni = serializers.CharField(write_only=True, required=False, allow_blank=True)
     telefono = serializers.CharField(write_only=True, required=False, allow_blank=True)
     departamento = serializers.CharField(write_only=True, required=False, allow_blank=True)
     cargo = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -314,7 +303,7 @@ class UsuarioCreateUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
-            'password', 'nombre_completo', 'rol', 'telefono',
+            'password', 'nombre_completo', 'rol', 'dni', 'telefono',
             'departamento', 'cargo', 'direccion', 'avatar_url'
         ]
         extra_kwargs = {
@@ -415,14 +404,20 @@ class GenerarReporteSerializer(serializers.Serializer):
 class TareaSerializer(serializers.ModelSerializer):
     """Serializer para Tareas"""
     proyecto_nombre = serializers.CharField(source='proyecto.nombre', read_only=True)
-    trabajador_nombre = serializers.CharField(source='trabajador_asignado.nombre', read_only=True)
+    obrero_nombre = serializers.SerializerMethodField()
 
     class Meta:
         model = Tarea
         fields = [
             'id', 'titulo', 'descripcion', 'proyecto', 'proyecto_nombre',
-            'trabajador_asignado', 'trabajador_nombre', 'estado', 'prioridad',
+            'obrero', 'obrero_nombre', 'estado', 'prioridad',
             'fecha_limite', 'creado_en', 'actualizado_en',
         ]
         read_only_fields = ['creado_en', 'actualizado_en']
+
+    def get_obrero_nombre(self, obj):
+        try:
+            return obj.obrero.usuariosupabase.nombre_completo or obj.obrero.get_full_name() or obj.obrero.username
+        except Exception:
+            return obj.obrero.username or ''
 

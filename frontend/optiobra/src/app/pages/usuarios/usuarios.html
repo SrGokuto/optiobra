@@ -168,7 +168,7 @@
         <div class="form-group">
           <label>Rol</label>
           <select [(ngModel)]="formulario.rol">
-            @for (rol of ['admin', 'supervisor', 'ingeniero', 'usuario']; track rol) {
+            @for (rol of ['usuario', 'obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin']; track rol) {
               <option [value]="rol">{{ formatearRol(rol) }}</option>
             }
           </select>
@@ -177,6 +177,11 @@
         <div class="form-group" *ngIf="!editando">
           <label>Contraseña</label>
           <input type="password" [(ngModel)]="formulario.password" placeholder="Contraseña">
+        </div>
+
+        <div class="form-group">
+          <label>DNI</label>
+          <input type="text" [(ngModel)]="formulario.dni" placeholder="DNI">
         </div>
 
         <div class="form-group">

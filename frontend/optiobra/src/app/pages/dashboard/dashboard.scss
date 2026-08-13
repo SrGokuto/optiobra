@@ -262,6 +262,30 @@
   color: #0d1b2a;
 }
 
+.welcome-card {
+  text-align: center;
+  padding: 40px 20px;
+  max-width: 500px;
+  margin: 40px auto;
+
+  .welcome-icon {
+    font-size: 48px;
+    color: #3b82f6;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: #0d1b2a;
+  }
+
+  p {
+    color: #6b7280;
+    line-height: 1.6;
+  }
+}
+
 
 
 .grafico {

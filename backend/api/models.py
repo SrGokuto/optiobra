@@ -132,24 +132,6 @@ class AvanceObra(models.Model):
         return f"{self.actividad} - {self.proyecto.nombre}"
 
 
-class Trabajador(models.Model):
-    """Modelo de trabajadores de la empresa"""
-    nombre = models.CharField(max_length=255)
-    dni = models.CharField(max_length=20, unique=True)
-    rol = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=50)
-    estado = models.CharField(max_length=20, choices=[('Activo', 'Activo'), ('Inactivo', 'Inactivo')], default='Activo')
-    creado_en = models.DateTimeField(auto_now_add=True)
-    actualizado_en = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Trabajadores"
-        ordering = ['-creado_en']
-
-    def __str__(self):
-        return self.nombre
-
-
 class UsuarioSupabase(models.Model):
     """Relación entre usuarios de Django y Supabase"""
     usuario_django = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -158,6 +140,7 @@ class UsuarioSupabase(models.Model):
     nombre_completo = models.CharField(max_length=255, blank=True)
     rol = models.CharField(max_length=50, default='usuario')
     activo = models.BooleanField(default=True)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='obreros_registrados')
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -172,6 +155,7 @@ class UsuarioSupabase(models.Model):
 class PerfilUsuario(models.Model):
     """Perfil extendido para los usuarios del sistema"""
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    dni = models.CharField(max_length=20, blank=True, null=True)
     telefono = models.CharField(max_length=50, blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
@@ -270,7 +254,7 @@ class Reporte(models.Model):
 
 
 class Tarea(models.Model):
-    """Tareas asignadas a trabajadores dentro de un proyecto"""
+    """Tareas asignadas a un obrero (usuario con rol 'obrero') dentro de un proyecto"""
     ESTADO_CHOICES = [
         ('pendiente', 'Pendiente'),
         ('en_progreso', 'En progreso'),
@@ -287,10 +271,11 @@ class Tarea(models.Model):
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True, null=True)
     proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
-    trabajador_asignado = models.ForeignKey(Trabajador, on_delete=models.CASCADE, related_name='tareas')
+    obrero = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tareas_asignadas')
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
     prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='media')
     fecha_limite = models.DateField(blank=True, null=True)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tareas_creadas')
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 

@@ -8,6 +8,10 @@ import {
   RegisterResponse,
   UsuarioAuth,
 } from '../Models/usuario';
+import {
+  nivelRol,
+  ROL_USUARIO,
+} from '../Models/roles';
 
 const TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -19,7 +23,7 @@ export class AuthService {
   private readonly authUrl = `${environment.apiUrl}/auth`;
   readonly usuarioActual = new BehaviorSubject<UsuarioAuth | null>(null);
   private refrescando: Promise<boolean> | null = null;
-  private sincronizando = false;
+  private sincronizando: Promise<boolean> | null = null;
 
   constructor(private http: HttpClient) {
     this.cargarUsuarioActual();
@@ -60,28 +64,43 @@ export class AuthService {
   }
 
   /** Restaura la sesión al iniciar la app: renueva el access_token por adelantado y luego valida con getMe. */
-  cargarUsuarioActual(): void {
-    if (this.sincronizando || !this.getToken()) {
-      return;
+  cargarUsuarioActual(): Promise<boolean> {
+    if (this.usuarioActual.value) {
+      return Promise.resolve(true);
     }
-    this.sincronizando = true;
+    if (this.sincronizando) {
+      return this.sincronizando;
+    }
+    if (!this.getToken()) {
+      return Promise.resolve(false);
+    }
+    this.sincronizando = this.nuevoIntentoSincronizacion();
 
-    this.refrescarToken().then((refrescado) => {
-      this.sincronizando = false;
-
-      if (refrescado) {
-        this.getMe().subscribe({
-          error: () => {},
-        });
-        return;
+    this.sincronizando.then((ok) => {
+      if (!ok) {
+        this.sincronizando = null;
       }
+    });
 
-      this.getMe().subscribe({
-        error: (error) => {
-          if (this.esErrorAuth(error)) {
-            this.clearSession();
-          }
-        },
+    return this.sincronizando;
+  }
+
+  private nuevoIntentoSincronizacion(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      this.refrescarToken().then((refrescado) => {
+        const suscripcion = this.getMe().subscribe({
+          next: () => {
+            suscripcion.unsubscribe();
+            resolve(true);
+          },
+          error: (error) => {
+            suscripcion.unsubscribe();
+            if (this.esErrorAuth(error) || !refrescado) {
+              this.clearSession();
+            }
+            resolve(false);
+          },
+        });
       });
     });
   }
@@ -159,6 +178,37 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  getRol(): string {
+    return this.usuarioActual.value?.rol || ROL_USUARIO;
+  }
+
+  esRol(...roles: string[]): boolean {
+    const rol = this.getRol();
+    return roles.includes(rol);
+  }
+
+  esGestion(): boolean {
+    return this.esRol(
+      'arquitecto',
+      'maestro_obra',
+      'supervisor',
+      'ingeniero',
+      'admin',
+    );
+  }
+
+  esObreroOMas(): boolean {
+    return this.esRol('obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin');
+  }
+
+  esAdmin(): boolean {
+    return this.esRol('admin');
+  }
+
+  tieneRolMinimo(rolObjetivo: string): boolean {
+    return nivelRol(this.getRol()) >= nivelRol(rolObjetivo);
   }
 
   clearSession(): void {

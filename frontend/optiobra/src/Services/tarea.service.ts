@@ -12,9 +12,9 @@ export class TareaService {
 
   constructor(private http: HttpClient) {}
 
-  getTareas(filtros: { trabajador?: number; estado?: string; proyecto?: number; page?: number } = {}): Observable<TareaPaginado> {
+  getTareas(filtros: { obrero?: number; estado?: string; proyecto?: number; page?: number } = {}): Observable<TareaPaginado> {
     let params = new HttpParams();
-    if (filtros.trabajador) params = params.set('trabajador', filtros.trabajador.toString());
+    if (filtros.obrero) params = params.set('obrero', filtros.obrero.toString());
     if (filtros.estado) params = params.set('estado', filtros.estado);
     if (filtros.proyecto) params = params.set('proyecto', filtros.proyecto.toString());
     if (filtros.page) params = params.set('page', filtros.page.toString());
@@ -22,7 +22,7 @@ export class TareaService {
   }
 
   getTodasLasTareas(
-    filtros: { trabajador?: number; estado?: string; proyecto?: number } = {}
+    filtros: { obrero?: number; estado?: string; proyecto?: number } = {}
   ): Observable<Tarea[]> {
     return new Observable((observer) => {
       const acumuladas: Tarea[] = [];

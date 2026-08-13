@@ -34,6 +34,7 @@ export class Usuarios implements OnInit {
     email: '',
     rol: 'usuario',
     password: '',
+    dni: '',
     telefono: '',
     departamento: '',
     cargo: '',
@@ -42,10 +43,13 @@ export class Usuarios implements OnInit {
 
   roles = [
     'Todos los roles',
-    'admin',
+    'usuario',
+    'obrero',
+    'arquitecto',
+    'maestro_obra',
     'supervisor',
     'ingeniero',
-    'usuario'
+    'admin'
   ];
 
   constructor(private usuarioService: UsuarioService) {}
@@ -97,6 +101,7 @@ export class Usuarios implements OnInit {
       email: '',
       rol: 'usuario',
       password: '',
+      dni: '',
       telefono: '',
       departamento: '',
       cargo: '',
@@ -115,6 +120,7 @@ export class Usuarios implements OnInit {
       email: usuario.email || '',
       rol: usuario.rol || 'usuario',
       password: '',
+      dni: usuario.perfil?.dni || '',
       telefono: usuario.perfil?.telefono || '',
       departamento: usuario.perfil?.departamento || '',
       cargo: usuario.perfil?.cargo || '',
@@ -152,6 +158,7 @@ export class Usuarios implements OnInit {
       username: this.formulario.username,
       email: this.formulario.email,
       rol: this.formulario.rol,
+      dni: this.formulario.dni,
       telefono: this.formulario.telefono,
       departamento: this.formulario.departamento,
       cargo: this.formulario.cargo,
@@ -218,10 +225,13 @@ export class Usuarios implements OnInit {
 
   formatearRol(rol: string): string {
     const mapaRoles: Record<string, string> = {
-      'admin': 'Administrador',
+      'usuario': 'Usuario',
+      'obrero': 'Obrero',
+      'arquitecto': 'Arquitecto',
+      'maestro_obra': 'Maestro de obra',
       'supervisor': 'Supervisor',
       'ingeniero': 'Ingeniero',
-      'usuario': 'Operario'
+      'admin': 'Administrador'
     };
     return mapaRoles[rol] || rol;
   }

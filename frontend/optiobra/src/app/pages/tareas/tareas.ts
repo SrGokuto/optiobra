@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { TareaService } from '../../../Services/tarea.service';
-import { TrabajadorService } from '../../../Services/trabajador.service';
+import { UsuarioService } from '../../../Services/usuario.service';
 import { ProyectoService } from '../../../Services/proyecto.service';
 import { Tarea, TareaPayload, ESTADOS_TAREA, PRIORIDADES_TAREA } from '../../../Models/tarea';
-import { Trabajador } from '../../../Models/trabajador';
+import { Usuario } from '../../../Models/usuario-sistema';
 import { Proyecto } from '../../../Models/proyecto';
 import { AuthService } from '../../../Services/auth.service';
 
@@ -22,7 +22,7 @@ export class Tareas implements OnInit {
   menuAbierto = true;
   tareas: Tarea[] = [];
   tareasFiltradas: Tarea[] = [];
-  trabajadores: Trabajador[] = [];
+  trabajadores: Usuario[] = [];
   proyectos: Proyecto[] = [];
   cargando = false;
   error = '';
@@ -36,11 +36,13 @@ export class Tareas implements OnInit {
   mostrarModal = false;
   guardando = false;
 
+  esObrero = false;
+
   nueva: TareaPayload = {
     titulo: '',
     descripcion: '',
     proyecto: 0,
-    trabajador_asignado: 0,
+    obrero: 0,
     estado: 'pendiente',
     prioridad: 'media',
     fecha_limite: null,
@@ -54,14 +56,17 @@ export class Tareas implements OnInit {
 
   constructor(
     private tareaService: TareaService,
-    private trabajadorService: TrabajadorService,
+    private usuarioService: UsuarioService,
     private proyectoService: ProyectoService,
     private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.cargarTrabajadores();
-    this.cargarProyectos();
+    this.esObrero = this.authService.esRol('obrero');
+    if (!this.esObrero) {
+      this.cargarTrabajadores();
+      this.cargarProyectos();
+    }
     this.cargarTareas();
   }
 
@@ -70,7 +75,7 @@ export class Tareas implements OnInit {
   }
 
   cargarTrabajadores(): void {
-    this.trabajadorService.getTrabajadores({ estado: 'Activo' }).subscribe({
+    this.usuarioService.getUsuarios({ rol: 'obrero' }).subscribe({
       next: (response) => {
         this.trabajadores = response.results;
       },
@@ -91,9 +96,9 @@ export class Tareas implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    const filtros: { trabajador?: number; estado?: string; proyecto?: number } = {};
+    const filtros: { obrero?: number; estado?: string; proyecto?: number } = {};
     if (this.trabajadorSeleccionado) {
-      filtros.trabajador = Number(this.trabajadorSeleccionado);
+      filtros.obrero = Number(this.trabajadorSeleccionado);
     }
     if (this.estadoSeleccionado) {
       filtros.estado = this.estadoSeleccionado;
@@ -102,9 +107,9 @@ export class Tareas implements OnInit {
       filtros.proyecto = Number(this.proyectoSeleccionado);
     }
 
-    this.tareaService.getTareas(filtros).subscribe({
-      next: (response) => {
-        this.tareas = response.results;
+    this.tareaService.getTodasLasTareas(filtros).subscribe({
+      next: (tareas) => {
+        this.tareas = tareas;
         this.tareasFiltradas = [...this.tareas];
         this.cargando = false;
         this.filtrarPorBusqueda();
@@ -163,7 +168,7 @@ export class Tareas implements OnInit {
     this.tareasFiltradas = this.tareas.filter(t => {
       const coincideTexto = this.textoBusqueda === '' ||
         t.titulo.toLowerCase().includes(this.textoBusqueda.toLowerCase()) ||
-        t.trabajador_nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase()) ||
+        t.obrero_nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase()) ||
         t.proyecto_nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase());
       return coincideTexto;
     });
@@ -191,7 +196,7 @@ export class Tareas implements OnInit {
       titulo: '',
       descripcion: '',
       proyecto: 0,
-      trabajador_asignado: 0,
+      obrero: 0,
       estado: 'pendiente',
       prioridad: 'media',
       fecha_limite: null,
@@ -217,8 +222,8 @@ export class Tareas implements OnInit {
       this.error = 'Selecciona un proyecto';
       return;
     }
-    if (!this.nueva.trabajador_asignado) {
-      this.error = 'Selecciona un trabajador';
+    if (!this.nueva.obrero) {
+      this.error = 'Selecciona un obrero';
       return;
     }
 
@@ -228,7 +233,7 @@ export class Tareas implements OnInit {
       titulo: this.nueva.titulo.trim(),
       descripcion: this.nueva.descripcion || '',
       proyecto: Number(this.nueva.proyecto),
-      trabajador_asignado: Number(this.nueva.trabajador_asignado),
+      obrero: Number(this.nueva.obrero),
       estado: this.nueva.estado,
       prioridad: this.nueva.prioridad,
       fecha_limite: this.nueva.fecha_limite || null,

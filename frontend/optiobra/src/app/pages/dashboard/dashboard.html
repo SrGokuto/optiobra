@@ -13,11 +13,10 @@
     class="contenido"
     [class.menu-cerrado]="!menuAbierto">
 
-    <!-- HEADER -->
     <div class="header">
       <div>
         <h2>Dashboard</h2>
-        <p>Resumen general de tus proyectos</p>
+        <p *ngIf="usuario">Bienvenido, {{ nombreUsuario() }}</p>
       </div>
     </div>
 
@@ -31,84 +30,112 @@
 
     @if (!cargando && estadisticas) {
 
-      <!-- TARJETAS -->
-      <div class="cards">
-        <div class="card">
-          <h4>Proyectos activos</h4>
-          <h2>{{ estadisticas.proyectos_en_progreso }}</h2>
-          <small>de {{ estadisticas.total_proyectos }} totales</small>
+      <!-- USUARIO BASICO (sin permisos de gestión) -->
+      @if (esBasico) {
+        <div class="panel welcome-card">
+          <div class="welcome-icon">
+            <i class="bi bi-person-check"></i>
+          </div>
+          <h3>{{ estadisticas.mensaje || 'Bienvenido a OptiObra' }}</h3>
+          <p>Tu cuenta está registrada con rol <strong>{{ estadisticas.rol }}</strong>.</p>
+          <p>Si necesitas acceder a más funcionalidades, contacta al administrador para que te asigne un rol con permisos.</p>
         </div>
-        <div class="card">
-          <h4>Materiales</h4>
-          <h2>{{ estadisticas.total_materiales }}</h2>
-          <small>registrados</small>
-        </div>
-        <div class="card">
-          <h4>Valor del inventario</h4>
-          <h2>{{ valorInventario | currency:'COP':'symbol':'1.2-2' }}</h2>
-          <small>precio × cantidad</small>
-        </div>
-        <div class="card">
-          <h4>Trabajadores</h4>
-          <h2>{{ estadisticas.total_trabajadores }}</h2>
-          <small>en la empresa</small>
-        </div>
-        <div class="card">
-          <h4>Avance promedio</h4>
-          <h2>{{ estadisticas.avance_promedio }}%</h2>
-          <small>de todos los proyectos</small>
-        </div>
-      </div>
+      }
 
-      <!-- DOS COLUMNAS -->
-      <div class="paneles">
-        <!-- GRAFICO -->
-        <div class="panel">
-          <h3>Avance de proyectos</h3>
-          <div class="grafico">
-            <div class="donut" [style.background]="'conic-gradient(#F29F05 ' + estadisticas.avance_promedio + '%, #e5e7eb ' + estadisticas.avance_promedio + '%)'">
-              <span>{{ estadisticas.avance_promedio }}%</span>
-            </div>
+      <!-- OBRERO -->
+      @if (esObrero) {
+        <div class="cards">
+          <div class="card">
+            <h4>Tareas pendientes</h4>
+            <h2>{{ estadisticas.total_tareas_pendientes }}</h2>
+          </div>
+          <div class="card">
+            <h4>Tareas en progreso</h4>
+            <h2>{{ estadisticas.total_tareas_en_progreso }}</h2>
+          </div>
+          <div class="card">
+            <h4>Tareas completadas</h4>
+            <h2>{{ estadisticas.total_tareas_completadas }}</h2>
+          </div>
+          <div class="card">
+            <h4>Materiales</h4>
+            <h2>{{ estadisticas.total_materiales }}</h2>
+            <small>en inventario</small>
+          </div>
+        </div>
+      }
+
+      <!-- GESTION (arquitecto, maestro_obra, supervisor, ingeniero, admin) -->
+      @if (esGestion) {
+        <div class="cards">
+          <div class="card">
+            <h4>Proyectos activos</h4>
+            <h2>{{ estadisticas.proyectos_en_progreso }}</h2>
+            <small>de {{ estadisticas.total_proyectos }} totales</small>
+          </div>
+          <div class="card">
+            <h4>Materiales</h4>
+            <h2>{{ estadisticas.total_materiales }}</h2>
+            <small>registrados</small>
+          </div>
+          <div class="card">
+            <h4>Trabajadores</h4>
+            <h2>{{ estadisticas.total_obreros }}</h2>
+            <small>en la empresa</small>
+          </div>
+          <div class="card">
+            <h4>Avance promedio</h4>
+            <h2>{{ estadisticas.avance_promedio }}%</h2>
+            <small>de todos los proyectos</small>
           </div>
         </div>
 
-        <!-- RESUMEN RAPIDO -->
-        <div class="panel">
-          <h3>Resumen rápido</h3>
-          <ul class="actividad">
-            <li><i class="bi bi-folder2-open"></i> {{ estadisticas.total_proyectos }} proyectos registrados</li>
-            <li><i class="bi bi-tools"></i> {{ estadisticas.proyectos_en_progreso }} en progreso</li>
-            <li><i class="bi bi-box-seam"></i> {{ estadisticas.total_materiales }} materiales en inventario</li>
-            <li><i class="bi bi-person-workspace"></i> {{ estadisticas.total_trabajadores }} trabajadores activos</li>
-            <li><i class="bi bi-graph-up-arrow"></i> {{ estadisticas.avance_promedio }}% avance promedio</li>
-          </ul>
-        </div>
-      </div>
+        <div class="panels">
+          <div class="panel">
+            <h3>Avance de proyectos</h3>
+            <div class="grafico">
+              <div class="donut" [style.background]="'conic-gradient(#F29F05 ' + estadisticas.avance_promedio + '%, #e5e7eb ' + estadisticas.avance_promedio + '%)'">
+                <span>{{ estadisticas.avance_promedio }}%</span>
+              </div>
+            </div>
+          </div>
 
-      <!-- PROYECTOS RECIENTES -->
-      <div class="panel" *ngIf="estadisticas.proyectos_recientes.length > 0">
-        <h3>Proyectos recientes</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Proyecto</th>
-              <th>Estado</th>
-              <th>Avance</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let proyecto of estadisticas.proyectos_recientes">
-              <td>{{ proyecto.nombre }}</td>
-              <td>
-                <span class="badge-estado" [ngClass]="proyecto.estado.toLowerCase().replace(' ', '-')">
-                  {{ proyecto.estado }}
-                </span>
-              </td>
-              <td>{{ proyecto.porcentaje_avance }}%</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <div class="panel">
+            <h3>Resumen rápido</h3>
+            <ul class="actividad">
+              <li><i class="bi bi-folder2-open"></i> {{ estadisticas.total_proyectos }} proyectos registrados</li>
+              <li><i class="bi bi-tools"></i> {{ estadisticas.proyectos_en_progreso }} en progreso</li>
+              <li><i class="bi bi-box-seam"></i> {{ estadisticas.total_materiales }} materiales en inventario</li>
+              <li><i class="bi bi-person-workspace"></i> {{ estadisticas.total_obreros }} trabajadores activos</li>
+              <li><i class="bi bi-graph-up-arrow"></i> {{ estadisticas.avance_promedio }}% avance promedio</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel" *ngIf="estadisticas.proyectos_recientes && estadisticas.proyectos_recientes.length > 0">
+          <h3>Proyectos recientes</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Proyecto</th>
+                <th>Estado</th>
+                <th>Avance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let proyecto of estadisticas.proyectos_recientes">
+                <td>{{ proyecto.nombre }}</td>
+                <td>
+                  <span class="badge-estado" [ngClass]="proyecto.estado.toLowerCase().replace(' ', '-')">
+                    {{ proyecto.estado }}
+                  </span>
+                </td>
+                <td>{{ proyecto.porcentaje_avance }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
 
     }
 
