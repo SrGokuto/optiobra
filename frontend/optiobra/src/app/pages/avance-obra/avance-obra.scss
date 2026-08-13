@@ -1,14 +1,12 @@
 @import 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap';
 * {
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
 
 :host {
   display: block;
-  background: #ffffff;
 }
 
 .dashboard {
@@ -83,9 +81,7 @@
   align-items: center;
 }
 
-.header-actions select,
-.modal-form input,
-.modal-form select {
+.header-actions select {
   min-width: 220px;
   padding: 12px 16px;
   border: 1px solid #e2e8f0;
@@ -94,24 +90,23 @@
   color: #334155;
 }
 
-.btn-primary {
+.header-actions .btn-primary {
   background: #F59E0B;
   border: none;
   color: white;
-  padding: 12px 28px;
+  padding: 12px 24px;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 700;
   box-shadow: 0 16px 40px rgba(245, 158, 11, 0.18);
 }
 
-.btn-secondary {
-  background: #f5f5f5;
-  border: 1px solid #d1d5db;
-  color: #334155;
-  padding: 12px 24px;
-  border-radius: 12px;
-  cursor: pointer;
+.alert-error {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .cards {
@@ -322,100 +317,6 @@ tbody tr:hover {
 
 .icon-btn.edit .bi { color: #f59e0b; }
 .icon-btn.delete .bi { color: #ef4444; }
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  z-index: 9999;
-}
-
-.modal {
-  width: min(720px, 100%);
-  background: white;
-  border-radius: 24px;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px 28px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.close {
-  background: transparent;
-  border: none;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.modal-form {
-  padding: 24px 28px 28px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.form-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: #334155;
-  font-weight: 600;
-}
-
-.form-grid input,
-.form-grid select {
-  width: 100%;
-}
-
-.modal-actions {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.confirm-box {
-  width: min(420px, 100%);
-  background: white;
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
-}
-
-.confirm-box h3 {
-  margin: 0 0 12px;
-  font-size: 22px;
-}
-
-.confirm-box p {
-  color: #475569;
-  margin-bottom: 24px;
-}
-
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
 
 @media (max-width: 1100px) {
   .cards { grid-template-columns: repeat(2, 1fr); }

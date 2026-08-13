@@ -26,7 +26,9 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   menuAbierto = true;
   cargando = false;
-  error = '';
+error = '';
+
+  mostrarExito = false;
 
   tipoReporte: string = '';
   proyecto: string = '';
@@ -316,7 +318,7 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
       fechaInicio: this.fechaInicio,
       fechaFin: this.fechaFin
     });
-    alert('Reporte generado correctamente.');
+    this.mostrarExito = true;
   }
 
   exportarPDF(): void {

@@ -83,7 +83,7 @@ RESET
 }
 
 .btn-primary {
-  background: #ff8c00;
+  background: #F29F05;
   color: #fff;
   border: none;
   padding: 11px 20px;
@@ -98,7 +98,7 @@ RESET
   white-space: nowrap;
 
   &:hover {
-    background: #ea7f00;
+    background: #d88e04;
     transform: translateY(-1px);
   }
 
@@ -173,10 +173,10 @@ RESET
   flex-shrink: 0;
   transition: .2s;
 
-  &:focus {
-    border-color: #ff8c00;
-    background: #fff;
-  }
+    &:focus {
+      border-color: #F29F05;
+      background: #fff;
+    }
 }
 
 /* CARD TABLA */
@@ -452,7 +452,7 @@ tbody {
 }
 
 .modal-header {
-  background: #0d274d;
+  background: #0d1b2a;
   color: #fff;
   padding: 18px 22px;
   display: flex;

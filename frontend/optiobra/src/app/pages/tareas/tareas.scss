@@ -2,7 +2,6 @@
 
 * {
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
 }
@@ -554,19 +553,6 @@ tbody {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.modal-header {
-  background: #0d274d;
-  color: #fff;
-  padding: 18px 22px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-  }
-}
 
 .cerrar {
   background: none;

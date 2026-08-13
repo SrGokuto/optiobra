@@ -124,4 +124,17 @@
 
   </main>
 
+  <div class="modal-backdrop" *ngIf="mostrarExito" (click)="mostrarExito = false">
+    <div class="modal-confirmacion" (click)="$event.stopPropagation()">
+      <div class="icono-exito">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <h3>Reporte generado</h3>
+      <p>El reporte se generó correctamente.</p>
+      <div class="modal-footer">
+        <button class="btn-primary" (click)="mostrarExito = false">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
 </div>

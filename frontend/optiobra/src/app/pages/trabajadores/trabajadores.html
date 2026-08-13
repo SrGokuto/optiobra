@@ -153,8 +153,8 @@
 </div>
 
 <!-- MODAL NUEVO TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarModal">
-  <div class="modal">
+<div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Nuevo trabajador</h3>
       <button class="cerrar" (click)="cerrarModal()">
@@ -199,8 +199,8 @@
 </div>
 
 <!-- MODAL EDITAR TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarEditar">
-  <div class="modal">
+<div class="modal-backdrop" *ngIf="mostrarEditar" (click)="cerrarEditar()">
+  <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Editar trabajador</h3>
       <button class="cerrar" (click)="cerrarEditar()">
@@ -244,8 +244,8 @@
 </div>
 
 <!-- MODAL ELIMINAR TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarEliminar">
-  <div class="modal-confirmacion">
+<div class="modal-backdrop" *ngIf="mostrarEliminar" (click)="cancelarEliminar()">
+  <div class="modal-confirmacion" (click)="$event.stopPropagation()">
     <div class="icono-warning">
       <i class="bi bi-exclamation-triangle"></i>
     </div>

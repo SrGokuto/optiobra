@@ -247,8 +247,8 @@
 
 </div>
 
-<div class="modal-backdrop" *ngIf="mostrarNuevaModal">
-  <div class="modal modal-form">
+<div class="modal-backdrop" *ngIf="mostrarNuevaModal" (click)="cerrarNuevaTarea()">
+  <div class="modal modal-form" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Nueva tarea</h3>
       <button class="cerrar" (click)="cerrarNuevaTarea()">
@@ -316,8 +316,8 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="mostrarModal">
-  <div class="modal">
+<div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Detalle de tarea</h3>
       <button class="cerrar" (click)="cerrarModal()">

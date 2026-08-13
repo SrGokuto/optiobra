@@ -11,4 +11,4 @@
 ### Build y validación
 - `ng build` y `tsc --noEmit` en `frontend/optiobra/`; el build debe quedar verde.
 - Budgets ajustados en `angular.json`: `initial` 1.5MB/2MB y `optimization.fonts.inline:false` (el budget default de fonts inline no es válido en esta versión).
-- Git: NO commitear `.pyc`, `pnpm-lock.yaml`, `favicon.ico`, `.env.bak`. Rama de trabajo: `development-merged` (push a `SrGokuto/optiobra`).
+- Git: NO commitear `.pyc`, `pnpm-lock.yaml`, `.env.bak`. Rama de trabajo: `development-merged` (push a `SrGokuto/optiobra`).

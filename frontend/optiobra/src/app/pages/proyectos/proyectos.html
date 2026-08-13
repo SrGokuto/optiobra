@@ -41,72 +41,81 @@
     </div>
 
     @if (mostrarFormulario) {
-      <section class="formulario">
-        <h3>{{ proyectoEnEdicion ? 'Editar Proyecto' : 'Nuevo Proyecto' }}</h3>
+      <div class="modal-backdrop" (click)="cerrarFormulario()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>{{ proyectoEnEdicion ? 'Editar proyecto' : 'Nuevo proyecto' }}</h3>
+            <button class="cerrar" (click)="cerrarFormulario()">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
 
-        <div class="form-grid">
-          <label>
-            Nombre
-            <input type="text" [(ngModel)]="formulario.nombre" placeholder="Nombre del proyecto">
-          </label>
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="formulario.nombre" placeholder="Nombre del proyecto">
+              </div>
 
-          <label>
-            Ubicación
-            <input type="text" [(ngModel)]="formulario.ubicacion" placeholder="Ubicación del proyecto">
-          </label>
+              <div class="form-group">
+                <label>Ubicación</label>
+                <input type="text" [(ngModel)]="formulario.ubicacion" placeholder="Ubicación del proyecto">
+              </div>
 
-          <label>
-            Responsable
-            <input type="text" [(ngModel)]="formulario.responsable" placeholder="Nombre del responsable">
-          </label>
+              <div class="form-group">
+                <label>Responsable</label>
+                <input type="text" [(ngModel)]="formulario.responsable" placeholder="Nombre del responsable">
+              </div>
 
-          <label>
-            Dirección
-            <input type="text" [(ngModel)]="formulario.direccion" placeholder="Dirección del proyecto">
-          </label>
+              <div class="form-group">
+                <label>Dirección</label>
+                <input type="text" [(ngModel)]="formulario.direccion" placeholder="Dirección del proyecto">
+              </div>
 
-          <label>
-          Estado
-          <select [(ngModel)]="formulario.estado">
-            @for (estado of estadosVisuales; track estado.valor) {
-              <option [value]="estado.valor">{{ estado.etiqueta }}</option>
-            }
-          </select>
-          </label>
+              <div class="form-group">
+                <label>Estado</label>
+                <select [(ngModel)]="formulario.estado">
+                  @for (estado of estadosVisuales; track estado.valor) {
+                    <option [value]="estado.valor">{{ estado.etiqueta }}</option>
+                  }
+                </select>
+              </div>
 
-          <label>
-            Avance (%)
-            <input type="number" [(ngModel)]="formulario.avance" min="0" max="100" placeholder="0">
-          </label>
+              <div class="form-group">
+                <label>Avance (%)</label>
+                <input type="number" [(ngModel)]="formulario.avance" min="0" max="100" placeholder="0">
+              </div>
 
-          <label>
-            Presupuesto
-            <input type="number" [(ngModel)]="formulario.presupuesto" placeholder="Presupuesto">
-          </label>
+              <div class="form-group">
+                <label>Presupuesto</label>
+                <input type="number" [(ngModel)]="formulario.presupuesto" placeholder="Presupuesto">
+              </div>
 
-          <label>
-            Fecha inicio
-            <input type="date" [(ngModel)]="formulario.fecha_inicio">
-          </label>
+              <div class="form-group">
+                <label>Fecha inicio</label>
+                <input type="date" [(ngModel)]="formulario.fecha_inicio">
+              </div>
 
-          <label>
-            Fecha fin estimada
-            <input type="date" [(ngModel)]="formulario.fecha_fin_estimada">
-          </label>
+              <div class="form-group">
+                <label>Fecha fin estimada</label>
+                <input type="date" [(ngModel)]="formulario.fecha_fin_estimada">
+              </div>
 
-          <label class="full-width">
-            Descripción
-            <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción del proyecto"></textarea>
-          </label>
+              <div class="form-group full-width">
+                <label>Descripción</label>
+                <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción del proyecto"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
+            <button class="btn-primary" [disabled]="guardando" (click)="guardarProyecto()">
+              {{ guardando ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
         </div>
-
-        <div class="form-actions">
-          <button class="btn-guardar" [disabled]="guardando" (click)="guardarProyecto()">
-            {{ guardando ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
-        </div>
-      </section>
+      </div>
     }
 
     <div class="tabla-container">

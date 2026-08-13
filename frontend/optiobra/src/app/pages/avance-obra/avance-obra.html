@@ -19,6 +19,10 @@
         </div>
       </div>
 
+      @if (error) {
+        <div class="alert-error">{{ error }}</div>
+      }
+
       <div class="cards">
         <div class="card" *ngFor="let stat of estadisticas">
           <div class="icon" [ngClass]="stat.color">
@@ -66,24 +70,30 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let a of avancesFiltrados">
-                      <td>{{ a.fecha }}</td>
-                      <td>{{ a.proyecto_nombre }}</td>
-                      <td>{{ a.actividad }}</td>
-                      <td>{{ a.porcentaje }}%</td>
-                      <td>{{ a.responsable }}</td>
-                      <td class="actions-cell">
-                          <button class="icon-btn edit" (click)="editarAvance(a)" aria-label="Editar">
-                            <i class="bi bi-pencil"></i>
-                          </button>
-                          <button class="icon-btn delete" (click)="eliminarAvance(a.id)" aria-label="Eliminar">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </td>
-                    </tr>
-                    <tr *ngIf="avancesFiltrados.length === 0">
-                      <td colspan="6" class="empty-row">No hay avances para este proyecto.</td>
-                    </tr>
+                    @if (cargando) {
+                      <tr>
+                        <td colspan="6" class="empty-row">Cargando avances...</td>
+                      </tr>
+                    } @else {
+                      <tr *ngFor="let a of avancesFiltrados">
+                        <td>{{ a.fecha }}</td>
+                        <td>{{ a.proyecto_nombre }}</td>
+                        <td>{{ a.actividad }}</td>
+                        <td>{{ a.porcentaje }}%</td>
+                        <td>{{ a.responsable }}</td>
+                        <td class="actions-cell">
+                            <button class="icon-btn edit" (click)="editarAvance(a)" aria-label="Editar">
+                              <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="icon-btn delete" (click)="eliminarAvance(a.id)" aria-label="Eliminar">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </td>
+                      </tr>
+                      <tr *ngIf="avancesFiltrados.length === 0">
+                        <td colspan="6" class="empty-row">No hay avances para este proyecto.</td>
+                      </tr>
+                    }
                   </tbody>
                 </table>
               </div>
@@ -95,38 +105,40 @@
     </div>
   </main>
 
-  <div class="modal-overlay" *ngIf="mostrarModal">
-    <div class="modal">
+  <div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ modoEdicion ? 'Editar avance' : 'Nuevo avance' }}</h3>
-        <button class="close" (click)="cerrarModal()">×</button>
+        <button class="cerrar" (click)="cerrarModal()">
+          <i class="bi bi-x"></i>
+        </button>
       </div>
-      <form (ngSubmit)="guardarAvance()" class="modal-form">
+      <form (ngSubmit)="guardarAvance()" class="modal-body">
         <div class="form-grid">
-          <label>
-            Fecha
+          <div class="form-group">
+            <label>Fecha</label>
             <input type="date" [(ngModel)]="nuevoAvance.fecha" name="fecha" required />
-          </label>
-          <label>
-            Proyecto
+          </div>
+          <div class="form-group">
+            <label>Proyecto</label>
             <select [(ngModel)]="nuevoAvance.proyecto" name="proyecto" required>
               <option *ngFor="let proyecto of proyectos" [ngValue]="proyecto.id">{{ proyecto.nombre }}</option>
             </select>
-          </label>
-          <label>
-            Actividad
+          </div>
+          <div class="form-group">
+            <label>Actividad</label>
             <input type="text" [(ngModel)]="nuevoAvance.actividad" name="actividad" placeholder="Describe la actividad" required />
-          </label>
-          <label>
-            Avance (%)
+          </div>
+          <div class="form-group">
+            <label>Avance (%)</label>
             <input type="number" [(ngModel)]="nuevoAvance.porcentaje" name="porcentaje" min="0" max="100" required />
-          </label>
-          <label>
-            Responsable
+          </div>
+          <div class="form-group full-width">
+            <label>Responsable</label>
             <input type="text" [(ngModel)]="nuevoAvance.responsable" name="responsable" placeholder="Nombre" required />
-          </label>
+          </div>
         </div>
-        <div class="modal-actions">
+        <div class="modal-footer">
           <button type="button" class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn-primary">{{ modoEdicion ? 'Actualizar' : 'Guardar' }}</button>
         </div>
@@ -134,13 +146,19 @@
     </div>
   </div>
 
-  <div class="modal-overlay" *ngIf="mostrarEliminar">
-    <div class="confirm-box">
+  <div class="modal-backdrop" *ngIf="mostrarEliminar" (click)="cancelarEliminar()">
+    <div class="modal-confirmacion" (click)="$event.stopPropagation()">
+      <div class="icono-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
       <h3>Confirmar eliminación</h3>
-      <p>¿Deseas eliminar este avance?</p>
-      <div class="confirm-actions">
+      <p>
+        ¿Deseas eliminar este avance?
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="modal-footer">
         <button class="btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
-        <button class="btn-primary" (click)="confirmarEliminar()">Eliminar</button>
+        <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>
       </div>
     </div>
   </div>
