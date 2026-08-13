@@ -32,6 +32,7 @@ export class SidebarComponent {
     { ruta: '/reportes', icono: 'bi bi-bar-chart-line', label: 'Reportes' },
     { ruta: '/usuarios', icono: 'bi bi-people', label: 'Usuarios' },
     { ruta: '/configuracion', icono: 'bi bi-gear', label: 'Configuración' },
+    { ruta: '/perfil', icono: 'bi bi-person-circle', label: 'Mi perfil' },
   ];
 
   onToggle(): void {

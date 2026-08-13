@@ -35,6 +35,7 @@ export interface UsuarioPayload {
   departamento?: string;
   cargo?: string;
   direccion?: string;
+  avatar_url?: string;
 }
 
 export interface UsuarioPaginado {

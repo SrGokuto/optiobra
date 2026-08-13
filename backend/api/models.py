@@ -175,7 +175,7 @@ class PerfilUsuario(models.Model):
     telefono = models.CharField(max_length=50, blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
-    avatar_url = models.URLField(max_length=500, blank=True, null=True)
+    avatar_url = models.TextField(blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)

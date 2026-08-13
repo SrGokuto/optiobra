@@ -572,24 +572,31 @@ class AuthViewSet(viewsets.ViewSet):
         Obtener información del usuario autenticado
         GET /api/auth/me/
         """
+        usuario_data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'nombre_completo': None,
+            'rol': None,
+            'activo': None,
+            'perfil': None,
+        }
+
         try:
             usuario_supabase = UsuarioSupabase.objects.get(
                 usuario_django=request.user
             )
-            return Response({
-                'id': request.user.id,
-                'username': request.user.username,
-                'email': request.user.email,
-                'nombre_completo': usuario_supabase.nombre_completo,
-                'rol': usuario_supabase.rol,
-                'activo': usuario_supabase.activo,
-            })
+            usuario_data['nombre_completo'] = usuario_supabase.nombre_completo
+            usuario_data['rol'] = usuario_supabase.rol
+            usuario_data['activo'] = usuario_supabase.activo
         except UsuarioSupabase.DoesNotExist:
-            return Response({
-                'id': request.user.id,
-                'username': request.user.username,
-                'email': request.user.email,
-            })
+            pass
+
+        perfil = getattr(request.user, 'perfil', None)
+        if perfil:
+            usuario_data['perfil'] = PerfilUsuarioSerializer(perfil).data
+
+        return Response(usuario_data)
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
@@ -673,6 +680,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         departamento = data.pop('departamento', None)
         cargo = data.pop('cargo', None)
         direccion = data.pop('direccion', None)
+        avatar_url = data.pop('avatar_url', None)
         password = data.pop('password', None)
 
         user = serializer.save()
@@ -696,6 +704,8 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             perfil.cargo = cargo
         if direccion is not None:
             perfil.direccion = direccion
+        if avatar_url is not None:
+            perfil.avatar_url = avatar_url
         perfil.save()
 
     def perform_destroy(self, instance):

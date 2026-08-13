@@ -187,7 +187,13 @@ class SupabaseAuthService:
                 )
             
             logger.info(f"Login exitoso para: {email}")
-            
+
+            perfil_data = None
+            perfil = getattr(django_user, 'perfil', None)
+            if perfil:
+                from .serializers import PerfilUsuarioSerializer
+                perfil_data = PerfilUsuarioSerializer(perfil).data
+
             return {
                 'error': False,
                 'mensaje': 'Login exitoso',
@@ -199,6 +205,7 @@ class SupabaseAuthService:
                     'email': django_user.email,
                     'nombre_completo': usuario_supabase.nombre_completo,
                     'rol': usuario_supabase.rol,
+                    'perfil': perfil_data,
                 }
             }
             

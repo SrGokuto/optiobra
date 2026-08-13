@@ -1,0 +1,108 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button *ngIf="!menuAbierto"
+          class="menu-fijo"
+          (click)="toggleMenu()">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="header">
+      <div>
+        <h2>Mi perfil</h2>
+        <p>Edita tu información personal y foto de perfil</p>
+      </div>
+    </div>
+
+    @if (error) {
+      <div class="alert-error">{{ error }}</div>
+    }
+
+    @if (cargando) {
+      <div class="cargando">Cargando perfil...</div>
+    }
+
+    @if (!cargando) {
+      <div class="perfil-contenido">
+
+        <section class="tarjeta-avatar">
+          <div class="avatar-wrap">
+            @if (avatarUrl) {
+              <img [src]="avatarUrl" alt="avatar">
+            } @else {
+              <img src="assets/avatar-default.png" alt="avatar">
+            }
+            @if (!subiendoAvatar) {
+              <button class="avatar-overlay" (click)="onAvatarClick(avatarInput)">✎</button>
+            } @else {
+              <span class="avatar-spinner"></span>
+            }
+          </div>
+          <input
+            #avatarInput
+            type="file"
+            accept="image/*"
+            hidden
+            (change)="onAvatarSelected($event)"
+          >
+          <h3>{{ nombreCompleto || email }}</h3>
+          <p>{{ email }}</p>
+        </section>
+
+        <section class="formulario">
+          <div class="grid">
+            <div class="campo full">
+              <label>Nombre completo</label>
+              <input type="text" [(ngModel)]="nombreCompleto" placeholder="Tu nombre completo">
+            </div>
+
+            <div class="campo full">
+              <label>Correo electrónico</label>
+              <input type="email" [value]="email" disabled>
+            </div>
+
+            <div class="campo">
+              <label>Teléfono</label>
+              <input type="text" [(ngModel)]="telefono" placeholder="+57 300 000 0000">
+            </div>
+
+            <div class="campo">
+              <label>Cargo</label>
+              <input type="text" [(ngModel)]="cargo" placeholder="Ingeniero, supervisor...">
+            </div>
+
+            <div class="campo">
+              <label>Departamento</label>
+              <input type="text" [(ngModel)]="departamento" placeholder="Área o departamento">
+            </div>
+
+            <div class="campo">
+              <label>Dirección</label>
+              <input type="text" [(ngModel)]="direccion" placeholder="Tu dirección">
+            </div>
+          </div>
+
+          <div class="acciones">
+            <button class="btn-guardar"
+                    (click)="guardar()"
+                    [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </section>
+
+      </div>
+    }
+
+    <div class="toast-container">
+      @for (toast of toasts; track toast.id) {
+        <div class="toast {{ toast.tipo }}">{{ toast.mensaje }}</div>
+      }
+    </div>
+
+  </main>
+
+</div>

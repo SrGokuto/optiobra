@@ -1,3 +1,12 @@
+export interface UsuarioPerfil {
+  id?: number;
+  telefono?: string;
+  departamento?: string;
+  cargo?: string;
+  avatar_url?: string;
+  direccion?: string;
+}
+
 export interface UsuarioAuth {
   id: number;
   username: string;
@@ -6,6 +15,7 @@ export interface UsuarioAuth {
   rol?: string;
   activo?: boolean;
   avatar_url?: string;
+  perfil?: UsuarioPerfil;
 }
 
 export interface LoginResponse {

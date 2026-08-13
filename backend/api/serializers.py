@@ -308,13 +308,14 @@ class UsuarioCreateUpdateSerializer(serializers.ModelSerializer):
     departamento = serializers.CharField(write_only=True, required=False, allow_blank=True)
     cargo = serializers.CharField(write_only=True, required=False, allow_blank=True)
     direccion = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    avatar_url = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'password', 'nombre_completo', 'rol', 'telefono',
-            'departamento', 'cargo', 'direccion'
+            'departamento', 'cargo', 'direccion', 'avatar_url'
         ]
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},

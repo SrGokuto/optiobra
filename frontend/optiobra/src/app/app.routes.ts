@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
+import { Landing } from './pages/landing/landing';
 import { Login } from './pages/login/login';
+import { Perfil } from './pages/perfil/perfil';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
@@ -14,8 +16,8 @@ import { authGuard, guestGuard } from '../guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'trabajadores',
-    pathMatch: 'full',
+    component: Landing,
+    title: 'OptiObra',
   },
   {
     path: 'register',
@@ -88,7 +90,13 @@ export const routes: Routes = [
     title: 'Configuración',
   },
   {
+    path: 'perfil',
+    component: Perfil,
+    canActivate: [authGuard],
+    title: 'Mi perfil',
+  },
+  {
     path: '**',
-    redirectTo: 'trabajadores',
+    redirectTo: '',
   },
 ];
