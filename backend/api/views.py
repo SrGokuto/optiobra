@@ -2,10 +2,12 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.db.models import Q, Avg, Sum, Count, F
 import logging
+import secrets
 
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
@@ -680,10 +682,23 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             user.set_unusable_password()
         user.save()
 
+        supabase_password = password if password else secrets.token_urlsafe(12)
+        supabase_result = auth_service.create_supabase_user(
+            email=user.email,
+            password=supabase_password,
+            nombre_completo=nombre_completo
+        )
+
+        if supabase_result.get('error'):
+            user.delete()
+            raise ValidationError(supabase_result.get('mensaje', 'Error al crear usuario en Supabase'))
+
+        supabase_uid = supabase_result['supabase_uid']
+
         # Crear relación de Supabase
         UsuarioSupabase.objects.create(
             usuario_django=user,
-            supabase_uid=f"local-{user.id}",
+            supabase_uid=supabase_uid,
             email=user.email,
             nombre_completo=nombre_completo or user.username,
             rol=rol,

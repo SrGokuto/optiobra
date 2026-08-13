@@ -116,6 +116,61 @@ class SupabaseAuthService:
                 'mensaje': f'Error al registrar usuario: {str(e)}'
             }
 
+    def create_supabase_user(self, email, password, nombre_completo=None):
+        """
+        Crear usuario en Supabase Auth y retornar el supabase_uid
+        
+        Args:
+            email: Email del usuario
+            password: Contraseña
+            nombre_completo: Nombre completo opcional
+            
+        Returns:
+            dict: supabase_uid o error
+        """
+        try:
+            headers = {
+                'apikey': self.supabase_key,
+                'Authorization': f'Bearer {self.supabase_key}',
+                'Content-Type': 'application/json'
+            }
+
+            payload = {
+                'email': email,
+                'password': password,
+            }
+            
+            if nombre_completo:
+                payload['user_metadata'] = {'nombre_completo': nombre_completo}
+            
+            response = requests.post(
+                f'{self.supabase_url}/auth/v1/signup',
+                json=payload,
+                headers=headers
+            )
+            
+            if response.status_code not in [200, 201]:
+                logger.error(f"Supabase signup error: {response.text}")
+                return {
+                    'error': True,
+                    'mensaje': response.json().get('message', 'Error al registrar usuario en Supabase')
+                }
+            
+            user_data = response.json()
+            supabase_uid = user_data.get('user', {}).get('id')
+            
+            return {
+                'error': False,
+                'supabase_uid': supabase_uid,
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creando usuario en Supabase: {str(e)}")
+            return {
+                'error': True,
+                'mensaje': f'Error al registrar usuario en Supabase: {str(e)}'
+            }
+
     def login_user(self, email, password):
         """
         Autenticar usuario con Supabase
