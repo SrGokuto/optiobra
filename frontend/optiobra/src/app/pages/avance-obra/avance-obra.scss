@@ -439,6 +439,21 @@ tbody tr:hover {
   .panel { overflow-x: auto; height: auto; min-height: 0; }
   .table-wrapper { overflow-x: auto; overflow-y: visible; }
   table { min-width: 450px; }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .header-actions select {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 @media (min-width: 769px) {

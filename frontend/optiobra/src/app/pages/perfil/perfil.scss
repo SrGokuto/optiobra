@@ -31,13 +31,13 @@
 
 .contenido {
   flex: 1;
+  min-width: 0;
   padding: 30px;
-  margin-left: 260px;
   transition: margin-left .3s;
 }
 
 .contenido.menu-cerrado {
-  margin-left: 60px;
+  padding-top: 70px;
 }
 
 .header {

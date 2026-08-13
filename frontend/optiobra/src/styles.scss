@@ -75,15 +75,18 @@ app-root {
 .form-grid input,
 .form-grid select,
 .form-grid textarea {
+    width: 100%;
     padding: 10px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 .form-grid textarea {
     min-height: 80px;
     resize: vertical;
+    font-family: inherit;
 }
 
 .form-grid input:focus,

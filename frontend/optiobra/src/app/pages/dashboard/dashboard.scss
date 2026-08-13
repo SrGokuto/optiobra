@@ -475,20 +475,8 @@ tr:hover {
   }
 
   .contenido{
-    height:calc(100vh - 10px);
-    overflow-y:auto;
-    overflow-x:hidden;
- }
-
-.dashboard {
-  overflow-x: hidden;
-}
-
-body {
-  overflow-x: hidden;
-}
-
-* {
-  max-width: 100%;
-}
+    height: calc(100vh - 10px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 }
