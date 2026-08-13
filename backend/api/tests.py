@@ -463,6 +463,24 @@ class ConfiguracionAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['nombre_empresa'], 'OptiObra Constructora S.A.S.')
 
+    def test_put_empresa_parcial_no_sobrescribe_campos_no_enviados(self):
+        """PUT parcial solo actualiza los campos enviados"""
+        data = {'nombre_empresa': 'Nueva Constructora S.A.S.'}
+        response = self.client.put('/api/configuracion/empresa/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nombre_empresa'], 'Nueva Constructora S.A.S.')
+        self.assertEqual(response.data['nit_runc'], '900.000.000-1')
+        self.assertEqual(response.data['moneda_principal'], 'COP')
+
+    def test_put_empresa_con_campos_vacios_no_sobrescribe(self):
+        """Campos vacíos o nulos no actualizan los valores existentes"""
+        self.client.put('/api/configuracion/empresa/', {'nombre_empresa': 'Empresa Original'}, format='json')
+        data = {'nombre_empresa': '', 'nit_runc': None}
+        response = self.client.put('/api/configuracion/empresa/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nombre_empresa'], 'Empresa Original')
+        self.assertEqual(response.data['nit_runc'], '900.000.000-1')
+
     def test_actualizar_configuracion_sistema(self):
         """Probar PUT /api/configuracion/sistema/"""
         data = {

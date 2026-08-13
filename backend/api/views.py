@@ -757,14 +757,20 @@ class ConfiguracionViewSet(viewsets.ViewSet):
             'sistema': ConfiguracionSistemaSerializer(sistema).data,
         })
 
+    @staticmethod
+    def _filtrar_vacios(data):
+        """Elimina campos vacíos o nulos para no sobrescribir valores existentes."""
+        return {k: v for k, v in data.items() if v not in (None, '')}
+
     @action(detail=False, methods=['get', 'put', 'patch'])
     def empresa(self, request):
         empresa = self._get_empresa()
         if request.method == 'GET':
             serializer = ConfiguracionEmpresaSerializer(empresa)
             return Response(serializer.data)
-        
-        serializer = ConfiguracionEmpresaSerializer(empresa, data=request.data, partial=(request.method == 'PATCH'))
+
+        data = self._filtrar_vacios(request.data)
+        serializer = ConfiguracionEmpresaSerializer(empresa, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -777,7 +783,8 @@ class ConfiguracionViewSet(viewsets.ViewSet):
             serializer = ConfiguracionSistemaSerializer(sistema)
             return Response(serializer.data)
 
-        serializer = ConfiguracionSistemaSerializer(sistema, data=request.data, partial=(request.method == 'PATCH'))
+        data = self._filtrar_vacios(request.data)
+        serializer = ConfiguracionSistemaSerializer(sistema, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
