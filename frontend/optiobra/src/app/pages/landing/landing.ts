@@ -9,4 +9,22 @@ import { RouterLink } from '@angular/router';
   templateUrl: './landing.html',
   styleUrls: ['./landing.scss'],
 })
-export class Landing {}
+export class Landing {
+  steps = [
+    {
+      number: '01',
+      title: 'Registra tu proyecto',
+      description: 'Crea tu cuenta y configura los datos básicos de tu obra en minutos.'
+    },
+    {
+      number: '02',
+      title: 'Organiza tu equipo',
+      description: 'Agrega trabajadores, asigna roles y establece permisos de acceso.'
+    },
+    {
+      number: '03',
+      title: 'Gestiona todo',
+      description: 'Controla tareas, materiales, avances y reportes desde una sola plataforma.'
+    }
+  ];
+}

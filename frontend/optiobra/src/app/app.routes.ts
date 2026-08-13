@@ -7,6 +7,7 @@ import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
 import { AvanceObraComponent } from './pages/avance-obra/avance-obra';
 import { Trabajadores } from './pages/trabajadores/trabajadores';
+import { Tareas } from './pages/tareas/tareas';
 import { RegisterComponent } from './components/register/register';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { Configuracion } from './pages/configuracion/configuracion';
@@ -69,6 +70,13 @@ export const routes: Routes = [
     // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
     // canActivate: [authGuard],
     title: 'Trabajadores',
+  },
+  {
+    path: 'tareas',
+    component: Tareas,
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
+    title: 'Tareas',
   },
   {
     path: 'reportes',

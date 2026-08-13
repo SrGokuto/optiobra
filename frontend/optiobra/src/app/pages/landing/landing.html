@@ -1,53 +1,257 @@
-<div class="landing">
-  <section class="hero">
-    <div class="overlay"></div>
+<div class="landing-page">
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <img src="assets/Logo.png" alt="OptiObra" class="brand-logo">
+        <span class="brand-name"><span class="brand-white">Opti</span><span class="brand-accent">Obra</span></span>
+      </div>
+      <nav class="nav-links">
+        <a href="#funcionalidades" class="nav-link">Funcionalidades</a>
+        <a href="#como-funciona" class="nav-link">Cómo funciona</a>
+      </nav>
+      <a routerLink="/login" class="nav-cta">
+        <span>Iniciar sesión</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </header>
 
-    <div class="hero-content">
-      <img src="assets/Logo.png" alt="Logo" class="icono-logo">
+  <main>
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="hero-overlay"></div>
+        <div class="hero-grid"></div>
+      </div>
+      <div class="hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Plataforma de gestión integral
+          </div>
+          <h1 class="hero-title">
+            Gestiona tu obra de forma
+            <span class="highlight">eficiente</span>,
+            <span class="highlight">organizada</span> y
+            <span class="highlight">sencilla</span>.
+          </h1>
+          <p class="hero-description">
+            La plataforma profesional para la gestión de construcción que simplifica 
+            la administración de proyectos, trabajadores, tareas y materiales en un solo lugar.
+          </p>
+          <div class="hero-actions">
+            <a routerLink="/login" class="btn-primary">
+              Comenzar ahora
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a href="#funcionalidades" class="btn-secondary">
+              Conocer más
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="visual-card card-1">
+            <div class="card-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/></svg>
+            </div>
+            <div class="card-text">
+              <span class="card-label">Proyecto activo</span>
+              <span class="card-value">Edificio Residencial</span>
+            </div>
+          </div>
+          <div class="visual-card card-2">
+            <div class="card-icon success">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="card-text">
+              <span class="card-label">Avance de obra</span>
+              <span class="card-value">78% completado</span>
+            </div>
+            <div class="card-progress">
+              <div class="progress-bar" style="width: 78%"></div>
+            </div>
+          </div>
+          <div class="visual-card card-3">
+            <div class="card-icon warning">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="card-text">
+              <span class="card-label">Equipo</span>
+              <span class="card-value">24 trabajadores</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <h1 class="nombre-logo">
-        <span class="blanco">Opti</span><span class="amarillo">Obra</span>
-      </h1>
+    <section id="funcionalidades" class="features">
+      <div class="features-container">
+        <div class="section-header">
+          <span class="section-tag">Funcionalidades</span>
+          <h2 class="section-title">Todo lo que necesitas para gestionar tu obra</h2>
+          <p class="section-subtitle">Herramientas potentes y intuitivas diseñadas para optimizar cada aspecto de tu proyecto de construcción.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Panel de control</h3>
+            <p class="feature-description">Visualiza el estado completo de tus obras en un solo dashboard con métricas en tiempo real.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 20h20"/>
+                <path d="M5 20V8l7-5 7 5v12"/>
+                <path d="M9 20v-6h6v6"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Gestión de obras</h3>
+            <p class="feature-description">Administra proyectos, define etapas, establece plazos y monitorea el avance de cada construcción.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="22" y1="11" x2="16" y2="11"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Equipo de trabajo</h3>
+            <p class="feature-description">Administra trabajadores, asigna roles, controla asistencia y gestiona permisos de acceso.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="2"/>
+                <path d="M9 14l2 2 4-4"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Control de tareas</h3>
+            <p class="feature-description">Crea, asigna y da seguimiento a actividades. Establece prioridades y fechas límite.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Inventario de materiales</h3>
+            <p class="feature-description">Controla existencias, registra entradas y salidas, y recibe alertas de stock mínimo.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <div class="feature-icon-bg"></div>
+              <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
+            </div>
+            <h3 class="feature-title">Reportes y avances</h3>
+            <p class="feature-description">Genera informes detallados de avance, costos y rendimiento con gráficas interactivas.</p>
+            <div class="feature-link">
+              <span>Ver más</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-      <p class="slogan">Datos que construyen</p>
+    <section id="como-funciona" class="how-it-works">
+      <div class="how-container">
+        <div class="section-header">
+          <span class="section-tag">Cómo funciona</span>
+          <h2 class="section-title">Simple, rápido y efectivo</h2>
+          <p class="section-subtitle">Comienza a gestionar tu obra en tan solo 3 pasos sencillos.</p>
+        </div>
+        <div class="steps-grid">
+          @for (step of steps; track step.number) {
+            <div class="step-card">
+              <span class="step-number">{{ step.number }}</span>
+              <h3 class="step-title">{{ step.title }}</h3>
+              <p class="step-description">{{ step.description }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
 
-      <div class="linea"></div>
+    <section class="cta">
+      <div class="cta-container">
+        <div class="cta-content">
+          <h2 class="cta-title">¿Listo para optimizar tu obra?</h2>
+          <p class="cta-description">Únete a cientos de empresas que ya confían en OptiObra para gestionar sus proyectos de construcción.</p>
+          <a routerLink="/login" class="btn-cta">
+            Empezar gratis
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      <p class="descripcion">
-        Gestiona tus proyectos de construcción: materiales, trabajadores,
-        avances y reportes, todo en un solo lugar.
-      </p>
-
-      <div class="acciones">
-        <a routerLink="/login" class="btn btn-primario">Iniciar sesión</a>
-        <a routerLink="/register" class="btn btn-secundario">Crear cuenta</a>
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <img src="assets/Logo.png" alt="OptiObra" class="footer-logo-img">
+          <span class="footer-logo-text"><span class="brand-white">Opti</span><span class="brand-accent">Obra</span></span>
+        </div>
+        <p class="footer-tagline">Datos que construyen</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>Producto</h4>
+          <a href="#funcionalidades">Funcionalidades</a>
+          <a href="#como-funciona">Cómo funciona</a>
+          <a routerLink="/login">Iniciar sesión</a>
+        </div>
+        <div class="footer-column">
+          <h4>Empresa</h4>
+          <a href="#">Sobre nosotros</a>
+          <a href="#">Contacto</a>
+          <a href="#">Soporte</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 OptiObra. Todos los derechos reservados.</p>
       </div>
     </div>
-  </section>
-
-  <section class="caracteristicas">
-    <h2>¿Qué puedes hacer con OptiObra?</h2>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Proyectos</h3>
-        <p>Administra tus obras y su avance en tiempo real.</p>
-      </div>
-
-      <div class="card">
-        <h3>Materiales</h3>
-        <p>Controla el inventario y el valor de tus materiales.</p>
-      </div>
-
-      <div class="card">
-        <h3>Trabajadores</h3>
-        <p>Registra personal, roles y estado de actividad.</p>
-      </div>
-
-      <div class="card">
-        <h3>Reportes</h3>
-        <p>Obtén información clara para tomar mejores decisiones.</p>
-      </div>
-    </div>
-  </section>
+  </footer>
 </div>
