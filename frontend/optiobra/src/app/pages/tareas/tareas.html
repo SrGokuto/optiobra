@@ -1,0 +1,255 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="page">
+
+      <!-- Encabezado -->
+      <div class="header">
+        <div class="header-info">
+          <h2>Tareas</h2>
+          <p>Tareas asignadas a los trabajadores</p>
+        </div>
+      </div>
+
+      <!-- Tarjetas resumen -->
+      <div class="cards">
+        <div class="card stat-card">
+          <div class="icon blue">
+            <span class="material-symbols-outlined">list_alt</span>
+          </div>
+          <div class="info">
+            <span>Total tareas</span>
+            <h3>{{ totalTareas }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon orange">
+            <span class="material-symbols-outlined">schedule</span>
+          </div>
+          <div class="info">
+            <span>Pendientes</span>
+            <h3>{{ tareasPendientes }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon amber">
+            <span class="material-symbols-outlined">autorenew</span>
+          </div>
+          <div class="info">
+            <span>En progreso</span>
+            <h3>{{ tareasEnProgreso }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon emerald">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="info">
+            <span>Completadas</span>
+            <h3>{{ tareasCompletadas }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de filtros -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="material-symbols-outlined">🔍</span>
+          <input
+            type="text"
+            placeholder="Buscar tareas..."
+            [(ngModel)]="textoBusqueda"
+            (input)="filtrarPorBusqueda()">
+        </div>
+        <select [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador(trabajadorSeleccionado)">
+          <option value="">Todos los trabajadores</option>
+          <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+        </select>
+        <select [(ngModel)]="estadoSeleccionado" (change)="seleccionarEstado(estadoSeleccionado)">
+          <option value="">Todos los estados</option>
+          <option *ngFor="let e of estados" [value]="e">{{ e | titlecase }}</option>
+        </select>
+      </div>
+
+      <!-- Tarjeta tabla -->
+      <div class="card">
+
+        <!-- Loading -->
+        <div *ngIf="cargando" class="sin-registros">
+          Cargando tareas...
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error && !cargando" class="sin-registros error-text">
+          {{ error }}
+        </div>
+
+        <!-- Tabla -->
+        <div *ngIf="!cargando && !error" class="table-wrapper">
+          <table>
+
+            <thead>
+              <tr>
+                <th>Tarea</th>
+                <th>Proyecto</th>
+                <th>Trabajador</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Fecha limite</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr *ngFor="let tarea of tareasPaginadas">
+
+                <td>
+                  <div class="tarea-info">
+                    <strong>{{ tarea.titulo }}</strong>
+                    <small *ngIf="tarea.descripcion">{{ tarea.descripcion }}</small>
+                  </div>
+                </td>
+
+                <td>{{ tarea.proyecto_nombre }}</td>
+
+                <td>
+                  <div class="trabajador">
+                    <div class="datos">
+                      <strong>{{ tarea.trabajador_nombre }}</strong>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="badge-estado" [ngClass]="claseEstado(tarea.estado)">
+                    {{ tarea.estado | titlecase }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="badge-prioridad" [ngClass]="clasePrioridad(tarea.prioridad)">
+                    {{ tarea.prioridad | titlecase }}
+                  </span>
+                </td>
+
+                <td>{{ fechaFormateada(tarea.fecha_limite) }}</td>
+
+                <td>
+                  <div class="acciones">
+                    <button
+                      class="btn-icon ver"
+                      (click)="verDetalle(tarea)"
+                      title="Ver detalle">
+                      <span class="material-symbols-outlined">visibility</span>
+                    </button>
+                  </div>
+                </td>
+
+              </tr>
+
+              <tr *ngIf="tareasFiltradas.length === 0 && !cargando">
+                <td colspan="7" class="sin-registros">
+                  No hay tareas registradas.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+        </div>
+
+        <!-- Footer paginacion -->
+        <div class="table-footer" *ngIf="!cargando && !error && tareasFiltradas.length > 0">
+
+          <div class="footer-info">
+            Mostrando
+            <strong>{{ (paginaActual - 1) * porPagina + 1 }} a {{ (paginaActual * porPagina) > tareasFiltradas.length ? tareasFiltradas.length : (paginaActual * porPagina) }}</strong>
+            de
+            <strong>{{ tareasFiltradas.length }}</strong>
+            tareas
+          </div>
+
+          <div class="pagination">
+            <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
+              <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+            <button
+              *ngFor="let p of paginasVisible"
+              [class.active]="p === paginaActual"
+              [class.ellipsis]="p === '...'"
+              (click)="onPageClick(p)">
+              {{ p }}
+            </button>
+            <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
+              <span class="material-symbols-outlined">chevron_right</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- MODAL DETALLE TAREA -->
+<div class="modal-backdrop" *ngIf="mostrarModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Detalle de tarea</h3>
+      <button class="cerrar" (click)="cerrarModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="tareaSeleccionada">
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <label>Titulo</label>
+          <span>{{ tareaSeleccionada.titulo }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Descripcion</label>
+          <span>{{ tareaSeleccionada.descripcion || 'Sin descripcion' }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Proyecto</label>
+          <span>{{ tareaSeleccionada.proyecto_nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Trabajador</label>
+          <span>{{ tareaSeleccionada.trabajador_nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Estado</label>
+          <span class="badge-estado" [ngClass]="claseEstado(tareaSeleccionada.estado)">
+            {{ tareaSeleccionada.estado | titlecase }}
+          </span>
+        </div>
+        <div class="detalle-item">
+          <label>Prioridad</label>
+          <span class="badge-prioridad" [ngClass]="clasePrioridad(tareaSeleccionada.prioridad)">
+            {{ tareaSeleccionada.prioridad | titlecase }}
+          </span>
+        </div>
+        <div class="detalle-item">
+          <label>Fecha limite</label>
+          <span>{{ fechaFormateada(tareaSeleccionada.fecha_limite) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

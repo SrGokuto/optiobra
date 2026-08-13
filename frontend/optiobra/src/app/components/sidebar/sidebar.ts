@@ -23,6 +23,7 @@ export class SidebarComponent {
     { ruta: '/materiales', icono: '📦', label: 'Materiales' },
     { ruta: '/avance-obra', icono: '📈', label: 'Avance de obra' },
     { ruta: '/trabajadores', icono: '👷', label: 'Trabajadores' },
+    { ruta: '/tareas', icono: '📋', label: 'Tareas' },
   ];
 
   onToggle(): void {

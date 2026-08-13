@@ -29,11 +29,11 @@ services:
       - LLAMA_CPP_URL=http://llama-server:8080
       - MODEL_NAME=Qwen3-0.6B
       - CACHE_TTL=600
-      - REQUEST_TIMEOUT=30
+      - REQUEST_TIMEOUT=180
       - LOG_LEVEL=INFO
       - USE_MOCK=false
     ports:
-      - "8000:8000"
+      - "8001:8000"
     depends_on:
       llama-server:
         condition: service_healthy

@@ -9,13 +9,15 @@ import { RegisterComponent } from './components/register/register';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { Configuracion } from './pages/configuracion/configuracion';
 import { ReportesComponent } from './pages/reportes/reportes';
+import { Tareas } from './pages/tareas/tareas';
+import { Landing } from './pages/landing/landing';
 import { authGuard, guestGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'trabajadores',
-    pathMatch: 'full',
+    component: Landing,
+    title: 'OptiObra - Gestión de Obras',
   },
   {
     path: 'register',
@@ -76,6 +78,13 @@ export const routes: Routes = [
     title: 'Reportes',
   },
   {
+    path: 'tareas',
+    component: Tareas,
+    // TEMPORAL: authGuard deshabilitado para desarrollar la interfaz sin backend.
+    // canActivate: [authGuard],
+    title: 'Tareas',
+  },
+  {
     path: 'usuarios',
     component: Usuarios,
     canActivate: [authGuard],
@@ -89,6 +98,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'trabajadores',
+    redirectTo: '',
   },
 ];
