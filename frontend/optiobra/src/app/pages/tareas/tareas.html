@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    ☰
+    <span class="material-symbols-outlined">menu</span>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -69,7 +69,7 @@
       <!-- Barra de filtros -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">🔍</span>
+          <span class="material-symbols-outlined">search</span>
           <input
             type="text"
             placeholder="Buscar tareas..."

@@ -36,7 +36,7 @@
               <img src="assets/avatar-default.png" alt="avatar">
             }
             @if (!subiendoAvatar) {
-              <button class="avatar-overlay" (click)="onAvatarClick(avatarInput)">✎</button>
+              <button class="avatar-overlay" (click)="onAvatarClick(avatarInput)"><span class="material-symbols-outlined">edit</span></button>
             } @else {
               <span class="avatar-spinner"></span>
             }

@@ -6,7 +6,7 @@
     *ngIf="!menuAbierto"
     class="menu-fijo"
     (click)="toggleMenu()">
-    ☰
+    <span class="material-symbols-outlined">menu</span>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">

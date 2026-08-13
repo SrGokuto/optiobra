@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    ☰
+    <span class="material-symbols-outlined">menu</span>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -17,7 +17,7 @@
           <p>Gestiona el personal de tu empresa</p>
         </div>
         <button class="btn-primary" (click)="nuevoTrabajador()">
-          <span class="material-symbols-outlined"></span>
+          <span class="material-symbols-outlined">person_add</span>
           Nuevo trabajador
         </button>
       </div>
@@ -25,7 +25,7 @@
       <!-- Barra de filtros -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">🔍</span>
+          <span class="material-symbols-outlined">search</span>
           <input
             type="text"
             placeholder="Buscar trabajadores..."
@@ -91,13 +91,13 @@
                       class="btn-icon editar"
                       (click)="editarTrabajador(trabajador)"
                       title="Editar">
-                      <span class="material-symbols-outlined">✏️</span>
+                      <span class="material-symbols-outlined">edit</span>
                     </button>
                     <button
                       class="btn-icon eliminar"
                       (click)="eliminarTrabajador(trabajador.id)"
                       title="Eliminar">
-                      <span class="material-symbols-outlined">⛔</span>
+                      <span class="material-symbols-outlined">block</span>
                     </button>
                   </div>
                 </td>
@@ -128,7 +128,7 @@
 
           <div class="pagination">
             <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
-              <span class="material-symbols-outlined"></span>
+              <span class="material-symbols-outlined">chevron_left</span>
             </button>
             <button
               *ngFor="let p of paginasVisible"
@@ -138,7 +138,7 @@
               {{ p }}
             </button>
             <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
-              <span class="material-symbols-outlined"></span>
+              <span class="material-symbols-outlined">chevron_right</span>
             </button>
           </div>
 
