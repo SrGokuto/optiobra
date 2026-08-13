@@ -125,7 +125,7 @@ RESET
   flex: 1;
   min-width: 0;
 
-  .material-symbols-outlined {
+  .bi {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -752,18 +752,12 @@ tbody {
   line-height: 1;
 }
 
-/* Material Symbols font for icons */
+/* Bootstrap Icons base size */
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
+.bi {
   font-size: 16px;
   line-height: 1;
   display: inline-block;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .btn-icon {
@@ -824,7 +818,7 @@ tbody {
   border-color: #e6eef7;
 }
 
-.pagination button.disabled .material-symbols-outlined {
+.pagination button.disabled .bi {
   color: #94a3b8;
 }
 

@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    <span class="material-symbols-outlined">menu</span>
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -16,7 +16,7 @@
           <p>Tareas de los trabajadores por fecha</p>
         </div>
         <button class="btn-nueva" (click)="abrirNuevaTarea()">
-          <span class="material-symbols-outlined">add</span>
+          <i class="bi bi-plus"></i>
           Nueva tarea
         </button>
       </div>
@@ -31,7 +31,7 @@
       <div class="cards">
         <div class="card stat-card">
           <div class="icon blue">
-            <span class="material-symbols-outlined">list_alt</span>
+            <i class="bi bi-card-list"></i>
           </div>
           <div class="info">
             <span>Tareas del periodo</span>
@@ -40,7 +40,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon orange">
-            <span class="material-symbols-outlined">schedule</span>
+            <i class="bi bi-clock"></i>
           </div>
           <div class="info">
             <span>Pendientes</span>
@@ -49,7 +49,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon amber">
-            <span class="material-symbols-outlined">autorenew</span>
+            <i class="bi bi-arrow-repeat"></i>
           </div>
           <div class="info">
             <span>En progreso</span>
@@ -58,7 +58,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon emerald">
-            <span class="material-symbols-outlined">check_circle</span>
+            <i class="bi bi-check-circle"></i>
           </div>
           <div class="info">
             <span>Completadas</span>
@@ -83,11 +83,11 @@
 
         <div class="nav-periodo">
           <button class="nav-btn" (click)="cambiarPeriodo(-1)" title="Anterior">
-            <span class="material-symbols-outlined">chevron_left</span>
+            <i class="bi bi-chevron-left"></i>
           </button>
           <button class="nav-btn hoy" (click)="irHoy()">Hoy</button>
           <button class="nav-btn" (click)="cambiarPeriodo(1)" title="Siguiente">
-            <span class="material-symbols-outlined">chevron_right</span>
+            <i class="bi bi-chevron-right"></i>
           </button>
         </div>
 
@@ -161,7 +161,7 @@
                       <p class="sin-tareas">No hay tareas para este día. Haz clic para crear una.</p>
                     }
                     <button class="btn-agregar-dia" (click)="abrirNuevaTarea(dia.fecha)">
-                      <span class="material-symbols-outlined">add</span>
+                      <i class="bi bi-plus"></i>
                       Agregar tarea
                     </button>
                   </div>
@@ -215,7 +215,7 @@
             (dragleave)="onDragLeave()"
             (drop)="onDropSinFecha($event)">
             <h4>
-              <span class="material-symbols-outlined">event_busy</span>
+              <i class="bi bi-calendar-x"></i>
               Sin fecha asignada ({{ tareasSinFecha.length }})
             </h4>
             <p class="pista">Suelta una tarea aquí para quitarle la fecha límite</p>
@@ -252,7 +252,7 @@
     <div class="modal-header">
       <h3>Nueva tarea</h3>
       <button class="cerrar" (click)="cerrarNuevaTarea()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body">
@@ -321,7 +321,7 @@
     <div class="modal-header">
       <h3>Detalle de tarea</h3>
       <button class="cerrar" (click)="cerrarModal()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body" *ngIf="tareaSeleccionada">

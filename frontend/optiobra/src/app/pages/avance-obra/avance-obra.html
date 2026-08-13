@@ -2,7 +2,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
 
-  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()"><span class="material-symbols-outlined">menu</span></button>
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()"><i class="bi bi-list"></i></button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
     <div class="page">
@@ -22,7 +22,7 @@
       <div class="cards">
         <div class="card" *ngFor="let stat of estadisticas">
           <div class="icon" [ngClass]="stat.color">
-            <span class="material-symbols-outlined">{{ stat.icon }}</span>
+            <i class="bi {{ stat.icon }}"></i>
           </div>
           <div class="info">
             <span>{{ stat.titulo }}</span>
@@ -74,10 +74,10 @@
                       <td>{{ a.responsable }}</td>
                       <td class="actions-cell">
                           <button class="icon-btn edit" (click)="editarAvance(a)" aria-label="Editar">
-                            <span class="material-symbols-outlined">edit</span>
+                            <i class="bi bi-pencil"></i>
                           </button>
                           <button class="icon-btn delete" (click)="eliminarAvance(a.id)" aria-label="Eliminar">
-                            <span class="material-symbols-outlined">delete</span>
+                            <i class="bi bi-trash"></i>
                           </button>
                         </td>
                     </tr>

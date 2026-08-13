@@ -142,9 +142,7 @@
   color: white;
 }
 
-.icon span {
-  font-family: 'Material Symbols Outlined';
-  font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 48;
+.icon .bi {
   font-size: 32px;
   line-height: 1;
 }
@@ -316,20 +314,14 @@ tbody tr:hover {
   background: transparent;
 }
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
+.bi {
   font-size: 18px;
   line-height: 1;
   display: inline-block;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
 }
 
-.icon-btn.edit .material-symbols-outlined { color: #f59e0b; }
-.icon-btn.delete .material-symbols-outlined { color: #ef4444; }
+.icon-btn.edit .bi { color: #f59e0b; }
+.icon-btn.delete .bi { color: #ef4444; }
 
 .modal-overlay {
   position: fixed;
@@ -641,11 +633,15 @@ tbody tr:last-child td:last-child {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.icon-btn.edit .material-symbols-outlined {
+.icon-btn .bi {
+  font-size: 16px;
+}
+
+.icon-btn.edit .bi {
   color: #f59e0b;
 }
 
-.icon-btn.delete .material-symbols-outlined {
+.icon-btn.delete .bi {
   color: #ef4444;
 }
 

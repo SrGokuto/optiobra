@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    <span class="material-symbols-outlined">menu</span>
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -17,7 +17,7 @@
           <p>Tareas asignadas a los trabajadores</p>
         </div>
         <button class="btn-nueva" (click)="abrirNuevaTarea()">
-          <span class="material-symbols-outlined">add</span>
+          <i class="bi bi-plus"></i>
           Nueva tarea
         </button>
       </div>
@@ -30,7 +30,7 @@
       <div class="cards">
         <div class="card stat-card">
           <div class="icon blue">
-            <span class="material-symbols-outlined">list_alt</span>
+            <i class="bi bi-card-list"></i>
           </div>
           <div class="info">
             <span>Total tareas</span>
@@ -39,7 +39,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon orange">
-            <span class="material-symbols-outlined">schedule</span>
+            <i class="bi bi-clock"></i>
           </div>
           <div class="info">
             <span>Pendientes</span>
@@ -48,7 +48,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon amber">
-            <span class="material-symbols-outlined">autorenew</span>
+            <i class="bi bi-arrow-repeat"></i>
           </div>
           <div class="info">
             <span>En progreso</span>
@@ -57,7 +57,7 @@
         </div>
         <div class="card stat-card">
           <div class="icon emerald">
-            <span class="material-symbols-outlined">check_circle</span>
+            <i class="bi bi-check-circle"></i>
           </div>
           <div class="info">
             <span>Completadas</span>
@@ -69,7 +69,7 @@
       <!-- Barra de filtros -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">search</span>
+          <i class="bi bi-search"></i>
           <input
             type="text"
             placeholder="Buscar tareas..."
@@ -160,7 +160,7 @@
                       class="btn-icon ver"
                       (click)="verDetalle(tarea)"
                       title="Ver detalle">
-                      <span class="material-symbols-outlined">visibility</span>
+                      <i class="bi bi-eye"></i>
                     </button>
                   </div>
                 </td>
@@ -191,7 +191,7 @@
 
           <div class="pagination">
             <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
-              <span class="material-symbols-outlined">chevron_left</span>
+              <i class="bi bi-chevron-left"></i>
             </button>
             <button
               *ngFor="let p of paginasVisible"
@@ -201,7 +201,7 @@
               {{ p }}
             </button>
             <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
-              <span class="material-symbols-outlined">chevron_right</span>
+              <i class="bi bi-chevron-right"></i>
             </button>
           </div>
 
@@ -221,7 +221,7 @@
     <div class="modal-header">
       <h3>Nueva tarea</h3>
       <button class="cerrar" (click)="cerrarNuevaTarea()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body">
@@ -291,7 +291,7 @@
     <div class="modal-header">
       <h3>Detalle de tarea</h3>
       <button class="cerrar" (click)="cerrarModal()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body" *ngIf="tareaSeleccionada">

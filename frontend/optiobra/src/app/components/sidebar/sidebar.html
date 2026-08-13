@@ -3,7 +3,7 @@
   <div class="logo">
     <img src="assets/Logo.png" alt="logo">
     <span>OPTIOBRA</span>
-    <button class="menu-btn" (click)="onToggle()"><span class="material-symbols-outlined">menu</span></button>
+    <button class="menu-btn" (click)="onToggle()"><i class="bi bi-list"></i></button>
   </div>
 
   <ul>
@@ -29,7 +29,7 @@
           <img src="assets/avatar-default.png" alt="usuario">
         }
         @if (!subiendoAvatar) {
-          <span class="avatar-overlay"><span class="material-symbols-outlined">edit</span></span>
+          <span class="avatar-overlay"><i class="bi bi-pencil"></i></span>
         } @else {
           <span class="avatar-spinner"></span>
         }

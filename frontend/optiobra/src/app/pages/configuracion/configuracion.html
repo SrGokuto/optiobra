@@ -5,7 +5,7 @@
   <button *ngIf="!menuAbierto"
           class="menu-fijo"
           (click)="toggleMenu()">
-    <span class="material-symbols-outlined">menu</span>
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">

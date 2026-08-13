@@ -5,7 +5,7 @@
   <button *ngIf="!menuAbierto"
           class="menu-fijo"
           (click)="toggleMenu()">
-    <span class="material-symbols-outlined">menu</span>
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -36,7 +36,7 @@
               <img src="assets/avatar-default.png" alt="avatar">
             }
             @if (!subiendoAvatar) {
-              <button class="avatar-overlay" (click)="onAvatarClick(avatarInput)"><span class="material-symbols-outlined">edit</span></button>
+              <button class="avatar-overlay" (click)="onAvatarClick(avatarInput)"><i class="bi bi-pencil"></i></button>
             } @else {
               <span class="avatar-spinner"></span>
             }

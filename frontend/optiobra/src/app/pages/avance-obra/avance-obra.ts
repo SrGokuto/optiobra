@@ -114,10 +114,10 @@ export class AvanceObraComponent implements OnInit {
 
   get estadisticas() {
     return [
-      { icon: 'folder', titulo: 'Proyectos en progreso', valor: this.proyectos.length, detalle: 'proyectos', color: 'amber' },
-      { icon: 'trending_up', titulo: 'Avance promedio', valor: `${this.avancePromedio}%`, detalle: '+5% este mes', success: true, color: 'emerald' },
-      { icon: 'check_circle', titulo: 'Tareas completadas', valor: this.tareasCompletas, detalle: 'tareas', color: 'blue' },
-      { icon: 'schedule', titulo: 'Tareas pendientes', valor: this.tareasPendientes, detalle: 'tareas', warning: true, color: 'orange' },
+      { icon: 'bi-folder2-open', titulo: 'Proyectos en progreso', valor: this.proyectos.length, detalle: 'proyectos', color: 'amber' },
+      { icon: 'bi-graph-up-arrow', titulo: 'Avance promedio', valor: `${this.avancePromedio}%`, detalle: '+5% este mes', success: true, color: 'emerald' },
+      { icon: 'bi-check-circle', titulo: 'Tareas completadas', valor: this.tareasCompletas, detalle: 'tareas', color: 'blue' },
+      { icon: 'bi-clock', titulo: 'Tareas pendientes', valor: this.tareasPendientes, detalle: 'tareas', warning: true, color: 'orange' },
     ];
   }
 

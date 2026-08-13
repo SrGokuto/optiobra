@@ -6,7 +6,7 @@
     *ngIf="!menuAbierto"
     class="menu-fijo"
     (click)="toggleMenu()">
-    <span class="material-symbols-outlined">menu</span>
+    <i class="bi bi-list"></i>
   </button>
 
   <main
@@ -76,11 +76,11 @@
         <div class="panel">
           <h3>Resumen rápido</h3>
           <ul class="actividad">
-            <li><span class="material-symbols-outlined">folder</span> {{ estadisticas.total_proyectos }} proyectos registrados</li>
-            <li><span class="material-symbols-outlined">construction</span> {{ estadisticas.proyectos_en_progreso }} en progreso</li>
-            <li><span class="material-symbols-outlined">inventory_2</span> {{ estadisticas.total_materiales }} materiales en inventario</li>
-            <li><span class="material-symbols-outlined">engineering</span> {{ estadisticas.total_trabajadores }} trabajadores activos</li>
-            <li><span class="material-symbols-outlined">trending_up</span> {{ estadisticas.avance_promedio }}% avance promedio</li>
+            <li><i class="bi bi-folder2-open"></i> {{ estadisticas.total_proyectos }} proyectos registrados</li>
+            <li><i class="bi bi-tools"></i> {{ estadisticas.proyectos_en_progreso }} en progreso</li>
+            <li><i class="bi bi-box-seam"></i> {{ estadisticas.total_materiales }} materiales en inventario</li>
+            <li><i class="bi bi-person-workspace"></i> {{ estadisticas.total_trabajadores }} trabajadores activos</li>
+            <li><i class="bi bi-graph-up-arrow"></i> {{ estadisticas.avance_promedio }}% avance promedio</li>
           </ul>
         </div>
       </div>
