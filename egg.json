@@ -1,0 +1,150 @@
+{
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "name": "OptiObra Full Stack",
+    "author": "OptiObra Team",
+    "description": "Sistema de gestion de construccion con Backend Django y Frontend Angular",
+    "features": [],
+    "docker_images": {
+        "srgokuto/optiobra-full:latest": "srgokuto/optiobra-full:latest"
+    },
+    "file_denylist": [],
+    "startup": "bash /app/start_ptero.sh",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"Uvicorn running on http://0.0.0.0:8001\", \"backend\": \"Starting gunicorn\", \"nginx\": \"start worker processes\"}",
+        "logs": "{\r\n\"custom\": false,\r\n\"location\": \"logs/latest.log\"\r\n}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\\r\\n# OptiObra Installation Script\\r\\n\\r\\n# Create directories\\r\\nmkdir -p \/home\/container\/models\\r\\nmkdir -p \/home\/container\/backend\/media\\r\\nmkdir -p \/home\/container\/logs\\r\\n\\r\\n# Install system dependencies\\r\\napt-get update\\r\\napt-get install -y --no-install-recommends curl ca-certificates gnupg\\r\\n\\r\\n# Download LLM model if MODEL_URL is provided\\r\\nif [ -n \"${MODEL_URL:-}\" ]; then\\r\\n  MODEL_FILE=\"\/home\/container\/models\/llama-3.2-1b-instruct-q4_k_m.gguf\"\\r\\n  if [ ! -f \"$MODEL_FILE\" ]; then\\r\\n    echo \"Downloading LLM model...\"\\r\\n    curl -L --fail --progress-bar -o \"$MODEL_FILE\" \"$MODEL_URL\"\\r\\n    chmod 644 \"$MODEL_FILE\"\\r\\n  else\\r\\n    echo \"Model already exists, skipping download.\"\\r\\n  fi\\r\\nfi\\r\\n\\r\\n# Set permissions\\r\\nchown -R 1000:1000 \/home\/container\/models\\r\\nchown -R 1000:1000 \/home\/container\/backend\/media\\r\\nchown -R 1000:1000 \/home\/container\/logs\\r\\n\\r\\necho \"Installation completed.\"\\r\\n",
+            "container": "ubuntu:24.04",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Database Host",
+            "description": "Host del servidor MariaDB (usa localhost o 127.0.0.1 si es externo).",
+            "env_variable": "DB_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Name",
+            "description": "Nombre de la base de datos MariaDB.",
+            "env_variable": "DB_NAME",
+            "default_value": "optiobra",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database User",
+            "description": "Usuario de la base de datos MariaDB.",
+            "env_variable": "DB_USER",
+            "default_value": "optiobra_user",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Password",
+            "description": "Contrasena de la base de datos MariaDB.",
+            "env_variable": "DB_PASSWORD",
+            "default_value": "123456",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Port",
+            "description": "Puerto del servidor MariaDB.",
+            "env_variable": "DB_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Django Secret Key",
+            "description": "Clave secreta de Django. Cambiala en produccion.",
+            "env_variable": "SECRET_KEY",
+            "default_value": "django-insecure-change-me-in-production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Mode",
+            "description": "Modo debug de Django. Desactivalo en produccion.",
+            "env_variable": "DEBUG",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed Hosts",
+            "description": "Hosts permitidos separados por comas.",
+            "env_variable": "ALLOWED_HOSTS",
+            "default_value": "*",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "CORS Origins",
+            "description": "Origenes permitidos para CORS separados por comas.",
+            "env_variable": "CORS_ALLOWED_ORIGINS",
+            "default_value": "*",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase URL",
+            "description": "URL de tu proyecto Supabase.",
+            "env_variable": "SUPABASE_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase Key",
+            "description": "Clave anonima de Supabase.",
+            "env_variable": "SUPABASE_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase JWT Secret",
+            "description": "Secreto JWT de Supabase.",
+            "env_variable": "SUPABASE_JWT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        }
+    ]
+}
