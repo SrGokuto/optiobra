@@ -30,6 +30,7 @@ export class SidebarComponent {
     { ruta: '/avance-obra', icono: 'bi bi-graph-up-arrow', label: 'Avance de obra' },
     { ruta: '/trabajadores', icono: 'bi bi-person-workspace', label: 'Trabajadores' },
     { ruta: '/tareas', icono: 'bi bi-check2-square', label: 'Tareas' },
+    { ruta: '/calendario', icono: 'bi bi-calendar3', label: 'Calendario' },
     { ruta: '/reportes', icono: 'bi bi-bar-chart-line', label: 'Reportes' },
     { ruta: '/usuarios', icono: 'bi bi-people', label: 'Usuarios' },
     { ruta: '/configuracion', icono: 'bi bi-gear', label: 'Configuración' },

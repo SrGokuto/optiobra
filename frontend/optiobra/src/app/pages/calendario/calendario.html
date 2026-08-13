@@ -1,0 +1,370 @@
+<div class="dashboard">
+
+  <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
+
+  <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <main class="contenido" [class.menu-cerrado]="!menuAbierto">
+
+    <div class="page">
+
+      <div class="header">
+        <div class="header-info">
+          <h2>Calendario</h2>
+          <p>Tareas de los trabajadores por fecha</p>
+        </div>
+        <button class="btn-nueva" (click)="abrirNuevaTarea()">
+          <span class="material-symbols-outlined">add</span>
+          Nueva tarea
+        </button>
+      </div>
+
+      @if (mensaje) {
+        <div class="alert-exito">{{ mensaje }}</div>
+      }
+      @if (error) {
+        <div class="alert-error">{{ error }}</div>
+      }
+
+      <div class="cards">
+        <div class="card stat-card">
+          <div class="icon blue">
+            <span class="material-symbols-outlined">list_alt</span>
+          </div>
+          <div class="info">
+            <span>Tareas del periodo</span>
+            <h3>{{ tareasEnPeriodo.length }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon orange">
+            <span class="material-symbols-outlined">schedule</span>
+          </div>
+          <div class="info">
+            <span>Pendientes</span>
+            <h3>{{ tareasPendientes }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon amber">
+            <span class="material-symbols-outlined">autorenew</span>
+          </div>
+          <div class="info">
+            <span>En progreso</span>
+            <h3>{{ tareasEnProgreso }}</h3>
+          </div>
+        </div>
+        <div class="card stat-card">
+          <div class="icon emerald">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="info">
+            <span>Completadas</span>
+            <h3>{{ tareasCompletadas }}</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+
+        <div class="vista-switcher">
+          <button
+            [class.activo]="vista === 'mes'"
+            (click)="cambiarVista('mes')">Mes</button>
+          <button
+            [class.activo]="vista === 'semana'"
+            (click)="cambiarVista('semana')">Semana</button>
+          <button
+            [class.activo]="vista === 'dia'"
+            (click)="cambiarVista('dia')">Día</button>
+        </div>
+
+        <div class="nav-periodo">
+          <button class="nav-btn" (click)="cambiarPeriodo(-1)" title="Anterior">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button class="nav-btn hoy" (click)="irHoy()">Hoy</button>
+          <button class="nav-btn" (click)="cambiarPeriodo(1)" title="Siguiente">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+
+        <h3 class="titulo-periodo">{{ tituloPeriodo }}</h3>
+
+        <div class="filtros">
+          <select [(ngModel)]="trabajadorSeleccionado" (change)="seleccionarTrabajador()">
+            <option value="">Todos los trabajadores</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+          </select>
+          <select [(ngModel)]="proyectoSeleccionado" (change)="seleccionarProyecto()">
+            <option value="">Todos los proyectos</option>
+            <option *ngFor="let p of proyectos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+          <select [(ngModel)]="estadoSeleccionado" (change)="seleccionarEstado()">
+            <option value="">Todos los estados</option>
+            <option *ngFor="let e of estados" [value]="e">{{ e | titlecase }}</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="leyenda">
+        <span><i class="dot urgente"></i> Urgente</span>
+        <span><i class="dot alta"></i> Alta</span>
+        <span><i class="dot media"></i> Media</span>
+        <span><i class="dot baja"></i> Baja</span>
+        <span><i class="dot pendiente"></i> Pendiente</span>
+        <span><i class="dot en-progreso"></i> En progreso</span>
+        <span><i class="dot completada"></i> Completada</span>
+        <span class="pista">Arrastra una tarea a otro día para cambiar su fecha</span>
+      </div>
+
+      <div class="card calendario-card">
+
+        <div *ngIf="cargando" class="sin-registros">
+          Cargando tareas...
+        </div>
+
+        <div *ngIf="error && !cargando" class="sin-registros error-text">
+          {{ error }}
+        </div>
+
+        <div *ngIf="!cargando && !error">
+
+          <div class="calendario" [class.vista-dia]="vista === 'dia'">
+
+            <div class="cabecera-fila" *ngIf="vista !== 'dia'">
+              <div class="celda-cabecera" *ngFor="let d of diasSemana">{{ d }}</div>
+            </div>
+
+            <ng-container *ngIf="vista === 'dia'">
+              <div *ngFor="let dia of diasVista" class="fila-dia">
+                <div class="dia-vista">
+                  <div class="dia-numero">
+                    <span class="dia-nombre">{{ fechaFormateada(dia.fecha.toISOString()) }}</span>
+                  </div>
+                  <div class="tareas-dia">
+                    @for (tarea of dia.tareas; track tarea.id) {
+                      <div
+                        class="chip-tarea"
+                        [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
+                        draggable="true"
+                        (dragstart)="onDragStart($event, tarea)"
+                        (dragend)="onDragEnd()"
+                        (click)="verDetalle(tarea)">
+                        <strong>{{ tarea.titulo }}</strong>
+                        <span>{{ tarea.trabajador_nombre }} · {{ tarea.proyecto_nombre }}</span>
+                      </div>
+                    } @empty {
+                      <p class="sin-tareas">No hay tareas para este día. Haz clic para crear una.</p>
+                    }
+                    <button class="btn-agregar-dia" (click)="abrirNuevaTarea(dia.fecha)">
+                      <span class="material-symbols-outlined">add</span>
+                      Agregar tarea
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="vista !== 'dia'">
+              <div class="fila-semana" *ngFor="let fila of semanas">
+                <div
+                  *ngFor="let dia of fila"
+                  class="celda-dia"
+                  [class.otro-mes]="!dia.enPeriodo"
+                  [class.hoy]="dia.esHoy"
+                  [class.objetivo]="esObjetivo(dia.fecha)"
+                  (dragover)="onDragOver($event, dia.fecha)"
+                  (dragleave)="onDragLeave()"
+                  (drop)="onDrop($event, dia.fecha)"
+                  (click)="abrirNuevaTarea(dia.fecha)">
+
+                  <div class="dia-numero">{{ dia.numero }}</div>
+
+                  <div class="tareas-dia" (click)="$event.stopPropagation()">
+                    @for (tarea of chipsDe(dia); track tarea.id) {
+                      <div
+                        class="chip-tarea"
+                        [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
+                        draggable="true"
+                        (dragstart)="onDragStart($event, tarea)"
+                        (dragend)="onDragEnd()"
+                        (click)="verDetalle(tarea)">
+                        <strong>{{ tarea.titulo }}</strong>
+                        <span>{{ tarea.trabajador_nombre }}</span>
+                      </div>
+                    }
+                    @if (extrasDe(dia) > 0) {
+                      <div class="chip-mas">+{{ extrasDe(dia) }} más</div>
+                    }
+                  </div>
+
+                </div>
+              </div>
+            </ng-container>
+
+          </div>
+
+          <div
+            class="sin-fecha"
+            [class.objetivo]="fechaObjetivo === 'sin-fecha'"
+            (dragover)="onDragOverSinFecha($event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDropSinFecha($event)">
+            <h4>
+              <span class="material-symbols-outlined">event_busy</span>
+              Sin fecha asignada ({{ tareasSinFecha.length }})
+            </h4>
+            <p class="pista">Suelta una tarea aquí para quitarle la fecha límite</p>
+            <div class="tareas-sin-fecha">
+              @for (tarea of tareasSinFecha; track tarea.id) {
+                <div
+                  class="chip-tarea"
+                  [ngClass]="[clasePrioridad(tarea.prioridad), claseEstado(tarea.estado)]"
+                  draggable="true"
+                  (dragstart)="onDragStart($event, tarea)"
+                  (dragend)="onDragEnd()"
+                  (click)="verDetalle(tarea)">
+                  <strong>{{ tarea.titulo }}</strong>
+                  <span>{{ tarea.trabajador_nombre }} · {{ tarea.proyecto_nombre }}</span>
+                </div>
+              } @empty {
+                <p class="sin-tareas">No hay tareas sin fecha.</p>
+              }
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<div class="modal-backdrop" *ngIf="mostrarNuevaModal">
+  <div class="modal modal-form">
+    <div class="modal-header">
+      <h3>Nueva tarea</h3>
+      <button class="cerrar" (click)="cerrarNuevaTarea()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="campo full">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="nueva.titulo" placeholder="Ej: Instalar cerámica">
+        </div>
+
+        <div class="campo full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="nueva.descripcion" rows="3" placeholder="Detalles de la tarea..."></textarea>
+        </div>
+
+        <div class="campo">
+          <label>Proyecto *</label>
+          <select [(ngModel)]="nueva.proyecto">
+            <option [value]="0">Selecciona un proyecto</option>
+            <option *ngFor="let p of proyectos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Trabajador *</label>
+          <select [(ngModel)]="nueva.trabajador_asignado">
+            <option [value]="0">Selecciona un trabajador</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Prioridad</label>
+          <select [(ngModel)]="nueva.prioridad">
+            <option *ngFor="let p of prioridades" [value]="p">{{ p | titlecase }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Fecha límite</label>
+          <input type="date" [(ngModel)]="nueva.fecha_limite">
+        </div>
+
+        <div class="campo">
+          <label>Estado</label>
+          <select [(ngModel)]="nueva.estado">
+            <option *ngFor="let e of estados" [value]="e">{{ e | titlecase }}</option>
+          </select>
+        </div>
+      </div>
+
+      @if (error) {
+        <p class="error-text form-error">{{ error }}</p>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarNuevaTarea()">Cancelar</button>
+      <button class="btn-primario" (click)="guardarTarea()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar tarea' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="mostrarModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Detalle de tarea</h3>
+      <button class="cerrar" (click)="cerrarModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="tareaSeleccionada">
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <label>Titulo</label>
+          <span>{{ tareaSeleccionada.titulo }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Descripcion</label>
+          <span>{{ tareaSeleccionada.descripcion || 'Sin descripcion' }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Proyecto</label>
+          <span>{{ tareaSeleccionada.proyecto_nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Trabajador</label>
+          <span>{{ tareaSeleccionada.trabajador_nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <label>Estado</label>
+          <select
+            [ngModel]="tareaSeleccionada.estado"
+            (ngModelChange)="cambiarEstado($event)"
+            class="estado-select">
+            <option *ngFor="let e of estados" [value]="e">{{ e | titlecase }}</option>
+          </select>
+        </div>
+        <div class="detalle-item">
+          <label>Prioridad</label>
+          <span class="badge-prioridad" [ngClass]="clasePrioridad(tareaSeleccionada.prioridad)">
+            {{ tareaSeleccionada.prioridad | titlecase }}
+          </span>
+        </div>
+        <div class="detalle-item">
+          <label>Fecha limite</label>
+          <span>{{ fechaFormateada(tareaSeleccionada.fecha_limite) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>

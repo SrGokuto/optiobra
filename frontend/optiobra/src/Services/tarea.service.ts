@@ -21,7 +21,34 @@ export class TareaService {
     return this.http.get<TareaPaginado>(`${this.apiUrl}/`, { params });
   }
 
+  getTodasLasTareas(
+    filtros: { trabajador?: number; estado?: string; proyecto?: number } = {}
+  ): Observable<Tarea[]> {
+    return new Observable((observer) => {
+      const acumuladas: Tarea[] = [];
+      const recorrer = (page: number) => {
+        this.getTareas({ ...filtros, page }).subscribe({
+          next: (response) => {
+            acumuladas.push(...response.results);
+            if (response.next) {
+              recorrer(page + 1);
+            } else {
+              observer.next(acumuladas);
+              observer.complete();
+            }
+          },
+          error: (error) => observer.error(error),
+        });
+      };
+      recorrer(1);
+    });
+  }
+
   crearTarea(tarea: TareaPayload): Observable<Tarea> {
     return this.http.post<Tarea>(`${this.apiUrl}/`, tarea);
+  }
+
+  actualizarTarea(id: number, cambios: Partial<TareaPayload>): Observable<Tarea> {
+    return this.http.patch<Tarea>(`${this.apiUrl}/${id}/`, cambios);
   }
 }
