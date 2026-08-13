@@ -3,6 +3,7 @@ Servicio de autenticación con Supabase
 """
 import jwt
 import requests
+from datetime import datetime, timedelta, timezone
 from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework.exceptions import AuthenticationFailed
@@ -150,10 +151,7 @@ class SupabaseAuthService:
             
             if response.status_code != 200:
                 logger.warning(f"Login fallido para email: {email}")
-                return {
-                    'error': True,
-                    'mensaje': 'Email o contraseña incorrectos'
-                }
+                return self._login_local(email, password)
             
             auth_data = response.json()
             access_token = auth_data.get('access_token')
@@ -216,6 +214,74 @@ class SupabaseAuthService:
                 'mensaje': f'Error al iniciar sesión: {str(e)}'
             }
 
+    def _login_local(self, email, password):
+        """Login para usuarios creados localmente (sin cuenta en Supabase)"""
+        try:
+            usuario_supabase = UsuarioSupabase.objects.select_related(
+                'usuario_django'
+            ).get(email=email)
+        except UsuarioSupabase.DoesNotExist:
+            return {'error': True, 'mensaje': 'Email o contraseña incorrectos'}
+
+        django_user = usuario_supabase.usuario_django
+
+        if not django_user or not django_user.check_password(password):
+            return {'error': True, 'mensaje': 'Email o contraseña incorrectos'}
+
+        if not django_user.is_active or not usuario_supabase.activo:
+            return {'error': True, 'mensaje': 'Usuario desactivado'}
+
+        if not self.jwt_secret:
+            return {'error': True, 'mensaje': 'Email o contraseña incorrectos'}
+
+        access_token = self._generar_token_local(usuario_supabase)
+        refresh_token = self._generar_refresh_token_local(usuario_supabase)
+
+        perfil_data = None
+        perfil = getattr(django_user, 'perfil', None)
+        if perfil:
+            from .serializers import PerfilUsuarioSerializer
+            perfil_data = PerfilUsuarioSerializer(perfil).data
+
+        return {
+            'error': False,
+            'mensaje': 'Login exitoso',
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+            'usuario': {
+                'id': django_user.id,
+                'username': django_user.username,
+                'email': django_user.email,
+                'nombre_completo': usuario_supabase.nombre_completo,
+                'rol': usuario_supabase.rol,
+                'perfil': perfil_data,
+            }
+        }
+
+    def _generar_token_local(self, usuario_supabase):
+        """Generar access_token HS256 para usuarios locales (valido 1 hora)"""
+        exp = datetime.now(timezone.utc) + timedelta(hours=1)
+        payload = {
+            'sub': usuario_supabase.supabase_uid,
+            'aud': 'authenticated',
+            'role': 'authenticated',
+            'exp': exp,
+            'iss': 'optiobra-local',
+        }
+        return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
+
+    def _generar_refresh_token_local(self, usuario_supabase):
+        """Generar refresh_token HS256 para usuarios locales (valido 30 dias)"""
+        exp = datetime.now(timezone.utc) + timedelta(days=30)
+        payload = {
+            'sub': usuario_supabase.supabase_uid,
+            'aud': 'authenticated',
+            'role': 'authenticated',
+            'exp': exp,
+            'iss': 'optiobra-local',
+        }
+        return jwt.encode(payload, self.jwt_secret, algorithm='HS256')
+
     def refresh_token(self, refresh_token):
         """
         Obtener un nuevo access_token usando el refresh_token de Supabase
@@ -227,6 +293,29 @@ class SupabaseAuthService:
             dict: Nuevos access_token y refresh_token
         """
         try:
+            # Refresh de usuarios locales (token firmado con jwt_secret y iss optiobra-local)
+            try:
+                local_payload = jwt.decode(
+                    refresh_token,
+                    self.jwt_secret,
+                    algorithms=['HS256'],
+                    options={"verify_aud": False}
+                )
+                if local_payload.get('iss') == 'optiobra-local':
+                    supabase_uid = local_payload.get('sub')
+                    usuario_supabase = UsuarioSupabase.objects.get(
+                        supabase_uid=supabase_uid
+                    )
+                    return {
+                        'error': False,
+                        'mensaje': 'Sesión renovada exitosamente',
+                        'access_token': self._generar_token_local(usuario_supabase),
+                        'refresh_token': self._generar_refresh_token_local(usuario_supabase),
+                        'supabase_uid': supabase_uid,
+                    }
+            except jwt.PyJWTError:
+                pass
+
             headers = {
                 'apikey': self.supabase_key,
                 'Authorization': f'Bearer {self.supabase_key}',
@@ -309,12 +398,18 @@ class SupabaseAuthService:
                 )
 
                 logger.info("Verificando token con ES256...")
-                return jwt.decode(token, pem, algorithms=['ES256'], options={"verify_aud": False})
-            except jwt.ExpiredSignatureError:
-                raise AuthenticationFailed('Token expirado')
+                try:
+                    return jwt.decode(token, pem, algorithms=['ES256'], options={"verify_aud": False})
+                except jwt.ExpiredSignatureError:
+                    raise AuthenticationFailed('Token expirado')
+                except Exception as e:
+                    logger.info(f"ES256 verification fallida, probando HS256 local: {e}")
+                    if not self.jwt_secret:
+                        raise AuthenticationFailed(f'Token inválido: {e}')
             except Exception as e:
-                logger.error(f"ES256 verification failed: {e}")
-                raise AuthenticationFailed(f'Token inválido: {e}')
+                logger.error(f"ES256 setup failed: {e}")
+                if not self.jwt_secret:
+                    raise AuthenticationFailed(f'Token inválido: {e}')
 
         if self.jwt_secret:
             try:

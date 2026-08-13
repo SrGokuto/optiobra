@@ -993,14 +993,14 @@ class ReporteViewSet(viewsets.ModelViewSet):
     def trabajadores(self, request):
         """GET /api/reportes/trabajadores/ (personal = usuarios con rol obrero)"""
         obreros = User.objects.filter(
-            usuario_django__isnull=False,
+            usuariosupabase__isnull=False,
             usuariosupabase__rol=OBRERO
         )
         total_trabajadores = obreros.count()
         activos = obreros.filter(is_active=True).count()
         inactivos = obreros.filter(is_active=False).count()
         por_rol = User.objects.filter(
-            usuario_django__isnull=False,
+            usuariosupabase__isnull=False,
             usuariosupabase__rol__in=[OBRERO, ARQUITECTO, MAESTRO_OBRA, SUPERVISOR, INGENIERO]
         ).values('usuariosupabase__rol').annotate(total=Count('id'))
 
