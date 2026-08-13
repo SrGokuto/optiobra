@@ -524,6 +524,30 @@ class AuthViewSet(viewsets.ViewSet):
         
         return Response(result, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'])
+    def refresh(self, request):
+        """
+        Renovar sesión
+        POST /api/auth/refresh/
+        Body: {
+            "refresh_token": "token_de_refresco"
+        }
+        """
+        refresh_token = request.data.get('refresh_token', '').strip()
+
+        if not refresh_token:
+            return Response(
+                {'error': 'El campo refresh_token es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        result = auth_service.refresh_token(refresh_token)
+
+        if result['error']:
+            return Response(result, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(result, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated]) # cambiar a IsAuthenticated en produccion
     def logout(self, request):
         """

@@ -12,6 +12,7 @@ export interface LoginResponse {
   error: boolean;
   mensaje: string;
   access_token?: string;
+  refresh_token?: string;
   usuario?: UsuarioAuth;
 }
 

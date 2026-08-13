@@ -157,6 +157,7 @@ class SupabaseAuthService:
             
             auth_data = response.json()
             access_token = auth_data.get('access_token')
+            refresh_token = auth_data.get('refresh_token')
             supabase_uid = auth_data.get('user', {}).get('id')
             
             # Obtener o crear usuario en Django
@@ -191,6 +192,7 @@ class SupabaseAuthService:
                 'error': False,
                 'mensaje': 'Login exitoso',
                 'access_token': access_token,
+                'refresh_token': refresh_token,
                 'usuario': {
                     'id': django_user.id,
                     'username': django_user.username,
@@ -206,6 +208,68 @@ class SupabaseAuthService:
                 'error': True,
                 'mensaje': f'Error al iniciar sesión: {str(e)}'
             }
+
+    def refresh_token(self, refresh_token):
+        """
+        Obtener un nuevo access_token usando el refresh_token de Supabase
+        
+        Args:
+            refresh_token: Token de refresco de Supabase
+            
+        Returns:
+            dict: Nuevos access_token y refresh_token
+        """
+        try:
+            headers = {
+                'apikey': self.supabase_key,
+                'Authorization': f'Bearer {self.supabase_key}',
+                'Content-Type': 'application/json'
+            }
+            payload = {
+                'refresh_token': refresh_token,
+            }
+            
+            response = requests.post(
+                f'{self.supabase_url}/auth/v1/token?grant_type=refresh_token',
+                json=payload,
+                headers=headers
+            )
+            
+            if response.status_code != 200:
+                logger.warning(f"Refresh fallido: {response.status_code}")
+                return {
+                    'error': True,
+                    'mensaje': response.json().get('message', 'No se pudo renovar la sesión')
+                }
+            
+            auth_data = response.json()
+            access_token = auth_data.get('access_token')
+            refresh_token_nuevo = auth_data.get('refresh_token')
+            supabase_uid = auth_data.get('user', {}).get('id')
+            
+            if not access_token:
+                return {
+                    'error': True,
+                    'mensaje': 'No se pudo renovar la sesión'
+                }
+            
+            logger.info(f"Refresh exitoso para UID: {supabase_uid}")
+            
+            return {
+                'error': False,
+                'mensaje': 'Sesión renovada exitosamente',
+                'access_token': access_token,
+                'refresh_token': refresh_token_nuevo,
+                'supabase_uid': supabase_uid,
+            }
+            
+        except Exception as e:
+            logger.error(f"Error en refresh: {str(e)}")
+            return {
+                'error': True,
+                'mensaje': f'Error al renovar la sesión: {str(e)}'
+            }
+
     def verify_token(self, token):
         """
         Verificar token de Supabase (ES256 con clave publica ECC)
