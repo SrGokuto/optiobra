@@ -51,4 +51,17 @@ Thumbs.db
 
 # Python
 *.pyc
+*.pyo
 *__pycache__/*
+**/__pycache__/
+
+# Cachés
+**/.cache/
+**/.angular/cache/
+**/dist/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.hypothesis/
+**/.eslintcache
+**/.stylelintcache
