@@ -61,7 +61,7 @@ export class RegisterComponent implements OnInit {
 
         password: ['', [
           Validators.required,
-          Validators.minLength(6)
+          Validators.minLength(8)
         ]],
 
         confirmPassword: ['', Validators.required],
@@ -148,7 +148,7 @@ export class RegisterComponent implements OnInit {
           return 'La contraseña es obligatoria.';
         }
         if (errors['minlength']) {
-          return 'La contraseña debe tener mínimo 6 caracteres.';
+          return 'La contraseña debe tener mínimo 8 caracteres.';
         }
         break;
 
