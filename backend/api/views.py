@@ -445,6 +445,34 @@ class TareaViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(creado_por=self.request.user)
 
+    @action(detail=True, methods=['post'], permission_classes=[EsObreroOMas])
+    def completar(self, request, pk=None):
+        """
+        Marcar una tarea como completada.
+        POST /api/tareas/{id}/completar/
+        El obrero solo puede completar tareas que le fueron asignadas.
+        """
+        tarea = self.get_object()
+
+        if es_rol(request.user, OBRERO) and tarea.obrero != request.user:
+            return Response(
+                {'error': 'No puedes completar una tarea que no te fue asignada'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if tarea.estado == 'cancelada':
+            return Response(
+                {'error': 'Una tarea cancelada no puede marcarse como completada'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        tarea.estado = 'completada'
+        tarea.save()
+        logger.info(f"Tarea completada: {tarea.titulo} por {request.user.username}")
+
+        serializer = self.get_serializer(tarea)
+        return Response(serializer.data)
+
 
 class AuthViewSet(viewsets.ViewSet):
     """

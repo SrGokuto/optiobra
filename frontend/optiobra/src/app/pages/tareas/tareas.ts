@@ -256,6 +256,8 @@ export class Tareas implements OnInit {
   /* MODAL DETALLE */
 
   tareaSeleccionada: Tarea | null = null;
+  mostrarConfirmarCompletar = false;
+  tareaCompletar: Tarea | null = null;
 
   verDetalle(tarea: Tarea) {
     this.tareaSeleccionada = tarea;
@@ -265,6 +267,37 @@ export class Tareas implements OnInit {
   cerrarModal() {
     this.mostrarModal = false;
     this.tareaSeleccionada = null;
+  }
+
+  marcarCompletada(tarea: Tarea) {
+    this.tareaCompletar = tarea;
+    this.mostrarConfirmarCompletar = true;
+  }
+
+  cancelarCompletar() {
+    this.mostrarConfirmarCompletar = false;
+    this.tareaCompletar = null;
+  }
+
+  confirmarCompletar() {
+    if (!this.tareaCompletar) return;
+
+    const tarea = this.tareaCompletar;
+    this.cancelarCompletar();
+
+    this.tareaService.completarTarea(tarea.id).subscribe({
+      next: () => {
+        this.mensaje = 'Tarea marcada como completada';
+        this.cargarTareas();
+      },
+      error: (err) => {
+        this.error = AuthService.extraerMensajeError(err);
+      },
+    });
+  }
+
+  puedeCompletar(tarea: Tarea): boolean {
+    return tarea.estado !== 'completada' && tarea.estado !== 'cancelada';
   }
 
   /* HELPERS DE ESTADO / PRIORIDAD */

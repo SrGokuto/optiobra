@@ -445,6 +445,16 @@ tbody {
       transform: scale(1.06);
     }
   }
+
+  &.completar {
+    background: #eff6ff;
+    color: #2563eb;
+
+    &:hover {
+      background: #dbeafe;
+      transform: scale(1.06);
+    }
+  }
 }
 
 /* SIN REGISTROS */
@@ -546,6 +556,27 @@ tbody {
 .modal.modal-form {
   width: 620px;
   max-width: 95vw;
+}
+
+.modal.modal-confirmar {
+  width: 440px;
+  max-width: 95vw;
+}
+
+.confirmar-texto {
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+
+  strong {
+    color: #0f172a;
+  }
+}
+
+.btn-primario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 @keyframes slideIn {

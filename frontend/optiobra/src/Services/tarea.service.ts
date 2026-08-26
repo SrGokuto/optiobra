@@ -51,4 +51,8 @@ export class TareaService {
   actualizarTarea(id: number, cambios: Partial<TareaPayload>): Observable<Tarea> {
     return this.http.patch<Tarea>(`${this.apiUrl}/${id}/`, cambios);
   }
+
+  completarTarea(id: number): Observable<Tarea> {
+    return this.http.post<Tarea>(`${this.apiUrl}/${id}/completar/`, {});
+  }
 }

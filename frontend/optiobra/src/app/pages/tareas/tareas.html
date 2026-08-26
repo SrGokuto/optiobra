@@ -157,6 +157,13 @@
                 <td>
                   <div class="acciones">
                     <button
+                      *ngIf="puedeCompletar(tarea)"
+                      class="btn-icon completar"
+                      (click)="marcarCompletada(tarea)"
+                      title="Marcar como completada">
+                      <i class="bi bi-check-circle"></i>
+                    </button>
+                    <button
                       class="btn-icon ver"
                       (click)="verDetalle(tarea)"
                       title="Ver detalle">
@@ -332,6 +339,30 @@
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR COMPLETAR -->
+<div class="modal-backdrop" *ngIf="mostrarConfirmarCompletar" (click)="cancelarCompletar()">
+  <div class="modal modal-confirmar" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Marcar tarea como completada</h3>
+      <button class="cerrar" (click)="cancelarCompletar()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="tareaCompletar">
+      <p class="confirmar-texto">
+        ¿Desea marcar la tarea <strong>{{ tareaCompletar.titulo }}</strong> como completada?
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancelarCompletar()">Cancelar</button>
+      <button class="btn-primario" (click)="confirmarCompletar()">
+        <i class="bi bi-check-circle"></i>
+        Completar tarea
+      </button>
     </div>
   </div>
 </div>
