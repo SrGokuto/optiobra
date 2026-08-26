@@ -668,14 +668,15 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        rol = obtener_rol(self.request.user)
-        if not es_rol(self.request.user, *ROLES_ADMIN):
+        rol_filtro = self.request.query_params.get('rol', '')
+        if not es_rol(self.request.user, *ROLES_ADMIN) and rol_filtro != OBRERO:
+            # Los roles de gestión solo ven/manejan usuarios bajo su cargo,
+            # excepto al listar obreros (requeridos para asignar tareas).
             queryset = queryset.filter(
                 Q(id=self.request.user.id) |
                 Q(usuariosupabase__creado_por=self.request.user)
             )
 
-        rol_filtro = self.request.query_params.get('rol', '')
         if rol_filtro:
             queryset = queryset.filter(usuariosupabase__rol=rol_filtro)
         activo = self.request.query_params.get('activo', '')
