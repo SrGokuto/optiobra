@@ -1,13 +1,32 @@
 #!/bin/bash
 set -e
 
-IMAGE_NAME="srgokuto/optiobra-full"
-VERSION="${1:-latest}"
+TARGET="${1:-full}"
+VERSION="${2:-latest}"
 
-echo "Building OptiObra Docker image..."
-docker build -t ${IMAGE_NAME}:${VERSION} -f Dockerfile .
+build_push() {
+    local name="$1"
+    local file="$2"
+    echo "Building OptiObra ${name} Docker image..."
+    docker build -t "${name}:${VERSION}" -f "$file" .
+    echo "Pushing to Docker Hub..."
+    docker push "${name}:${VERSION}"
+    echo "Done! Image available at ${name}:${VERSION}"
+}
 
-echo "Pushing to Docker Hub..."
-docker push ${IMAGE_NAME}:${VERSION}
-
-echo "Done! Image available at ${IMAGE_NAME}:${VERSION}"
+case "$TARGET" in
+    full)
+        build_push "srgokuto/optiobra-full" "Dockerfile"
+        ;;
+    backend)
+        build_push "srgokuto/optiobra-backend" "docker/Dockerfile.backend"
+        ;;
+    all)
+        build_push "srgokuto/optiobra-full" "Dockerfile"
+        build_push "srgokuto/optiobra-backend" "docker/Dockerfile.backend"
+        ;;
+    *)
+        echo "Usage: $0 {full|backend|all} [version]"
+        exit 1
+        ;;
+esac

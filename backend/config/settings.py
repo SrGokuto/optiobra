@@ -143,6 +143,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# En Pterodactyl el filesystem raíz puede ser read-only: usar rutas del volumen
+# de datos (/home/container) para archivos generados en runtime.
+STATIC_ROOT = '/home/container/static'
+MEDIA_ROOT = '/home/container/media'
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
@@ -166,9 +172,13 @@ REST_FRAMEWORK = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+_cors_origins = [
+    o.strip() for o in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()
+]
+CORS_ALLOW_ALL_ORIGINS = '*' in _cors_origins
+CORS_ALLOWED_ORIGINS = [o for o in _cors_origins if o != '*']
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = not CORS_ALLOW_ALL_ORIGINS
 
 # Supabase Configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL', '')

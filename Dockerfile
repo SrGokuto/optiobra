@@ -10,7 +10,7 @@ COPY frontend/optiobra/ ./
 RUN npm run build
 
 # Stage 2: Build Python dependencies
-FROM python:3.11-slim AS python-builder
+FROM python:3.12-slim-bookworm AS python-builder
 
 WORKDIR /build
 
@@ -19,27 +19,35 @@ COPY backend/requirements.txt ./backend/requirements.txt
 RUN pip install --no-cache-dir --prefix=/install -r backend/requirements.txt
 
 
-# Stage 3: Final image
-FROM python:3.11-slim
+# Stage 3: Final image (Debian + Python + Nginx + MySQL Server + cloudflared)
+FROM python:3.12-slim-bookworm
 
 LABEL maintainer="OptiObra Team"
-LABEL description="OptiObra - Sistema de gestión de construcción"
-LABEL version="1.0.0"
+LABEL description="OptiObra - Sistema de gestión de construcción (Full Stack con MySQL y cloudflared)"
+LABEL version="1.1.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies, nginx, supervisord, and build tools
+# Install system dependencies, nginx, MySQL Server 8.0 (mysql-alpine equivalent)
+# and download cloudflared for Cloudflare Tunnels.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
-    supervisor \
     curl \
+    wget \
     gnupg \
-    build-essential \
-    cmake \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    lsb-release \
+    apt-transport-https \
+    && wget -qO - https://repo.mysql.com/RPM-GPG-KEY-mysql-2025 | gpg --dearmor -o /usr/share/keyrings/mysql-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/mysql-archive-keyring.gpg] http://repo.mysql.com/apt/debian bookworm mysql-8.0" > /etc/apt/sources.list.d/mysql.list \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mysql-server \
+    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/mysql.list \
+    && wget -qO /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+    && chmod +x /usr/local/bin/cloudflared \
+    && rm -rf /var/lib/mysql /var/lib/apt/lists/*
 
 # Copy Python dependencies from builder
 COPY --from=python-builder /install /usr/local
@@ -54,30 +62,32 @@ COPY --from=frontend-builder /build/frontend/dist/optiobra/browser/ /var/www/htm
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy supervisord config
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Remove Debian's default site (conflicts with our default_server)
+RUN rm -f /etc/nginx/sites-enabled/default
+
+# Copy MySQL tuning config
+COPY docker/mysql/optiobra.cnf /etc/mysql/conf.d/optiobra.cnf
 
 # Copy startup script
 COPY docker/start_ptero.sh /app/start_ptero.sh
 RUN chmod +x /app/start_ptero.sh
 
-# Create directories for logs, media, static
-RUN mkdir -p /var/log/supervisor \
-    /var/log/nginx \
-    /var/log/optiobra \
+# Create directories for logs, media, static and the persistent MySQL datadir
+RUN mkdir -p \
     /app/backend/media \
     /app/backend/static \
+    /home/container/models \
+    /home/container/mysql \
     && chmod 755 /var/www/html \
-    && chmod 775 /var/log/nginx \
     && chown -R 1000:1000 /app/backend/media \
     && chown -R 1000:1000 /app/backend/static \
-    && chown -R 1000:1000 /home/container
+    && chmod 777 /home/container/mysql
 
 # Expose ports
-EXPOSE 80 443 8000
+EXPOSE 80 443 8000 3306
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+# Health check (nginx serves /health/)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost/health/ || exit 1
 
 # Start script (compatible with Pterodactyl startup command)

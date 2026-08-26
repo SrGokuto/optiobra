@@ -6,13 +6,16 @@ Dockerización completa del proyecto OptiObra para despliegue en Pterodactyl y d
 
 ```
 docker/
-├── Dockerfile              # Imagen multi-stage para Pterodactyl
+├── Dockerfile              # Imagen full-stack para Pterodactyl (Frontend + Backend + MySQL + nginx + cloudflared)
+├── Dockerfile.backend      # Imagen solo backend (Django + MySQL Server interno)
 ├── Dockerfile.dev          # Imagen para desarrollo frontend
 ├── docker-compose.yml      # Orquestación local
 ├── nginx.conf              # Configuración principal de nginx
 ├── default.conf            # Virtual host de nginx
-├── supervisord.conf        # Orquestador de procesos
-├── start_ptero.sh          # Script de inicio para Pterodactyl
+├── mysql/optiobra.cnf      # Tuning de MySQL Server interno
+├── start_ptero.sh          # Script de inicio full-stack para Pterodactyl (gestiona todos los procesos)
+├── start_backend_ptero.sh  # Script de inicio solo backend para Pterodactyl
+├── build-push.sh           # Script para construir y publicar las imágenes
 └── README.md               # Este archivo
 ```
 
@@ -36,10 +39,62 @@ docker push srgokuto/optiobra-full:latest
 Importa el archivo `egg.json` en tu panel de Pterodactyl.
 
 **Variables importantes:**
-- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: Credenciales de MariaDB
+- `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: Credenciales de MySQL (servidor interno del contenedor, deja `DB_HOST=127.0.0.1`).
+- `DB_ROOT_PASSWORD`: Contraseña del usuario root de MySQL interno.
 - `SECRET_KEY`: Clave secreta de Django
-- `CORS_ALLOWED_ORIGINS`: Orígenes permitidos para CORS
+- `ALLOWED_HOSTS`: Dominios permitidos (default: `optiobra.inferna.dev,api-optiobra.inferna.dev`)
+- `CORS_ALLOWED_ORIGINS`: Orígenes permitidos para CORS (default: `https://optiobra.inferna.dev`)
 - `SUPABASE_URL`, `SUPABASE_KEY`: Configuración de Supabase
+- `CLOUDFLARE_TUNNEL_TOKEN`: Token del túnel de Cloudflare (cloudflared). Déjalo vacío para deshabilitarlo.
+
+### Túnel de Cloudflare (cloudflared)
+
+La imagen incluye `cloudflared`. Para exponer OptiObra sin abrir puertos:
+
+1. Crea un túnel en el panel de Cloudflare Zero Trust (`Access → Tunnels → Create a tunnel`).
+2. Copia el **token** del túnel.
+3. Pega el token en la variable `CLOUDFLARE_TUNNEL_TOKEN` del servidor en Pterodactyl.
+4. En la configuración del túnel (panel de Cloudflare), define el `ingress` con **dos hostnames**, ambos apuntando a `http://localhost:80` (nginx enruta por el header `Host`):
+
+   ```yaml
+   ingress:
+     - hostname: optiobra.inferna.dev
+       service: http://localhost:80
+     - hostname: api-optiobra.inferna.dev
+       service: http://localhost:80
+     - service: http_status:404
+   ```
+
+5. Añade en Cloudflare un registro CNAME `api-optiobra` → `{tunnel-id}.cfargotunnel.com` (igual que el del frontend).
+
+Resultado:
+- `optiobra.inferna.dev` → nginx sirve la SPA Angular y el `/api/` como fallback.
+- `api-optiobra.inferna.dev` → nginx reenvía **todo** al backend Django (uso desde la app móvil).
+- La app móvil debe apuntar a `https://api-optiobra.inferna.dev/api`.
+
+Si el token está vacío, el proceso `cloudflared` no se inicia y la app queda solo en la red interna del nodo.
+
+### Imagen solo backend (`srgokuto/optiobra-backend`)
+
+Variante ligera que **solo contiene el backend Django + MySQL Server interno** (sin frontend, nginx ni cloudflared). Útil si ya sirves el frontend desde otro sitio (por ejemplo, Cloudflare Pages o un egg aparte).
+
+```bash
+# Construir y publicar
+./docker/build-push.sh backend        # o: docker/build-push.sh all
+
+# Construir manualmente
+docker build -t srgokuto/optiobra-backend:latest -f docker/Dockerfile.backend .
+```
+
+- La API escucha en el puerto **8000** directamente (sin nginx en medio).
+- MySQL interno sigue escuchando solo en `127.0.0.1:3306`.
+- Mismas variables de entorno que el egg full-stack: `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `SECRET_KEY`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `SUPABASE_URL`, `SUPABASE_KEY`, etc.
+- Para crear un egg en Pterodactyl, importa `egg.json` y reemplaza el `startup` por `bash /app/start_backend_ptero.sh` y la imagen por `srgokuto/optiobra-backend:latest`.
+
+| Imagen | Contenido | Comando de inicio |
+|--------|-----------|-------------------|
+| `srgokuto/optiobra-full` | Frontend + Backend + MySQL + nginx + cloudflared | `bash /app/start_ptero.sh` |
+| `srgokuto/optiobra-backend` | Backend + MySQL | `bash /app/start_backend_ptero.sh` |
 
 ## 🛠️ Desarrollo Local
 
@@ -103,7 +158,7 @@ docker compose run --rm frontend-builder npm run build
 |------------|--------|------------------------------|
 | Frontend   | 80     | UI Angular (nginx)           |
 | Backend    | 8000   | API REST Django              |
-| MariaDB    | 3306   | Base de datos                |
+| MySQL      | 3306   | Base de datos (interna)      |
 
 ## 🔐 Seguridad
 

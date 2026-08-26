@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "=== OptiObra Docker Startup ==="
+echo "=== OptiObra Backend Docker Startup ==="
 
 # El filesystem raíz del contenedor puede ser de solo lectura en Pterodactyl
 # (Wings con docker.read_only=true), así que TODO lo escribible se ubica en
@@ -14,14 +14,12 @@ export PYTHONPATH=/app/backend
 
 # Ensure writable directories exist
 mkdir -p "$LOG_DIR"
-mkdir -p "$DATA_DIR/models"
 mkdir -p "$DATA_DIR/static"
 mkdir -p "$DATA_DIR/media"
 mkdir -p "$MYSQL_DIR"
-mkdir -p /tmp/nginx_temp
 chown -R mysql:mysql "$MYSQL_DIR" 2>/dev/null || true
 
-# Reinicia un proceso en bucle si muere (nginx, backend, mysql, cloudflared)
+# Reinicia un proceso en bucle si muere (mysql, backend)
 run_loop() {
     local name="$1"
     shift
@@ -62,28 +60,17 @@ python manage.py collectstatic --noinput --clear
 
 # ===================== Backend (gunicorn) =====================
 run_loop backend gunicorn config.wsgi:application \
-    --bind 127.0.0.1:8000 --workers 2 --timeout 120 \
+    --bind 0.0.0.0:8000 --workers 2 --timeout 120 \
     --access-logfile - --error-logfile - &
 
-# ===================== Nginx =====================
-run_loop nginx nginx -g "daemon off;" &
-
-# ===================== Cloudflare Tunnel =====================
-if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
-    echo "[cloudflared] Starting Cloudflare Tunnel..."
-    run_loop cloudflared cloudflared tunnel --no-autoupdate run --token "$CLOUDFLARE_TUNNEL_TOKEN" &
-else
-    echo "[cloudflared] No CLOUDFLARE_TUNNEL_TOKEN provided, skipping tunnel..."
-fi
-
 # ===================== Esperar readiness =====================
-echo "Waiting for OptiObra to be ready..."
-until curl -sf http://localhost/health/ > /dev/null 2>&1 && curl -s http://127.0.0.1:8000/api/ -o /dev/null; do
+echo "Waiting for OptiObra backend to be ready..."
+until curl -sf http://localhost:8000/api/ -o /dev/null; do
     sleep 2
 done
 
 # Marca de arranque para Pterodactyl (config.startup.done del egg)
-echo "OptiObra is up and running on optiobra.inferna.dev and api-optiobra.inferna.dev"
+echo "OptiObra backend is up and running on port 8000"
 
 # Mantener el contenedor vivo
 while true; do
