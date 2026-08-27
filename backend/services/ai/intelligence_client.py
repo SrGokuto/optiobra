@@ -94,3 +94,74 @@ class IntelligenceClient:
                     "error": "CONNECTION_ERROR",
                     "message": "No se pudo conectar con el motor de inteligencia",
                 }
+
+    def send_assistant_message_sync(
+        self, messages: list[dict[str, str]], max_tokens: int = 400
+    ) -> dict[str, Any]:
+        """Send a chat message to the project assistant and get the reply."""
+        with httpx.Client(timeout=self._timeout) as client:
+            try:
+                response = client.post(
+                    f"{self._base_url}/api/v1/assistant/chat",
+                    json={"messages": messages, "max_tokens": max_tokens},
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.TimeoutException:
+                logger.error("Intelligence engine timed out")
+                return {
+                    "success": False,
+                    "error": "LLM_TIMEOUT",
+                    "message": "El motor de inteligencia no responde",
+                }
+            except httpx.HTTPStatusError as e:
+                logger.error("Intelligence engine error: %s", e.response.status_code)
+                return {
+                    "success": False,
+                    "error": "LLM_ERROR",
+                    "message": f"Error del motor de inteligencia: {e.response.status_code}",
+                }
+            except Exception as e:
+                logger.error("Intelligence engine connection failed: %s", str(e))
+                return {
+                    "success": False,
+                    "error": "CONNECTION_ERROR",
+                    "message": "No se pudo conectar con el motor de inteligencia",
+                }
+
+    def estimate_materials_sync(
+        self, descripcion_proyecto: str, materiales: list[dict[str, Any]]
+    ) -> dict[str, Any]:
+        """Estimate material quantities for a project description."""
+        with httpx.Client(timeout=self._timeout) as client:
+            try:
+                response = client.post(
+                    f"{self._base_url}/api/v1/assistant/estimate",
+                    json={
+                        "descripcion_proyecto": descripcion_proyecto,
+                        "materiales": materiales,
+                    },
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.TimeoutException:
+                logger.error("Intelligence engine timed out")
+                return {
+                    "success": False,
+                    "error": "LLM_TIMEOUT",
+                    "message": "El motor de inteligencia no responde",
+                }
+            except httpx.HTTPStatusError as e:
+                logger.error("Intelligence engine error: %s", e.response.status_code)
+                return {
+                    "success": False,
+                    "error": "LLM_ERROR",
+                    "message": f"Error del motor de inteligencia: {e.response.status_code}",
+                }
+            except Exception as e:
+                logger.error("Intelligence engine connection failed: %s", str(e))
+                return {
+                    "success": False,
+                    "error": "CONNECTION_ERROR",
+                    "message": "No se pudo conectar con el motor de inteligencia",
+                }

@@ -11,63 +11,84 @@
     <div class="header">
       <div>
         <h2>Inteligencia IA</h2>
-        <p>Resúmenes ejecutivos de proyectos generados con inteligencia artificial</p>
+        <p>Resúmenes ejecutivos y asistente de proyectos con inteligencia artificial</p>
       </div>
       <span class="badge-ia"><i class="bi bi-robot"></i> Motor de IA</span>
+    </div>
+
+    <div class="modulos">
+      <button
+        class="modulo-btn"
+        [class.activo]="modulo === 'reportes'"
+        (click)="cambiarModulo('reportes')">
+        <i class="bi bi-file-earmark-text"></i> Resúmenes ejecutivos
+      </button>
+      <button
+        class="modulo-btn"
+        [class.activo]="modulo === 'asistente'"
+        (click)="cambiarModulo('asistente')">
+        <i class="bi bi-chat-dots"></i> Asistente de proyectos
+      </button>
     </div>
 
     @if (error) {
       <div class="alert-error">{{ error }}</div>
     }
 
-    <div class="panel-generador">
+    @if (modulo === 'reportes') {
+      <div class="panel-generador">
 
-      <div class="campo">
-        <label>Proyecto</label>
-        <select [(ngModel)]="proyectoId" [disabled]="generando">
-          <option selected disabled [ngValue]="null">Seleccione un proyecto</option>
-          @for (p of proyectos; track p.id) {
-            <option [ngValue]="p.id">{{ p.nombre }} — {{ p.porcentaje_avance || 0 }}% de avance</option>
-          }
-        </select>
-      </div>
-
-      <div class="boton-generar">
-        <button [disabled]="generando || !proyectoId" (click)="generar()">
-          @if (generando) {
-            <span class="loading-spinner"></span> Generando...
-          } @else {
-            <i class="bi bi-magic"></i> Generar resumen ejecutivo
-          }
-        </button>
-      </div>
-
-    </div>
-
-    @if (generando) {
-      <div class="cargando">
-        <div class="spinner-grande"></div>
-        <p>El motor de inteligencia está analizando el proyecto...</p>
-        <small>Puede tardar unos segundos</small>
-      </div>
-    }
-
-    @if (resultado && resultado.success && reporteHtml) {
-      <div class="resumen">
-
-        <div class="resumen-head">
-          <h3><i class="bi bi-file-earmark-text"></i> Resumen Ejecutivo</h3>
-          <div class="meta">
-            @if (resultado.model) {
-              <span class="chip"><i class="bi bi-cpu"></i> {{ resultado.model }}</span>
+        <div class="campo">
+          <label>Proyecto</label>
+          <select [(ngModel)]="proyectoId" [disabled]="generando">
+            <option selected disabled [ngValue]="null">Seleccione un proyecto</option>
+            @for (p of proyectos; track p.id) {
+              <option [ngValue]="p.id">{{ p.nombre }} — {{ p.porcentaje_avance || 0 }}% de avance</option>
             }
-            <span class="chip"><i class="bi bi-clock"></i> {{ formatearDuracion(resultado.duration_ms) }}</span>
-          </div>
+          </select>
         </div>
 
-        <div class="resumen-body" [innerHTML]="reporteHtml"></div>
+        <div class="boton-generar">
+          <button [disabled]="generando || !proyectoId" (click)="generar()">
+            @if (generando) {
+              <span class="loading-spinner"></span> Generando...
+            } @else {
+              <i class="bi bi-magic"></i> Generar resumen ejecutivo
+            }
+          </button>
+        </div>
 
       </div>
+
+      @if (generando) {
+        <div class="cargando">
+          <div class="spinner-grande"></div>
+          <p>El motor de inteligencia está analizando el proyecto...</p>
+          <small>Puede tardar unos segundos</small>
+        </div>
+      }
+
+      @if (resultado && resultado.success && reporteHtml) {
+        <div class="resumen">
+
+          <div class="resumen-head">
+            <h3><i class="bi bi-file-earmark-text"></i> Resumen Ejecutivo</h3>
+            <div class="meta">
+              @if (resultado.model) {
+                <span class="chip"><i class="bi bi-cpu"></i> {{ resultado.model }}</span>
+              }
+              <span class="chip"><i class="bi bi-clock"></i> {{ formatearDuracion(resultado.duration_ms) }}</span>
+            </div>
+          </div>
+
+          <div class="resumen-body" [innerHTML]="reporteHtml"></div>
+
+        </div>
+      }
+    }
+
+    @if (modulo === 'asistente') {
+      <app-asistente-proyectos></app-asistente-proyectos>
     }
 
   </main>

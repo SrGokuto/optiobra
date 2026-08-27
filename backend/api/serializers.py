@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
     Proyecto, PerfilUsuario,
-    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea,
+    ConversacionIA, MensajeIA,
 )
 
 
@@ -393,4 +394,46 @@ class TareaSerializer(serializers.ModelSerializer):
             return obj.obrero.usuariosupabase.nombre_completo or obj.obrero.get_full_name() or obj.obrero.username
         except Exception:
             return obj.obrero.username or ''
+
+
+class MensajeIASerializer(serializers.ModelSerializer):
+    """Serializer para mensajes de conversaciones IA."""
+    class Meta:
+        model = MensajeIA
+        fields = ['id', 'rol', 'contenido', 'creado_en']
+        read_only_fields = ['id', 'creado_en']
+
+
+class ConversacionIASerializer(serializers.ModelSerializer):
+    """Serializer para conversaciones del asistente IA."""
+    usuario_nombre = serializers.CharField(source='usuario.username', read_only=True)
+    total_mensajes = serializers.IntegerField(source='mensajes.count', read_only=True)
+    ultimo_mensaje = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ConversacionIA
+        fields = [
+            'id',
+            'titulo',
+            'tipo',
+            'descripcion_proyecto',
+            'materiales',
+            'total_mensajes',
+            'ultimo_mensaje',
+            'usuario',
+            'usuario_nombre',
+            'creado_en',
+            'actualizado_en',
+        ]
+        read_only_fields = ['usuario', 'usuario_nombre', 'creado_en', 'actualizado_en']
+
+    def get_ultimo_mensaje(self, obj):
+        ultimo = obj.mensajes.order_by('-creado_en').first()
+        if ultimo:
+            return {
+                'rol': ultimo.rol,
+                'contenido': ultimo.contenido[:120],
+                'creado_en': ultimo.creado_en.isoformat(),
+            }
+        return None
 

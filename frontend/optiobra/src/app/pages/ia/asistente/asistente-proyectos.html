@@ -1,0 +1,164 @@
+<div class="asistente">
+
+  @if (error) {
+    <div class="alert-error">{{ error }}</div>
+  }
+
+  <div class="asistente-grid">
+
+    <!-- LISTA DE CONVERSACIONES -->
+    <aside class="conversaciones">
+      <div class="conv-head">
+        <h4><i class="bi bi-chat-dots"></i> Conversaciones</h4>
+        <button class="btn-nueva" (click)="nuevaConversacion()" [disabled]="cargando">
+          <i class="bi bi-plus"></i> Nueva
+        </button>
+      </div>
+
+      @if (cargando && conversaciones.length === 0) {
+        <div class="conv-vacio">
+          <div class="spinner-peque"></div>
+        </div>
+      }
+
+      @if (!cargando && conversaciones.length === 0) {
+        <div class="conv-vacio">
+          <i class="bi bi-chat-square-text"></i>
+          <p>Sin conversaciones todavía.<br>Empieza una nueva.</p>
+        </div>
+      }
+
+      <ul class="conv-lista">
+        @for (conv of conversaciones; track conv.id) {
+          <li
+            class="conv-item"
+            [class.activa]="conversacionActiva?.id === conv.id"
+            (click)="seleccionarConversacion(conv)">
+            <div class="conv-item-main">
+              <span class="conv-titulo">{{ conv.titulo || 'Conversación sin título' }}</span>
+              @if (conv.ultimo_mensaje) {
+                <span class="conv-ultimo">{{ conv.ultimo_mensaje.contenido }}</span>
+              }
+            </div>
+            <button class="conv-eliminar" (click)="$event.stopPropagation(); eliminarConversacion(conv)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </li>
+        }
+      </ul>
+    </aside>
+
+    <!-- CHAT -->
+    <section class="chat">
+      @if (!conversacionActiva) {
+        <div class="chat-vacio">
+          <i class="bi bi-robot"></i>
+          <h3>Asistente de proyectos</h3>
+          <p>
+            Cuéntame qué tipo de proyecto quieres construir y te recomendaré los materiales
+            que necesitas. Luego podrás estimar las cantidades.
+          </p>
+          <button class="btn-primario" (click)="nuevaConversacion()">
+            <i class="bi bi-plus"></i> Nueva conversación
+          </button>
+        </div>
+      }
+
+      @if (conversacionActiva) {
+        <div class="chat-head">
+          <div>
+            <h4>{{ conversacionActiva.titulo || 'Conversación' }}</h4>
+            <small>{{ conversacionActiva.total_mensajes }} mensajes</small>
+          </div>
+          <span class="chip-ia"><i class="bi bi-robot"></i> Asistente IA</span>
+        </div>
+
+        <div class="chat-mensajes">
+          @if (mensajes.length === 0) {
+            <div class="chat-sin-msj">
+              Escribe tu primer mensaje para empezar. Por ejemplo:
+              <em>"Quiero construir una bodega de 300 m²"</em>
+            </div>
+          }
+
+          @for (m of mensajes; track m.id) {
+            <div class="msg" [class.msg-usuario]="m.rol === 'usuario'">
+              <div class="msg-burbuja" [innerHTML]="render(m.contenido)"></div>
+              <small class="msg-fecha">{{ m.creado_en | date: 'short' }}</small>
+            </div>
+          }
+
+          @if (enviando) {
+            <div class="msg msg-asistente">
+              <div class="msg-burbuja escribiendo">
+                <span class="punto"></span><span class="punto"></span><span class="punto"></span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="chat-input">
+          <textarea
+            [(ngModel)]="nuevoMensaje"
+            (keydown.enter)="$event.preventDefault(); enviarMensaje()"
+            rows="2"
+            placeholder="Describe tu proyecto... (Enter para enviar)"></textarea>
+          <button class="btn-enviar" (click)="enviarMensaje()" [disabled]="enviando || !nuevoMensaje.trim()">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- MATERIALES -->
+    <aside class="materiales-panel" *ngIf="conversacionActiva">
+      <div class="mat-head">
+        <h4><i class="bi bi-box-seam"></i> Materiales a estimar</h4>
+      </div>
+
+      <div class="mat-campo">
+        <label>Descripción del proyecto</label>
+        <textarea
+          [(ngModel)]="descripcionProyecto"
+          rows="3"
+          placeholder="Ej: Casa de 2 pisos de 120 m², acabados básicos"></textarea>
+      </div>
+
+      <div class="mat-agregar">
+        <input [(ngModel)]="nuevoMaterial.nombre" placeholder="Material (ej: Cemento)">
+        <input [(ngModel)]="nuevoMaterial.unidad" placeholder="Unidad (ej: bolsas)">
+        <button (click)="agregarMaterial()" [disabled]="!nuevoMaterial.nombre.trim()">
+          <i class="bi bi-plus"></i>
+        </button>
+      </div>
+
+      @if (materiales.length > 0) {
+        <ul class="mat-lista">
+          @for (mat of materiales; track $index) {
+            <li>
+              <span>{{ mat.nombre }}</span>
+              <small>{{ mat.unidad }}</small>
+              <button (click)="quitarMaterial($index)"><i class="bi bi-x"></i></button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="mat-vacio">Agrega los materiales que usarás para estimar cantidades.</p>
+      }
+
+      <div class="mat-acciones">
+        <button class="btn-guardar" (click)="guardarMateriales()" [disabled]="guardandoMateriales">
+          {{ guardandoMateriales ? 'Guardando...' : 'Guardar materiales' }}
+        </button>
+        <button class="btn-estimar" (click)="estimar()" [disabled]="estimando || materiales.length === 0">
+          @if (estimando) {
+            <span class="loading-spinner"></span> Estimando...
+          } @else {
+            <i class="bi bi-calculator"></i> Estimar cantidades
+          }
+        </button>
+      </div>
+    </aside>
+
+  </div>
+</div>

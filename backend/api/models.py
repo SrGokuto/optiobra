@@ -285,3 +285,49 @@ def recalcular_avance_proyecto(proyecto) -> None:
         proyecto.porcentaje_avance = avance
         proyecto.save(update_fields=['avance', 'porcentaje_avance', 'actualizado_en'])
 
+
+class ConversacionIA(models.Model):
+    """Conversación del asistente IA (módulo de proyectos).
+
+    Persiste el hilo de chat para poder retomarlo, junto con la descripción
+    del proyecto que se quiere construir y la lista de materiales a estimar.
+    """
+    TIPO_CHOICES = [
+        ('proyectos', 'Asistente de proyectos'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='conversaciones_ia')
+    titulo = models.CharField(max_length=200, blank=True, default='')
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='proyectos')
+    descripcion_proyecto = models.TextField(blank=True, null=True)
+    materiales = models.JSONField(default=list, blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Conversaciones IA"
+        ordering = ['-actualizado_en']
+
+    def __str__(self):
+        return self.titulo or f"Conversación #{self.id}"
+
+
+class MensajeIA(models.Model):
+    """Mensaje dentro de una conversación del asistente IA."""
+    ROL_CHOICES = [
+        ('usuario', 'Usuario'),
+        ('asistente', 'Asistente'),
+    ]
+
+    conversacion = models.ForeignKey(ConversacionIA, on_delete=models.CASCADE, related_name='mensajes')
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES)
+    contenido = models.TextField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Mensajes IA"
+        ordering = ['creado_en']
+
+    def __str__(self):
+        return f"{self.rol}: {self.contenido[:50]}"
+

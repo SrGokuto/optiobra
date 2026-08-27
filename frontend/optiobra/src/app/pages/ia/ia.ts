@@ -1,23 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { marked } from 'marked';
-import DOMPurify from 'dompurify';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
+import { AsistenteProyectosComponent } from './asistente/asistente-proyectos';
 import { ProyectoService } from '../../../Services/proyecto.service';
 import { IaService } from '../../../Services/ia.service';
 import { Proyecto } from '../../../Models/proyecto';
 import { EstimacionIA } from '../../../Models/estimacion';
+import { renderizarMarkdown } from '../../../utils/markdown';
+
+type ModuloIA = 'reportes' | 'asistente';
 
 @Component({
   selector: 'app-ia',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, AsistenteProyectosComponent],
   templateUrl: './ia.html',
   styleUrls: ['./ia.scss'],
 })
 export class IaComponent implements OnInit {
   menuAbierto = true;
+  modulo: ModuloIA = 'reportes';
   cargandoProyectos = false;
   generando = false;
   error = '';
@@ -39,6 +42,11 @@ export class IaComponent implements OnInit {
 
   toggleMenu(): void {
     this.menuAbierto = !this.menuAbierto;
+  }
+
+  cambiarModulo(modulo: ModuloIA): void {
+    this.modulo = modulo;
+    this.error = '';
   }
 
   cargarProyectos(): void {
@@ -71,7 +79,7 @@ export class IaComponent implements OnInit {
         this.generando = false;
         this.resultado = res;
         if (res.success && res.report) {
-          this.reporteHtml = this.renderizarMarkdown(res.report);
+          this.reporteHtml = renderizarMarkdown(res.report);
         } else {
           this.error = res.message || 'El motor no pudo generar el resumen ejecutivo';
         }
@@ -89,10 +97,5 @@ export class IaComponent implements OnInit {
       return '-';
     }
     return `${(ms / 1000).toFixed(2)} s`;
-  }
-
-  renderizarMarkdown(markdown: string): string {
-    const html = marked.parse(markdown, { async: false }) as string;
-    return DOMPurify.sanitize(html);
   }
 }

@@ -12,14 +12,16 @@ import secrets
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
     Proyecto, PerfilUsuario,
-    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
+    ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea,
+    ConversacionIA, MensajeIA,
 )
 from .serializers import (
     MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
     ProyectoSerializer,
     PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
     ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
-    ReporteSerializer, GenerarReporteSerializer, TareaSerializer
+    ReporteSerializer, GenerarReporteSerializer, TareaSerializer,
+    ConversacionIASerializer, MensajeIASerializer,
 )
 from .roles import (
     EsAdmin, EsGestion, EsObreroOMas, MaterialesPermiso, TareasPermiso,
@@ -1052,3 +1054,128 @@ class ReporteViewSet(viewsets.ModelViewSet):
 
         return Response(resumen)
 
+
+
+class AsistenteIAViewSet(viewsets.ModelViewSet):
+    """
+    Conversaciones del asistente IA (módulo de proyectos).
+    Endpoints:
+    - GET/POST /api/ia/asistentes/  - Listar/Crear conversaciones
+    - GET/PATCH/DELETE /api/ia/asistentes/{id}/
+    - GET/POST /api/ia/asistentes/{id}/mensajes/
+    - POST /api/ia/asistentes/{id}/materiales/
+    - POST /api/ia/asistentes/{id}/estimar/
+    """
+    queryset = ConversacionIA.objects.select_related('usuario').all()
+    serializer_class = ConversacionIASerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(usuario=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+
+    @action(detail=True, methods=['get', 'post'])
+    def mensajes(self, request, pk=None):
+        conversacion = self.get_object()
+
+        if request.method == 'GET':
+            mensajes = conversacion.mensajes.all().order_by('creado_en')
+            return Response(MensajeIASerializer(mensajes, many=True).data)
+
+        contenido = (request.data.get('contenido') or '').strip()
+        if not contenido:
+            return Response({'error': 'El contenido es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        MensajeIA.objects.create(conversacion=conversacion, rol='usuario', contenido=contenido)
+        if not conversacion.titulo:
+            conversacion.titulo = contenido[:80]
+            conversacion.save(update_fields=['titulo', 'actualizado_en'])
+
+        historial = [
+            {'rol': m.rol, 'contenido': m.contenido}
+            for m in conversacion.mensajes.all().order_by('creado_en')
+        ]
+
+        from services.ai.intelligence_client import IntelligenceClient
+        client = IntelligenceClient()
+        result = client.send_assistant_message_sync(historial)
+
+        if result.get('success'):
+            respuesta = MensajeIA.objects.create(
+                conversacion=conversacion,
+                rol='asistente',
+                contenido=result.get('reply', ''),
+            )
+            return Response(
+                {
+                    'success': True,
+                    'mensaje': MensajeIASerializer(respuesta).data,
+                    'model': result.get('model', ''),
+                    'duration_ms': result.get('duration_ms', 0),
+                }
+            )
+
+        return Response(
+            {'success': False, 'error': result.get('error', 'LLM_ERROR'),
+             'message': result.get('message', 'No se pudo generar la respuesta')},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    @action(detail=True, methods=['post'])
+    def materiales(self, request, pk=None):
+        conversacion = self.get_object()
+        descripcion = (request.data.get('descripcion_proyecto') or '').strip()
+        materiales = request.data.get('materiales', [])
+
+        if not isinstance(materiales, list):
+            return Response({'error': 'materiales debe ser una lista'}, status=status.HTTP_400_BAD_REQUEST)
+
+        conversacion.descripcion_proyecto = descripcion or conversacion.descripcion_proyecto
+        conversacion.materiales = materiales
+        conversacion.save(update_fields=['descripcion_proyecto', 'materiales', 'actualizado_en'])
+        return Response(self.get_serializer(conversacion).data)
+
+    @action(detail=True, methods=['post'])
+    def estimar(self, request, pk=None):
+        conversacion = self.get_object()
+
+        if not conversacion.descripcion_proyecto:
+            return Response(
+                {'error': 'Define primero la descripción del proyecto en la sección de materiales'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not conversacion.materiales:
+            return Response(
+                {'error': 'Agrega al menos un material para poder estimar cantidades'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from services.ai.intelligence_client import IntelligenceClient
+        client = IntelligenceClient()
+        result = client.estimate_materials_sync(
+            conversacion.descripcion_proyecto,
+            conversacion.materiales,
+        )
+
+        if result.get('success'):
+            respuesta = MensajeIA.objects.create(
+                conversacion=conversacion,
+                rol='asistente',
+                contenido=result.get('reply', ''),
+            )
+            return Response(
+                {
+                    'success': True,
+                    'mensaje': MensajeIASerializer(respuesta).data,
+                    'model': result.get('model', ''),
+                    'duration_ms': result.get('duration_ms', 0),
+                }
+            )
+
+        return Response(
+            {'success': False, 'error': result.get('error', 'LLM_ERROR'),
+             'message': result.get('message', 'No se pudo estimar los materiales')},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )

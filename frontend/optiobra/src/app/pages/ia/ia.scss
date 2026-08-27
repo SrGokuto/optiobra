@@ -60,6 +60,43 @@
   font-size: 15px;
 }
 
+.modulos {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.modulo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modulo-btn:hover {
+  border-color: #F29F05;
+  color: #0d1b2a;
+}
+
+.modulo-btn.activo {
+  background: #0d1b2a;
+  color: #fff;
+  border-color: #0d1b2a;
+}
+
+.modulo-btn.activo .bi {
+  color: #F29F05;
+}
+
 .badge-ia {
   display: inline-flex;
   align-items: center;
