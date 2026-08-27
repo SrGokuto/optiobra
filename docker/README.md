@@ -7,14 +7,17 @@ Dockerización completa del proyecto OptiObra para despliegue en Pterodactyl y d
 ```
 docker/
 ├── Dockerfile              # Imagen full-stack para Pterodactyl (Frontend + Backend + MySQL + nginx + cloudflared)
-├── Dockerfile.backend      # Imagen solo backend (Django + MySQL Server interno)
+├── Dockerfile.backend      # Imagen solo backend (Django + MySQL Server interno + cloudflared)
+├── Dockerfile.frontend     # Imagen solo frontend (nginx + cloudflared)
 ├── Dockerfile.dev          # Imagen para desarrollo frontend
 ├── docker-compose.yml      # Orquestación local
 ├── nginx.conf              # Configuración principal de nginx
-├── default.conf            # Virtual host de nginx
+├── default.conf            # Virtual host de nginx (full-stack)
+├── nginx-frontend.conf     # Virtual host de nginx (solo frontend)
 ├── mysql/optiobra.cnf      # Tuning de MySQL Server interno
 ├── start_ptero.sh          # Script de inicio full-stack para Pterodactyl (gestiona todos los procesos)
 ├── start_backend_ptero.sh  # Script de inicio solo backend para Pterodactyl
+├── start_frontend_ptero.sh # Script de inicio solo frontend para Pterodactyl
 ├── build-push.sh           # Script para construir y publicar las imágenes
 └── README.md               # Este archivo
 ```
@@ -102,10 +105,36 @@ ingress:
 
 Añade también el hostname a `ALLOWED_HOSTS` de Django (default del egg: `api-optiobra.inferna.dev`).
 
+### Imagen solo frontend (`srgokuto/optiobra-frontend`)
+
+Variante que **solo contiene el frontend Angular servido por nginx + cloudflared** (sin backend). Útil si el backend corre en otro servidor/egg y solo quieres servir la SPA.
+
+```bash
+# Construir y publicar
+./docker/build-push.sh frontend        # o: docker/build-push.sh all
+
+# Construir manualmente
+docker build -t srgokuto/optiobra-frontend:latest -f docker/Dockerfile.frontend .
+```
+
+- nginx sirve la SPA en el puerto **80** (con `/health/` para Pterodactyl).
+- La API se consume directamente desde el navegador: el build apunta a `https://api-optiobra.inferna.dev/api` (definido en `environment.prod.ts`).
+- Para el egg en Pterodactyl, importa **`egg.frontend.json`** (imagen y startup correctos).
+
+**Túnel de Cloudflare (sin abrir puertos):** igual que el backend, cloudflared conecta de forma saliente. Pega el token en `CLOUDFLARE_TUNNEL_TOKEN` y en el panel define el `ingress` apuntando a `http://localhost:80`:
+
+```yaml
+ingress:
+  - hostname: optiobra.inferna.dev
+    service: http://localhost:80
+  - service: http_status:404
+```
+
 | Imagen | Contenido | Comando de inicio |
 |--------|-----------|-------------------|
 | `srgokuto/optiobra-full` | Frontend + Backend + MySQL + nginx + cloudflared | `bash /app/start_ptero.sh` |
-| `srgokuto/optiobra-backend` | Backend + MySQL | `bash /app/start_backend_ptero.sh` |
+| `srgokuto/optiobra-backend` | Backend + MySQL + cloudflared | `bash /app/start_backend_ptero.sh` |
+| `srgokuto/optiobra-frontend` | Frontend (nginx) + cloudflared | `bash /app/start_frontend_ptero.sh` |
 
 ## 🛠️ Desarrollo Local
 

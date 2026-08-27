@@ -21,12 +21,16 @@ case "$TARGET" in
     backend)
         build_push "srgokuto/optiobra-backend" "docker/Dockerfile.backend"
         ;;
+    frontend)
+        build_push "srgokuto/optiobra-frontend" "docker/Dockerfile.frontend"
+        ;;
     all)
         build_push "srgokuto/optiobra-full" "Dockerfile"
         build_push "srgokuto/optiobra-backend" "docker/Dockerfile.backend"
+        build_push "srgokuto/optiobra-frontend" "docker/Dockerfile.frontend"
         ;;
     *)
-        echo "Usage: $0 {full|backend|all} [version]"
+        echo "Usage: $0 {full|backend|frontend|all} [version]"
         exit 1
         ;;
 esac

@@ -1,0 +1,40 @@
+{
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "name": "OptiObra Frontend",
+    "author": "OptiObra Team",
+    "description": "Frontend Angular servido por nginx con soporte de tuneles de Cloudflare (cloudflared). Se expone via tunnel sin abrir puertos.",
+    "features": [],
+    "docker_images": {
+        "srgokuto/optiobra-frontend:latest": "srgokuto/optiobra-frontend:latest"
+    },
+    "file_denylist": [],
+    "startup": "bash /app/start_frontend_ptero.sh",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"OptiObra frontend is up and running\", \"nginx\": \"start worker processes\"}",
+        "logs": "{\r\n\"custom\": false,\r\n\"location\": \"logs/latest.log\"\r\n}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# OptiObra Frontend Installation Script\r\n\r\n# Create directories\r\nmkdir -p \/home\/container\/logs\r\n\r\n# Set permissions\r\nchown -R 1000:1000 \/home\/container\/logs\r\n\r\necho \"Installation completed.\"\r\n",
+            "container": "ubuntu:24.04",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Cloudflare Tunnel Token",
+            "description": "Token del tunel de Cloudflare (cloudflared). Dejalo vacio para deshabilitar el tunel. Configura el ingress en el panel de Cloudflare apuntando a http://localhost.",
+            "env_variable": "CLOUDFLARE_TUNNEL_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "nullable|string|max:1000",
+            "field_type": "text"
+        }
+    ]
+}
