@@ -1069,6 +1069,7 @@ class AsistenteIAViewSet(viewsets.ModelViewSet):
     queryset = ConversacionIA.objects.select_related('usuario').all()
     serializer_class = ConversacionIASerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = None
 
     def get_queryset(self):
         return super().get_queryset().filter(usuario=self.request.user)
