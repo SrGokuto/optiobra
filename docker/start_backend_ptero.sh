@@ -63,6 +63,17 @@ run_loop backend gunicorn config.wsgi:application \
     --bind 0.0.0.0:8000 --workers 2 --timeout 120 \
     --access-logfile - --error-logfile - &
 
+# ===================== Cloudflare Tunnel =====================
+# Conecta de forma SALIENTE hacia el edge de Cloudflare, sin necesidad de
+# abrir/exponer puertos en el nodo de Pterodactyl. El ingress en el panel de
+# Cloudflare debe apuntar a http://localhost:8000.
+if [ -n "${CLOUDFLARE_TUNNEL_TOKEN:-}" ]; then
+    echo "[cloudflared] Starting Cloudflare Tunnel..."
+    run_loop cloudflared cloudflared tunnel --no-autoupdate run --token "$CLOUDFLARE_TUNNEL_TOKEN" &
+else
+    echo "[cloudflared] No CLOUDFLARE_TUNNEL_TOKEN provided, skipping tunnel..."
+fi
+
 # ===================== Esperar readiness =====================
 echo "Waiting for OptiObra backend to be ready..."
 until curl -sf http://localhost:8000/api/ -o /dev/null; do

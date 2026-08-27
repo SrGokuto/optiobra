@@ -76,7 +76,7 @@ Si el token está vacío, el proceso `cloudflared` no se inicia y la app queda s
 
 ### Imagen solo backend (`srgokuto/optiobra-backend`)
 
-Variante ligera que **solo contiene el backend Django + MySQL Server interno** (sin frontend, nginx ni cloudflared). Útil si ya sirves el frontend desde otro sitio (por ejemplo, Cloudflare Pages o un egg aparte).
+Variante que **solo contiene el backend Django + MySQL Server interno + cloudflared** (sin frontend ni nginx). Útil si ya sirves el frontend desde otro sitio (por ejemplo, Cloudflare Pages o un egg aparte).
 
 ```bash
 # Construir y publicar
@@ -88,8 +88,19 @@ docker build -t srgokuto/optiobra-backend:latest -f docker/Dockerfile.backend .
 
 - La API escucha en el puerto **8000** directamente (sin nginx en medio).
 - MySQL interno sigue escuchando solo en `127.0.0.1:3306`.
-- Mismas variables de entorno que el egg full-stack: `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `SECRET_KEY`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `SUPABASE_URL`, `SUPABASE_KEY`, etc.
-- Para crear un egg en Pterodactyl, importa `egg.json` y reemplaza el `startup` por `bash /app/start_backend_ptero.sh` y la imagen por `srgokuto/optiobra-backend:latest`.
+- Mismas variables de entorno que el egg full-stack: `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST=127.0.0.1`, `SECRET_KEY`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, `SUPABASE_URL`, `SUPABASE_KEY`, `CLOUDFLARE_TUNNEL_TOKEN`, etc.
+- Para crear el egg en Pterodactyl, importa **`egg.backend.json`** (ya apunta a `srgokuto/optiobra-backend:latest` y al startup correcto).
+
+**Túnel de Cloudflare (sin abrir puertos):** cloudflared conecta de forma saliente hacia el edge de Cloudflare, así que no necesitas exponer ningún puerto en el nodo de Pterodactyl. Pega el token en la variable `CLOUDFLARE_TUNNEL_TOKEN` y en el panel de Cloudflare define el `ingress` apuntando a `http://localhost:8000`:
+
+```yaml
+ingress:
+  - hostname: api-optiobra.inferna.dev
+    service: http://localhost:8000
+  - service: http_status:404
+```
+
+Añade también el hostname a `ALLOWED_HOSTS` de Django (default del egg: `api-optiobra.inferna.dev`).
 
 | Imagen | Contenido | Comando de inicio |
 |--------|-----------|-------------------|
