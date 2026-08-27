@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { ProyectoService } from '../../../Services/proyecto.service';
 import { IaService } from '../../../Services/ia.service';
@@ -90,65 +92,7 @@ export class IaComponent implements OnInit {
   }
 
   renderizarMarkdown(markdown: string): string {
-    const bloques: string[] = [];
-    let listaEnCurso = false;
-
-    const cerrarLista = () => {
-      if (listaEnCurso) {
-        bloques.push('</ul>');
-        listaEnCurso = false;
-      }
-    };
-
-    for (const linea of markdown.split('\n')) {
-      const texto = this.aplicarFormato(this.escaparHTML(linea));
-
-      const h1 = texto.match(/^#\s+(.*)/);
-      const h2 = texto.match(/^##\s+(.*)/);
-      const h3 = texto.match(/^###\s+(.*)/);
-
-      if (h3) {
-        cerrarLista();
-        bloques.push(`<h3>${h3[1]}</h3>`);
-      } else if (h2) {
-        cerrarLista();
-        bloques.push(`<h2>${h2[1]}</h2>`);
-      } else if (h1) {
-        cerrarLista();
-        bloques.push(`<h1>${h1[1]}</h1>`);
-      } else if (/^\s*[-*]\s+/.test(texto)) {
-        if (!listaEnCurso) {
-          bloques.push('<ul>');
-          listaEnCurso = true;
-        }
-        bloques.push(`<li>${texto.replace(/^\s*[-*]\s+/, '')}</li>`);
-      } else if (texto.trim() === '') {
-        cerrarLista();
-      } else {
-        cerrarLista();
-        bloques.push(`<p>${texto.trim()}</p>`);
-      }
-    }
-    cerrarLista();
-    return bloques.join('\n');
-  }
-
-  private aplicarFormato(texto: string): string {
-    let resultado = texto;
-    resultado = resultado.replace(/`([^`]+)`/g, '<code>$1</code>');
-    resultado = resultado.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    resultado = resultado.replace(/__([^_]+)__/g, '<strong>$1</strong>');
-    resultado = resultado.replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
-    resultado = resultado.replace(
-      /\[([^\]]+)\]\(([^)]+)\)/g,
-      '<a href="$2" target="_blank" rel="noopener">$1</a>'
-    );
-    return resultado;
-  }
-
-  private escaparHTML(texto: string): string {
-    const div = document.createElement('div');
-    div.textContent = texto;
-    return div.innerHTML;
+    const html = marked.parse(markdown, { async: false }) as string;
+    return DOMPurify.sanitize(html);
   }
 }
