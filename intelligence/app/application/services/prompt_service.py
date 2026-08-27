@@ -161,21 +161,4 @@ class PromptService:
                 lines.append(f"- {t.get('date', '')}: {t.get('event', '')}")
             lines.append("")
 
-        analysis = context.get("analysis", {})
-        if analysis:
-            lines.append("### Analisis Previamente Calculado")
-            for name, data in analysis.items():
-                lines.append(f"\n#### {name}")
-                findings = data.get("findings", {})
-                if findings:
-                    lines.append("Hallazgos:")
-                    for fk, fv in findings.items():
-                        lines.append(f"  - {fk}: {fv}")
-                recommendations = data.get("recommendations", [])
-                if recommendations:
-                    lines.append("Recomendaciones:")
-                    for rec in recommendations:
-                        lines.append(f"  - {rec}")
-            lines.append("")
-
         return "\n".join(lines)
