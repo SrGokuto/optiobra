@@ -31,13 +31,13 @@ class AssistantService:
 
     async def estimate(
         self,
-        descripcion_proyecto: str,
+        mensajes: list[dict[str, str]],
         materiales: list[dict[str, Any]],
         max_tokens: int = 600,
     ) -> AssistantResponseDTO:
         """Estimate material quantities."""
         return await self._estimate_materials.execute(
-            descripcion_proyecto,
+            mensajes,
             materiales,
             max_tokens,
         )

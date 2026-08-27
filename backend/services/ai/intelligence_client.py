@@ -106,7 +106,10 @@ class IntelligenceClient:
                     json={"messages": messages, "max_tokens": max_tokens},
                 )
                 response.raise_for_status()
-                return response.json()
+                data = response.json()
+                if isinstance(data, dict) and "materiales" not in data:
+                    data["materiales"] = []
+                return data
             except httpx.TimeoutException:
                 logger.error("Intelligence engine timed out")
                 return {
@@ -130,15 +133,15 @@ class IntelligenceClient:
                 }
 
     def estimate_materials_sync(
-        self, descripcion_proyecto: str, materiales: list[dict[str, Any]]
+        self, mensajes: list[dict[str, str]], materiales: list[dict[str, Any]]
     ) -> dict[str, Any]:
-        """Estimate material quantities for a project description."""
+        """Estimate material quantities using the conversation context."""
         with httpx.Client(timeout=self._timeout) as client:
             try:
                 response = client.post(
                     f"{self._base_url}/api/v1/assistant/estimate",
                     json={
-                        "descripcion_proyecto": descripcion_proyecto,
+                        "mensajes": mensajes,
                         "materiales": materiales,
                     },
                 )

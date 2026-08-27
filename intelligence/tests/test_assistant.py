@@ -33,10 +33,10 @@ class TestAssistantPrompts:
     def test_build_estimate_prompt(self):
         service = PromptService()
         prompt = service.build_estimate(
-            "Casa de 2 pisos, 120 m2",
+            [{"rol": "usuario", "contenido": "Quiero una casa de 2 pisos de 120 m2"}],
             [{"nombre": "Cemento", "unidad": "bolsas"}],
         )
-        assert "Casa de 2 pisos, 120 m2" in prompt
+        assert "Quiero una casa de 2 pisos de 120 m2" in prompt
         assert "Cemento" in prompt
         assert "bolsas" in prompt
 
@@ -68,9 +68,25 @@ class TestAssistantUseCases:
             llm_service=llm_service,
         )
         dto = await service.execute(
-            "Casa de 2 pisos, 120 m2",
+            [{"rol": "usuario", "contenido": "Casa de 2 pisos, 120 m2"}],
             [{"nombre": "Cemento", "unidad": "bolsas"}],
             max_tokens=300,
         )
         assert dto.success is True
         assert len(dto.reply) > 0
+
+    @pytest.mark.asyncio
+    async def test_chat_extracts_materiales(self, llm_service):
+        service = GenerateAssistantResponse(
+            prompt_service=PromptService(),
+            llm_service=llm_service,
+        )
+        # El mock devuelve MOCK_REPORT sin JSON; probamos el extractor aparte
+        reply, materiales = service._extract_materiales(
+            "Necesitas: cemento y ladrillo\n```json\n"
+            '{"materiales": [{"nombre": "Cemento", "unidad": "bolsas"}, '
+            '{"nombre": "Ladrillo", "unidad": "unidades"}]}\n```'
+        )
+        assert "Necesitas: cemento y ladrillo" in reply
+        assert len(materiales) == 2
+        assert materiales[0]["nombre"] == "Cemento"

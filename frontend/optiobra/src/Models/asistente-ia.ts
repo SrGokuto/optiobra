@@ -16,6 +16,7 @@ export interface ConversacionIA {
   tipo: string;
   descripcion_proyecto?: string | null;
   materiales: MaterialIA[];
+  materiales_sugeridos: MaterialIA[];
   total_mensajes: number;
   ultimo_mensaje?: {
     rol: string;
@@ -37,6 +38,7 @@ export interface RespuestaMensajeIA {
   mensaje: MensajeIA;
   model?: string;
   duration_ms?: number;
+  materiales_sugeridos?: MaterialIA[];
   error?: string;
   message?: string;
 }

@@ -1104,17 +1104,22 @@ class AsistenteIAViewSet(viewsets.ModelViewSet):
         result = client.send_assistant_message_sync(historial)
 
         if result.get('success'):
+            sugeridos = result.get('materiales', []) or []
             respuesta = MensajeIA.objects.create(
                 conversacion=conversacion,
                 rol='asistente',
                 contenido=result.get('reply', ''),
             )
+            if sugeridos:
+                conversacion.materiales_sugeridos = sugeridos
+                conversacion.save(update_fields=['materiales_sugeridos', 'actualizado_en'])
             return Response(
                 {
                     'success': True,
                     'mensaje': MensajeIASerializer(respuesta).data,
                     'model': result.get('model', ''),
                     'duration_ms': result.get('duration_ms', 0),
+                    'materiales_sugeridos': sugeridos,
                 }
             )
 
@@ -1139,24 +1144,53 @@ class AsistenteIAViewSet(viewsets.ModelViewSet):
         return Response(self.get_serializer(conversacion).data)
 
     @action(detail=True, methods=['post'])
+    def materiales_sugeridos(self, request, pk=None):
+        """Añade los materiales sugeridos por el modelo a la lista de estimación."""
+        conversacion = self.get_object()
+        sugeridos = conversacion.materiales_sugeridos or []
+
+        if not sugeridos:
+            return Response(
+                {'error': 'No hay materiales sugeridos por el asistente todavía'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        actuales = {m.get('nombre', '').strip().lower(): m for m in (conversacion.materiales or [])}
+        for mat in sugeridos:
+            nombre = (mat.get('nombre') or '').strip()
+            if not nombre:
+                continue
+            clave = nombre.lower()
+            if clave in actuales:
+                continue
+            actuales[clave] = {
+                'nombre': nombre,
+                'unidad': (mat.get('unidad') or '').strip() or 'unidad',
+            }
+
+        conversacion.materiales = list(actuales.values())
+        conversacion.save(update_fields=['materiales', 'actualizado_en'])
+        return Response(self.get_serializer(conversacion).data)
+
+    @action(detail=True, methods=['post'])
     def estimar(self, request, pk=None):
         conversacion = self.get_object()
 
-        if not conversacion.descripcion_proyecto:
-            return Response(
-                {'error': 'Define primero la descripción del proyecto en la sección de materiales'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
         if not conversacion.materiales:
             return Response(
-                {'error': 'Agrega al menos un material para poder estimar cantidades'},
+                {'error': 'Añade al menos un material para poder estimar cantidades'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        mensajes = [
+            {'rol': m.rol, 'contenido': m.contenido}
+            for m in conversacion.mensajes.all().order_by('creado_en')
+        ]
 
         from services.ai.intelligence_client import IntelligenceClient
         client = IntelligenceClient()
         result = client.estimate_materials_sync(
-            conversacion.descripcion_proyecto,
+            mensajes,
             conversacion.materiales,
         )
 

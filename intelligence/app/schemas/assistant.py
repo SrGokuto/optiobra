@@ -27,7 +27,7 @@ class EstimateMaterialItem(BaseModel):
 class EstimateRequest(BaseModel):
     """Request contract for material quantity estimation."""
 
-    descripcion_proyecto: str
+    mensajes: list[ChatMessage] = Field(default_factory=list)
     materiales: list[EstimateMaterialItem] = Field(default_factory=list)
     max_tokens: int = 600
 
@@ -39,3 +39,4 @@ class AssistantChatResponse(BaseModel):
     reply: str
     model: str = ""
     duration_ms: int = 0
+    materiales: list[EstimateMaterialItem] = Field(default_factory=list)

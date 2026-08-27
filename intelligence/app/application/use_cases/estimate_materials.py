@@ -24,14 +24,14 @@ class EstimateMaterials:
 
     async def execute(
         self,
-        descripcion_proyecto: str,
+        mensajes: list[dict[str, str]],
         materiales: list[dict[str, Any]],
         max_tokens: int = 600,
     ) -> AssistantResponseDTO:
-        """Estimate quantities for the given materials."""
+        """Estimate quantities for the given materials using the chat context."""
         start = time.monotonic()
 
-        prompt = self._prompt_service.build_estimate(descripcion_proyecto, materiales)
+        prompt = self._prompt_service.build_estimate(mensajes, materiales)
 
         llm_response, metrics = await self._llm_service.generate(
             prompt,

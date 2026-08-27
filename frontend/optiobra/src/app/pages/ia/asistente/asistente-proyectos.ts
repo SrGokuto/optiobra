@@ -23,11 +23,11 @@ export class AsistenteProyectosComponent implements OnInit {
   cargando = false;
   error = '';
 
-  descripcionProyecto = '';
   materiales: MaterialIA[] = [];
-  nuevoMaterial = { nombre: '', unidad: '' };
-  guardandoMateriales = false;
+  materialesSugeridos: MaterialIA[] = [];
+  agregandoSugeridos = false;
   estimando = false;
+  mensajeInfo = '';
 
   constructor(private asistenteService: AsistenteIAService) {}
 
@@ -46,6 +46,8 @@ export class AsistenteProyectosComponent implements OnInit {
           const refrescada = data.find((c) => c.id === this.conversacionActiva?.id);
           if (refrescada) {
             this.conversacionActiva = refrescada;
+            this.materiales = [...(refrescada.materiales || [])];
+            this.materialesSugeridos = [...(refrescada.materiales_sugeridos || [])];
           }
         }
       },
@@ -74,8 +76,9 @@ export class AsistenteProyectosComponent implements OnInit {
   seleccionarConversacion(conv: ConversacionIA): void {
     this.conversacionActiva = conv;
     this.error = '';
-    this.descripcionProyecto = conv.descripcion_proyecto || '';
+    this.mensajeInfo = '';
     this.materiales = [...(conv.materiales || [])];
+    this.materialesSugeridos = [...(conv.materiales_sugeridos || [])];
     this.nuevoMensaje = '';
     this.cargarMensajes(conv.id);
   }
@@ -101,7 +104,7 @@ export class AsistenteProyectosComponent implements OnInit {
           this.conversacionActiva = null;
           this.mensajes = [];
           this.materiales = [];
-          this.descripcionProyecto = '';
+          this.materialesSugeridos = [];
         }
       },
       error: () => {
@@ -117,6 +120,7 @@ export class AsistenteProyectosComponent implements OnInit {
     }
     this.enviando = true;
     this.error = '';
+    this.mensajeInfo = '';
 
     const id = this.conversacionActiva.id;
     this.mensajes.push({
@@ -133,6 +137,11 @@ export class AsistenteProyectosComponent implements OnInit {
         this.enviando = false;
         if (res.success && res.mensaje) {
           this.mensajes.push(res.mensaje);
+          if (res.materiales_sugeridos && res.materiales_sugeridos.length) {
+            this.materialesSugeridos = res.materiales_sugeridos;
+            this.mensajeInfo =
+              'El asistente sugirió materiales. Pulsa "Añadir materiales sugeridos" para incluirlos.';
+          }
           this.scrollAlFinal();
           this.cargarConversaciones();
         } else {
@@ -146,41 +155,44 @@ export class AsistenteProyectosComponent implements OnInit {
     });
   }
 
-  agregarMaterial(): void {
-    const nombre = this.nuevoMaterial.nombre.trim();
-    if (!nombre) {
+  anadirMaterialesSugeridos(): void {
+    if (!this.conversacionActiva || this.agregandoSugeridos) {
       return;
     }
-    this.materiales.push({
-      nombre,
-      unidad: this.nuevoMaterial.unidad.trim() || 'unidad',
+    this.agregandoSugeridos = true;
+    this.error = '';
+    this.mensajeInfo = '';
+    this.asistenteService.anadirMaterialesSugeridos(this.conversacionActiva.id).subscribe({
+      next: (conv) => {
+        this.agregandoSugeridos = false;
+        this.conversacionActiva = conv;
+        this.materiales = [...(conv.materiales || [])];
+        this.materialesSugeridos = [];
+        this.mensajeInfo = 'Materiales sugeridos añadidos a la lista de estimación.';
+        this.cargarConversaciones();
+      },
+      error: (err) => {
+        this.agregandoSugeridos = false;
+        this.error = AuthService.extraerMensajeError(err);
+      },
     });
-    this.nuevoMaterial = { nombre: '', unidad: '' };
   }
 
   quitarMaterial(index: number): void {
     this.materiales.splice(index, 1);
-  }
-
-  guardarMateriales(): void {
-    if (!this.conversacionActiva || this.guardandoMateriales) {
-      return;
+    if (this.conversacionActiva) {
+      this.asistenteService
+        .guardarMateriales(this.conversacionActiva.id, '', this.materiales)
+        .subscribe({
+          next: (conv) => {
+            this.conversacionActiva = conv;
+            this.cargarConversaciones();
+          },
+          error: () => {
+            this.error = 'No se pudo actualizar la lista de materiales';
+          },
+        });
     }
-    this.guardandoMateriales = true;
-    this.error = '';
-    this.asistenteService
-      .guardarMateriales(this.conversacionActiva.id, this.descripcionProyecto, this.materiales)
-      .subscribe({
-        next: (conv) => {
-          this.guardandoMateriales = false;
-          this.conversacionActiva = conv;
-          this.cargarConversaciones();
-        },
-        error: () => {
-          this.guardandoMateriales = false;
-          this.error = 'No se pudieron guardar los materiales';
-        },
-      });
   }
 
   estimar(): void {
@@ -189,6 +201,7 @@ export class AsistenteProyectosComponent implements OnInit {
     }
     this.estimando = true;
     this.error = '';
+    this.mensajeInfo = '';
     this.asistenteService.estimarMateriales(this.conversacionActiva.id).subscribe({
       next: (res) => {
         this.estimando = false;

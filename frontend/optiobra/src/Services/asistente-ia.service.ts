@@ -51,6 +51,10 @@ export class AsistenteIAService {
     });
   }
 
+  anadirMaterialesSugeridos(id: number): Observable<ConversacionIA> {
+    return this.http.post<ConversacionIA>(`${this.apiUrl}/${id}/materiales_sugeridos/`, {});
+  }
+
   estimarMateriales(id: number): Observable<RespuestaMensajeIA> {
     return this.http.post<RespuestaMensajeIA>(`${this.apiUrl}/${id}/estimar/`, {});
   }

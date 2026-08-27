@@ -301,6 +301,7 @@ class ConversacionIA(models.Model):
     tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='proyectos')
     descripcion_proyecto = models.TextField(blank=True, null=True)
     materiales = models.JSONField(default=list, blank=True)
+    materiales_sugeridos = models.JSONField(default=list, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 

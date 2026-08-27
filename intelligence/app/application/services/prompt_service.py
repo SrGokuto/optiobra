@@ -114,7 +114,7 @@ class PromptService:
 
     def build_estimate(
         self,
-        descripcion_proyecto: str,
+        mensajes: list[dict[str, Any]],
         materiales: list[dict[str, Any]],
     ) -> str:
         """Assemble the prompt for material quantity estimation."""
@@ -125,7 +125,13 @@ class PromptService:
         for rule in ["general.md", "style.md"]:
             blocks.append(self._load_template(f"rules/{rule}"))
 
-        lines = ["## Proyecto", f"- Descripcion: {descripcion_proyecto}", "", "## Materiales a estimar"]
+        lines = ["## Conversacion", ""]
+        for msg in mensajes:
+            speaker = "Usuario" if msg.get("rol") == "usuario" else "Asistente"
+            lines.append(f"{speaker}: {msg.get('contenido', '')}")
+            lines.append("")
+
+        lines.append("## Materiales a estimar")
         for m in materiales:
             nombre = m.get("nombre", "")
             unidad = m.get("unidad", "")

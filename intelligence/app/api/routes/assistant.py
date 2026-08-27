@@ -37,6 +37,7 @@ async def assistant_chat(
         reply=result.reply,
         model=result.model,
         duration_ms=result.duration_ms,
+        materiales=result.materiales,
     )
 
 
@@ -49,9 +50,9 @@ async def assistant_estimate(
     request: EstimateRequest,
     service: AssistantService = Depends(get_assistant_service),
 ) -> AssistantChatResponse:
-    """Estimate material quantities for a project description."""
+    """Estimate material quantities using the conversation context."""
     result = await service.estimate(
-        request.descripcion_proyecto,
+        [{"rol": m.rol, "contenido": m.contenido} for m in request.mensajes],
         [{"nombre": m.nombre, "unidad": m.unidad} for m in request.materiales],
         max_tokens=request.max_tokens,
     )

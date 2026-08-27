@@ -3,6 +3,9 @@
   @if (error) {
     <div class="alert-error">{{ error }}</div>
   }
+  @if (mensajeInfo) {
+    <div class="alert-info"><i class="bi bi-info-circle"></i> {{ mensajeInfo }}</div>
+  }
 
   <div class="asistente-grid">
 
@@ -56,7 +59,7 @@
           <h3>Asistente de proyectos</h3>
           <p>
             Cuéntame qué tipo de proyecto quieres construir y te recomendaré los materiales
-            que necesitas. Luego podrás estimar las cantidades.
+            que necesitas. Después podrás añadirlos y estimar las cantidades.
           </p>
           <button class="btn-primario" (click)="nuevaConversacion()">
             <i class="bi bi-plus"></i> Nueva conversación
@@ -71,6 +74,46 @@
             <small>{{ conversacionActiva.total_mensajes }} mensajes</small>
           </div>
           <span class="chip-ia"><i class="bi bi-robot"></i> Asistente IA</span>
+        </div>
+
+        <div class="chat-acciones">
+          <div class="chips">
+            @if (materiales.length === 0) {
+              <span class="chips-vacio">Sin materiales para estimar</span>
+            }
+            @for (mat of materiales; track $index) {
+              <span class="chip-mat">
+                {{ mat.nombre }} · {{ mat.unidad }}
+                <button (click)="quitarMaterial($index)" title="Quitar">
+                  <i class="bi bi-x"></i>
+                </button>
+              </span>
+            }
+          </div>
+
+          <div class="acciones-btns">
+            <button
+              class="btn-sugeridos"
+              (click)="anadirMaterialesSugeridos()"
+              [disabled]="agregandoSugeridos || materialesSugeridos.length === 0"
+              [title]="materialesSugeridos.length === 0 ? 'El asistente no ha sugerido materiales todavía' : 'Añadir los materiales que sugirió el asistente'">
+              <i class="bi bi-plus-circle"></i>
+              Añadir sugeridos
+              @if (materialesSugeridos.length > 0) {
+                <span class="badge-cont">{{ materialesSugeridos.length }}</span>
+              }
+            </button>
+            <button
+              class="btn-estimar"
+              (click)="estimar()"
+              [disabled]="estimando || materiales.length === 0">
+              @if (estimando) {
+                <span class="loading-spinner"></span> Estimando...
+              } @else {
+                <i class="bi bi-calculator"></i> Estimar cantidades
+              }
+            </button>
+          </div>
         </div>
 
         <div class="chat-mensajes">
@@ -109,56 +152,6 @@
         </div>
       }
     </section>
-
-    <!-- MATERIALES -->
-    <aside class="materiales-panel" *ngIf="conversacionActiva">
-      <div class="mat-head">
-        <h4><i class="bi bi-box-seam"></i> Materiales a estimar</h4>
-      </div>
-
-      <div class="mat-campo">
-        <label>Descripción del proyecto</label>
-        <textarea
-          [(ngModel)]="descripcionProyecto"
-          rows="3"
-          placeholder="Ej: Casa de 2 pisos de 120 m², acabados básicos"></textarea>
-      </div>
-
-      <div class="mat-agregar">
-        <input [(ngModel)]="nuevoMaterial.nombre" placeholder="Material (ej: Cemento)">
-        <input [(ngModel)]="nuevoMaterial.unidad" placeholder="Unidad (ej: bolsas)">
-        <button (click)="agregarMaterial()" [disabled]="!nuevoMaterial.nombre.trim()">
-          <i class="bi bi-plus"></i>
-        </button>
-      </div>
-
-      @if (materiales.length > 0) {
-        <ul class="mat-lista">
-          @for (mat of materiales; track $index) {
-            <li>
-              <span>{{ mat.nombre }}</span>
-              <small>{{ mat.unidad }}</small>
-              <button (click)="quitarMaterial($index)"><i class="bi bi-x"></i></button>
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="mat-vacio">Agrega los materiales que usarás para estimar cantidades.</p>
-      }
-
-      <div class="mat-acciones">
-        <button class="btn-guardar" (click)="guardarMateriales()" [disabled]="guardandoMateriales">
-          {{ guardandoMateriales ? 'Guardando...' : 'Guardar materiales' }}
-        </button>
-        <button class="btn-estimar" (click)="estimar()" [disabled]="estimando || materiales.length === 0">
-          @if (estimando) {
-            <span class="loading-spinner"></span> Estimando...
-          } @else {
-            <i class="bi bi-calculator"></i> Estimar cantidades
-          }
-        </button>
-      </div>
-    </aside>
 
   </div>
 </div>

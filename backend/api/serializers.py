@@ -418,6 +418,7 @@ class ConversacionIASerializer(serializers.ModelSerializer):
             'tipo',
             'descripcion_proyecto',
             'materiales',
+            'materiales_sugeridos',
             'total_mensajes',
             'ultimo_mensaje',
             'usuario',
