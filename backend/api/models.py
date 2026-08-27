@@ -113,25 +113,6 @@ class Proyecto(models.Model):
         return f"{self.nombre} ({self.get_estado_display()})"
 
 
-class AvanceObra(models.Model):
-    """Avances de obra asociados a un proyecto"""
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='avances')
-    actividad = models.CharField(max_length=200)
-    descripcion = models.TextField(blank=True, null=True)
-    porcentaje = models.IntegerField()
-    responsable = models.CharField(max_length=100)
-    fecha = models.DateField()
-    creado_en = models.DateTimeField(auto_now_add=True)
-    actualizado_en = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Avances de Obra"
-        ordering = ['-fecha']
-
-    def __str__(self):
-        return f"{self.actividad} - {self.proyecto.nombre}"
-
-
 class UsuarioSupabase(models.Model):
     """Relación entre usuarios de Django y Supabase"""
     usuario_django = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -285,4 +266,22 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
+def recalcular_avance_proyecto(proyecto) -> None:
+    """Recalcula el avance de un proyecto a partir de sus tareas.
+
+    El 100% del proyecto se reparte entre todas sus tareas: el avance es el
+    porcentaje de tareas completadas sobre el total. Se obtiene con una
+    consulta directa a las tareas del proyecto.
+    """
+    tareas = Tarea.objects.filter(proyecto=proyecto)
+    total = tareas.count()
+    completadas = tareas.filter(estado='completada').count()
+    avance = round((completadas / total) * 100) if total > 0 else 0
+
+    if proyecto.avance != avance or proyecto.porcentaje_avance != avance:
+        proyecto.avance = avance
+        proyecto.porcentaje_avance = avance
+        proyecto.save(update_fields=['avance', 'porcentaje_avance', 'actualizado_en'])
 

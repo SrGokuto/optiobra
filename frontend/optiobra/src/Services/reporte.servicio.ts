@@ -30,11 +30,6 @@ export interface Reporte {
 
   avancePromedio: number;
 
-  avances: {
-    nombre: string;
-    porcentaje: number;
-  }[];
-
 }
 
 

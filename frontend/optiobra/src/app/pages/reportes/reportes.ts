@@ -414,7 +414,7 @@ error = '';
       Ubicacion: p.ubicacion || '-',
       Estado: p.estado,
       'Avance (%)': p.porcentaje_avance,
-      'Total avances': p.total_avances,
+      'Total tareas': p.total_tareas,
       'Fecha inicio': p.fecha_inicio || '-',
       'Fecha fin': p.fecha_fin || '-',
     }));

@@ -11,12 +11,12 @@ import secrets
 
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
-    Proyecto, AvanceObra, PerfilUsuario,
+    Proyecto, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 from .serializers import (
     MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
-    ProyectoSerializer, AvanceObraSerializer,
+    ProyectoSerializer,
     PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
     ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
     ReporteSerializer, GenerarReporteSerializer, TareaSerializer
@@ -395,24 +395,6 @@ class ProyectoViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-
-
-class AvanceObraViewSet(viewsets.ModelViewSet):
-    """ViewSet para gestionar avances de obra"""
-    queryset = AvanceObra.objects.all().select_related('proyecto')
-    serializer_class = AvanceObraSerializer
-    permission_classes = [EsGestion]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['actividad', 'responsable', 'proyecto__nombre']
-    ordering_fields = ['fecha', 'porcentaje', 'creado_en']
-    ordering = ['-fecha']
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        proyecto_id = self.request.query_params.get('proyecto', '')
-        if proyecto_id:
-            queryset = queryset.filter(proyecto_id=proyecto_id)
-        return queryset
 
 
 class TareaViewSet(viewsets.ModelViewSet):
@@ -1000,8 +982,8 @@ class ReporteViewSet(viewsets.ModelViewSet):
     def proyectos(self, request):
         """GET /api/reportes/proyectos/"""
         total_proyectos = Proyecto.objects.count()
-        proyectos = Proyecto.objects.annotate(total_avances=Count('avances')).values(
-            'id', 'nombre', 'ubicacion', 'estado', 'porcentaje_avance', 'total_avances', 'fecha_inicio', 'fecha_fin'
+        proyectos = Proyecto.objects.annotate(total_tareas=Count('tareas')).values(
+            'id', 'nombre', 'ubicacion', 'estado', 'porcentaje_avance', 'total_tareas', 'fecha_inicio', 'fecha_fin'
         )
 
         promedio = Proyecto.objects.aggregate(prom=Avg('porcentaje_avance'))['prom'] or 0
@@ -1012,7 +994,7 @@ class ReporteViewSet(viewsets.ModelViewSet):
             'ubicacion': p['ubicacion'],
             'estado': p['estado'],
             'porcentaje_avance': p['porcentaje_avance'],
-            'total_avances': p['total_avances'],
+            'total_tareas': p['total_tareas'],
             'fecha_inicio': str(p['fecha_inicio']) if p['fecha_inicio'] else None,
             'fecha_fin': str(p['fecha_fin']) if p['fecha_fin'] else None,
         } for p in proyectos]

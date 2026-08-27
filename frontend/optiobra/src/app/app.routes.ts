@@ -5,7 +5,6 @@ import { Perfil } from './pages/perfil/perfil';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Materiales } from './pages/materiales/materiales';
 import { Proyectos } from './pages/proyectos/proyectos';
-import { AvanceObraComponent } from './pages/avance-obra/avance-obra';
 import { Trabajadores } from './pages/trabajadores/trabajadores';
 import { Tareas } from './pages/tareas/tareas';
 import { Calendario } from './pages/calendario/calendario';
@@ -54,12 +53,6 @@ export const routes: Routes = [
     component: Proyectos,
     canActivate: [rolGuard(['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'])],
     title: 'Proyectos',
-  },
-  {
-    path: 'avance-obra',
-    component: AvanceObraComponent,
-    canActivate: [rolGuard(['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'])],
-    title: 'Avance de obra',
   },
   {
     path: 'trabajadores',

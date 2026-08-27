@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
-    Proyecto, AvanceObra, PerfilUsuario,
+    Proyecto, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea
 )
 
@@ -117,7 +117,8 @@ class HistorialMaterialSerializer(serializers.ModelSerializer):
 class ProyectoSerializer(serializers.ModelSerializer):
     """Serializer para Proyectos"""
     creado_por_nombre = serializers.CharField(source='creado_por.username', read_only=True)
-    avances_count = serializers.IntegerField(source='avances.count', read_only=True)
+    tareas_count = serializers.IntegerField(source='tareas.count', read_only=True)
+    tareas_completadas = serializers.SerializerMethodField()
 
     class Meta:
         model = Proyecto
@@ -135,13 +136,24 @@ class ProyectoSerializer(serializers.ModelSerializer):
             'fecha_fin_estimada',
             'fecha_fin',
             'presupuesto',
-            'avances_count',
+            'tareas_count',
+            'tareas_completadas',
             'creado_en',
             'actualizado_en',
             'creado_por',
             'creado_por_nombre',
         ]
-        read_only_fields = ['creado_en', 'actualizado_en', 'creado_por', 'creado_por_nombre']
+        read_only_fields = [
+            'avance',
+            'porcentaje_avance',
+            'creado_en',
+            'actualizado_en',
+            'creado_por',
+            'creado_por_nombre',
+        ]
+
+    def get_tareas_completadas(self, obj) -> int:
+        return obj.tareas.filter(estado='completada').count()
 
     def validate_nombre(self, value):
         if not value or len(value.strip()) == 0:
@@ -149,16 +161,6 @@ class ProyectoSerializer(serializers.ModelSerializer):
         if len(value) > 255:
             raise serializers.ValidationError("El nombre no puede exceder 255 caracteres")
         return value.strip()
-
-    def validate_avance(self, value):
-        if value < 0 or value > 100:
-            raise serializers.ValidationError("El avance debe estar entre 0 y 100")
-        return value
-
-    def validate_porcentaje_avance(self, value):
-        if value < 0 or value > 100:
-            raise serializers.ValidationError("El porcentaje de avance debe estar entre 0 y 100")
-        return value
 
 
 class UsuarioSupabaseSerializer(serializers.ModelSerializer):
@@ -189,35 +191,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
         read_only_fields = ['id']
-
-
-class AvanceObraSerializer(serializers.ModelSerializer):
-    """Serializer para Avances de Obra"""
-    proyecto_nombre = serializers.CharField(source='proyecto.nombre', read_only=True)
-
-    class Meta:
-        model = AvanceObra
-        fields = [
-            'id', 'proyecto', 'proyecto_nombre', 'actividad', 'descripcion',
-            'porcentaje', 'responsable', 'fecha',
-            'creado_en', 'actualizado_en',
-        ]
-        read_only_fields = ['creado_en', 'actualizado_en']
-
-    def validate_actividad(self, value):
-        if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError("La actividad no puede estar vacía")
-        return value.strip()
-
-    def validate_porcentaje(self, value):
-        if value < 0 or value > 100:
-            raise serializers.ValidationError("El porcentaje debe estar entre 0 y 100")
-        return value
-
-    def validate_responsable(self, value):
-        if not value or len(value.strip()) == 0:
-            raise serializers.ValidationError("El responsable no puede estar vacío")
-        return value.strip()
 
 
 class PerfilUsuarioSerializer(serializers.ModelSerializer):

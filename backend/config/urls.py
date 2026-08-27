@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from api.views import (
     MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet,
-    AvanceObraViewSet, DashboardViewSet,
+    DashboardViewSet,
     UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet, TareaViewSet
 )
 
@@ -28,7 +28,6 @@ router = DefaultRouter()
 router.register(r'materiales', MaterialViewSet, basename='material')
 router.register(r'categorias', CategoriaViewSet, basename='categoria')
 router.register(r'proyectos', ProyectoViewSet, basename='proyecto')
-router.register(r'avances', AvanceObraViewSet, basename='avance')
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')

@@ -27,7 +27,6 @@ export class SidebarComponent {
     { ruta: '/dashboard', icono: 'bi bi-speedometer2', label: 'Dashboard', roles: null },
     { ruta: '/proyectos', icono: 'bi bi-folder2-open', label: 'Proyectos', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/materiales', icono: 'bi bi-box-seam', label: 'Materiales', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
-    { ruta: '/avance-obra', icono: 'bi bi-graph-up-arrow', label: 'Avance de obra', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/trabajadores', icono: 'bi bi-person-workspace', label: 'Obreros', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/tareas', icono: 'bi bi-check2-square', label: 'Tareas', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/calendario', icono: 'bi bi-calendar3', label: 'Calendario', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
