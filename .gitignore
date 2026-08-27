@@ -65,3 +65,6 @@ Thumbs.db
 **/.hypothesis/
 **/.eslintcache
 **/.stylelintcache
+
+# Modelos LLM locales (intelligence engine)
+models/

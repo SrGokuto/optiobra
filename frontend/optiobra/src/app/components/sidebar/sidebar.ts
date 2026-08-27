@@ -32,6 +32,7 @@ export class SidebarComponent {
     { ruta: '/tareas', icono: 'bi bi-check2-square', label: 'Tareas', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/calendario', icono: 'bi bi-calendar3', label: 'Calendario', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/reportes', icono: 'bi bi-bar-chart-line', label: 'Reportes', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/ia', icono: 'bi bi-robot', label: 'Inteligencia IA', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/usuarios', icono: 'bi bi-people', label: 'Usuarios', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/configuracion', icono: 'bi bi-gear', label: 'Configuración', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
     { ruta: '/perfil', icono: 'bi bi-person-circle', label: 'Mi perfil', roles: null },

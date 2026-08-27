@@ -13,6 +13,7 @@ import { RegisterComponent } from './components/register/register';
 import { Usuarios } from './pages/usuarios/usuarios';
 import { Configuracion } from './pages/configuracion/configuracion';
 import { ReportesComponent } from './pages/reportes/reportes';
+import { IaComponent } from './pages/ia/ia';
 import { authGuard, guestGuard, rolGuard } from '../guards/auth.guard';
 
 export const routes: Routes = [
@@ -83,6 +84,12 @@ export const routes: Routes = [
     component: ReportesComponent,
     canActivate: [rolGuard(['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'])],
     title: 'Reportes',
+  },
+  {
+    path: 'ia',
+    component: IaComponent,
+    canActivate: [rolGuard(['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'])],
+    title: 'Inteligencia IA',
   },
   {
     path: 'usuarios',

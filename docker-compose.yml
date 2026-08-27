@@ -46,6 +46,9 @@ services:
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_KEY: ${SUPABASE_KEY:-}
       SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      # Motor de inteligencia FastAPI (servicio en /intelligence). Ej: http://intelligence:8000
+      INTELLIGENCE_URL: ${INTELLIGENCE_URL:-http://localhost:8000}
+      INTELLIGENCE_TIMEOUT: ${INTELLIGENCE_TIMEOUT:-30}
     depends_on:
       mariadb:
         condition: service_healthy

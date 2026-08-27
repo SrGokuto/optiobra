@@ -187,6 +187,10 @@ SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET', '')
 SUPABASE_ECC_X = os.getenv('SUPABASE_ECC_X', '')
 SUPABASE_ECC_Y = os.getenv('SUPABASE_ECC_Y', '')
 
+# Motor de inteligencia (servicio FastAPI en intelligence/)
+INTELLIGENCE_URL = os.getenv('INTELLIGENCE_URL', 'http://localhost:8000')
+INTELLIGENCE_TIMEOUT = int(os.getenv('INTELLIGENCE_TIMEOUT', '30'))
+
 # Tests unitarios usan SQLite en memoria (no requiere MariaDB local).
 if 'test' in sys.argv:
     DATABASES['default'] = {
