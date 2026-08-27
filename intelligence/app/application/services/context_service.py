@@ -90,6 +90,8 @@ class ContextService:
                 "activity": a.get("activity", ""),
                 "description": a.get("description", ""),
                 "responsible": a.get("responsible", ""),
+                "status": a.get("status", ""),
+                "priority": a.get("priority", ""),
                 "progress_before": a.get("progress_before", 0),
                 "progress_after": a.get("progress_after", 0),
             })

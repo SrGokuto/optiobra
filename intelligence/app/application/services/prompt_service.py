@@ -113,14 +113,29 @@ class PromptService:
             for a in activities:
                 date = a.get("date", "")
                 name = a.get("activity", "")
-                desc = a.get("description", "")
+                desc = (a.get("description") or "").strip()
                 resp = a.get("responsible", "")
-                before = a.get("progress_before", 0)
-                after = a.get("progress_after", 0)
-                lines.append(
-                    f"- {date}: {name} - {desc} (Responsable: {resp}, "
-                    f"Avance: {before}% -> {after}%)"
-                )
+                status = a.get("status", "")
+                priority = a.get("priority", "")
+
+                header = name or "(sin titulo)"
+                if date:
+                    header = f"{date}: {header}"
+
+                detalle = []
+                if desc:
+                    detalle.append(desc)
+                if resp:
+                    detalle.append(f"Responsable: {resp}")
+                if status:
+                    detalle.append(f"Estado: {status}")
+                if priority:
+                    detalle.append(f"Prioridad: {priority}")
+
+                line = f"- {header}"
+                if detalle:
+                    line += f" - {' | '.join(detalle)}"
+                lines.append(line)
             lines.append("")
 
         materials = context.get("materials", [])
