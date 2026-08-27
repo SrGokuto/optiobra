@@ -46,11 +46,16 @@ class ContextBuilder:
         return {
             "id": proyecto.id,
             "name": proyecto.nombre,
+            "description": proyecto.descripcion or "",
             "location": proyecto.ubicacion,
+            "address": proyecto.direccion or "",
+            "responsible": proyecto.responsable or "",
+            "budget": str(proyecto.presupuesto) if proyecto.presupuesto is not None else "",
             "status": proyecto.estado,
             "current_progress": proyecto.porcentaje_avance,
             "planned_progress": self._calculate_planned_progress(proyecto),
             "start_date": proyecto.fecha_inicio.isoformat() if proyecto.fecha_inicio else "",
+            "planned_finish": proyecto.fecha_fin_estimada.isoformat() if proyecto.fecha_fin_estimada else "",
             "estimated_finish": proyecto.fecha_fin.isoformat() if proyecto.fecha_fin else "",
             "last_update": proyecto.actualizado_en.isoformat() if proyecto.actualizado_en else "",
         }
