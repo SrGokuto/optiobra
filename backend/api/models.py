@@ -113,43 +113,6 @@ class Proyecto(models.Model):
         return f"{self.nombre} ({self.get_estado_display()})"
 
 
-class AvanceObra(models.Model):
-    """Avances de obra asociados a un proyecto"""
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='avances')
-    actividad = models.CharField(max_length=200)
-    descripcion = models.TextField(blank=True, null=True)
-    porcentaje = models.IntegerField()
-    responsable = models.CharField(max_length=100)
-    fecha = models.DateField()
-    creado_en = models.DateTimeField(auto_now_add=True)
-    actualizado_en = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Avances de Obra"
-        ordering = ['-fecha']
-
-    def __str__(self):
-        return f"{self.actividad} - {self.proyecto.nombre}"
-
-
-class Trabajador(models.Model):
-    """Modelo de trabajadores de la empresa"""
-    nombre = models.CharField(max_length=255)
-    dni = models.CharField(max_length=20, unique=True)
-    rol = models.CharField(max_length=100)
-    telefono = models.CharField(max_length=50)
-    estado = models.CharField(max_length=20, choices=[('Activo', 'Activo'), ('Inactivo', 'Inactivo')], default='Activo')
-    creado_en = models.DateTimeField(auto_now_add=True)
-    actualizado_en = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name_plural = "Trabajadores"
-        ordering = ['-creado_en']
-
-    def __str__(self):
-        return self.nombre
-
-
 class UsuarioSupabase(models.Model):
     """Relación entre usuarios de Django y Supabase"""
     usuario_django = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -158,6 +121,7 @@ class UsuarioSupabase(models.Model):
     nombre_completo = models.CharField(max_length=255, blank=True)
     rol = models.CharField(max_length=50, default='usuario')
     activo = models.BooleanField(default=True)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='obreros_registrados')
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
 
@@ -172,10 +136,11 @@ class UsuarioSupabase(models.Model):
 class PerfilUsuario(models.Model):
     """Perfil extendido para los usuarios del sistema"""
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    dni = models.CharField(max_length=20, blank=True, null=True)
     telefono = models.CharField(max_length=50, blank=True, null=True)
     departamento = models.CharField(max_length=100, blank=True, null=True)
     cargo = models.CharField(max_length=100, blank=True, null=True)
-    avatar_url = models.URLField(max_length=500, blank=True, null=True)
+    avatar_url = models.TextField(blank=True, null=True)
     direccion = models.CharField(max_length=255, blank=True, null=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
@@ -267,4 +232,103 @@ class Reporte(models.Model):
 
     def __str__(self):
         return f"Reporte: {self.titulo} ({self.tipo_reporte}) - {self.fecha_generacion.strftime('%Y-%m-%d %H:%M')}"
+
+
+class Tarea(models.Model):
+    """Tareas asignadas a un obrero (usuario con rol 'obrero') dentro de un proyecto"""
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('en_progreso', 'En progreso'),
+        ('completada', 'Completada'),
+        ('cancelada', 'Cancelada'),
+    ]
+    PRIORIDAD_CHOICES = [
+        ('baja', 'Baja'),
+        ('media', 'Media'),
+        ('alta', 'Alta'),
+        ('urgente', 'Urgente'),
+    ]
+
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField(blank=True, null=True)
+    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')
+    obrero = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tareas_asignadas')
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='pendiente')
+    prioridad = models.CharField(max_length=20, choices=PRIORIDAD_CHOICES, default='media')
+    fecha_limite = models.DateField(blank=True, null=True)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='tareas_creadas')
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Tareas"
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        return self.titulo
+
+
+def recalcular_avance_proyecto(proyecto) -> None:
+    """Recalcula el avance de un proyecto a partir de sus tareas.
+
+    El 100% del proyecto se reparte entre todas sus tareas: el avance es el
+    porcentaje de tareas completadas sobre el total. Se obtiene con una
+    consulta directa a las tareas del proyecto.
+    """
+    tareas = Tarea.objects.filter(proyecto=proyecto)
+    total = tareas.count()
+    completadas = tareas.filter(estado='completada').count()
+    avance = round((completadas / total) * 100) if total > 0 else 0
+
+    if proyecto.avance != avance or proyecto.porcentaje_avance != avance:
+        proyecto.avance = avance
+        proyecto.porcentaje_avance = avance
+        proyecto.save(update_fields=['avance', 'porcentaje_avance', 'actualizado_en'])
+
+
+class ConversacionIA(models.Model):
+    """Conversación del asistente IA (módulo de proyectos).
+
+    Persiste el hilo de chat para poder retomarlo, junto con la descripción
+    del proyecto que se quiere construir y la lista de materiales a estimar.
+    """
+    TIPO_CHOICES = [
+        ('proyectos', 'Asistente de proyectos'),
+    ]
+
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='conversaciones_ia')
+    titulo = models.CharField(max_length=200, blank=True, default='')
+    tipo = models.CharField(max_length=50, choices=TIPO_CHOICES, default='proyectos')
+    descripcion_proyecto = models.TextField(blank=True, null=True)
+    materiales = models.JSONField(default=list, blank=True)
+    materiales_sugeridos = models.JSONField(default=list, blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Conversaciones IA"
+        ordering = ['-actualizado_en']
+
+    def __str__(self):
+        return self.titulo or f"Conversación #{self.id}"
+
+
+class MensajeIA(models.Model):
+    """Mensaje dentro de una conversación del asistente IA."""
+    ROL_CHOICES = [
+        ('usuario', 'Usuario'),
+        ('asistente', 'Asistente'),
+    ]
+
+    conversacion = models.ForeignKey(ConversacionIA, on_delete=models.CASCADE, related_name='mensajes')
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES)
+    contenido = models.TextField()
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Mensajes IA"
+        ordering = ['creado_en']
+
+    def __str__(self):
+        return f"{self.rol}: {self.contenido[:50]}"
 

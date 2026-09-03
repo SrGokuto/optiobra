@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
-import { TrabajadorService } from '../../../Services/trabajador.service';
-import { Trabajador, TrabajadorPayload } from '../../../Models/trabajador';
+import { UsuarioService } from '../../../Services/usuario.service';
+import { Usuario, UsuarioPayload } from '../../../Models/usuario-sistema';
 import { AuthService } from '../../../Services/auth.service';
 
 @Component({
@@ -16,8 +16,8 @@ import { AuthService } from '../../../Services/auth.service';
 export class Trabajadores implements OnInit {
 
   menuAbierto = true;
-  trabajadores: Trabajador[] = [];
-  trabajadoresFiltrados: Trabajador[] = [];
+  trabajadores: Usuario[] = [];
+  trabajadoresFiltrados: Usuario[] = [];
   cargando = false;
   error = '';
   mensaje = '';
@@ -30,18 +30,17 @@ export class Trabajadores implements OnInit {
   idEliminar = 0;
 
   roles: string[] = [
-    'Ingeniero', 'Arquitecto', 'Maestro de obra', 'Supervisor',
-    'Albañil', 'Electricista', 'Plomero', 'Carpintero',
+    'obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero',
   ];
 
-  nuevo: TrabajadorPayload = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
-  trabajadorEditar: TrabajadorPayload = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
+  nuevo: UsuarioPayload = { username: '', email: '', nombre_completo: '', dni: '', telefono: '', password: '', rol: 'obrero' };
+  trabajadorEditar: UsuarioPayload = { username: '', email: '', nombre_completo: '', dni: '', telefono: '', rol: 'obrero' };
 
   paginaActual = 1;
   porPagina = 5;
 
   constructor(
-    private trabajadorService: TrabajadorService,
+    private usuarioService: UsuarioService,
     private authService: AuthService,
   ) {}
 
@@ -56,14 +55,14 @@ export class Trabajadores implements OnInit {
   cargarTrabajadores(): void {
     this.cargando = true;
     this.error = '';
-    this.trabajadorService.getTrabajadores().subscribe({
+    this.usuarioService.getUsuarios({ rol: this.rolSeleccionado || undefined }).subscribe({
       next: (response) => {
         this.trabajadores = response.results;
         this.trabajadoresFiltrados = [...this.trabajadores];
         this.cargando = false;
       },
       error: () => {
-        this.error = 'No se pudieron cargar los trabajadores';
+        this.error = 'No se pudieron cargar los obreros';
         this.cargando = false;
       },
     });
@@ -99,7 +98,7 @@ export class Trabajadores implements OnInit {
     this.cambiarPagina(Number(p));
   }
 
-  get trabajadoresPaginados(): Trabajador[] {
+  get trabajadoresPaginados(): Usuario[] {
     const inicio = (this.paginaActual - 1) * this.porPagina;
     return this.trabajadoresFiltrados.slice(inicio, inicio + this.porPagina);
   }
@@ -114,7 +113,7 @@ export class Trabajadores implements OnInit {
   filtrarTrabajadores() {
     this.paginaActual = 1;
     this.trabajadoresFiltrados = this.trabajadores.filter(t => {
-      const coincideNombre = t.nombre.toLowerCase().includes(this.textoBusqueda.toLowerCase());
+      const coincideNombre = (t.nombre_completo || t.username).toLowerCase().includes(this.textoBusqueda.toLowerCase());
       const coincideRol = this.rolSeleccionado === '' || t.rol === this.rolSeleccionado;
       return coincideNombre && coincideRol;
     });
@@ -123,7 +122,7 @@ export class Trabajadores implements OnInit {
   /* MODAL NUEVO */
 
   nuevoTrabajador() {
-    this.nuevo = { nombre: '', dni: '', rol: '', telefono: '', estado: 'Activo' };
+    this.nuevo = { username: '', email: '', nombre_completo: '', dni: '', telefono: '', password: '', rol: 'obrero' };
     this.mostrarModal = true;
   }
 
@@ -132,17 +131,21 @@ export class Trabajadores implements OnInit {
   }
 
   guardarTrabajador() {
-    if (!this.nuevo.nombre || !this.nuevo.dni || !this.nuevo.rol) {
-      this.error = 'Completa nombre, DNI y rol';
+    if (!this.nuevo.nombre_completo || !this.nuevo.dni || !this.nuevo.email) {
+      this.error = 'Completa nombre, DNI y email';
       return;
     }
+    if (!this.nuevo.username) {
+      this.nuevo.username = this.nuevo.email.split('@')[0];
+    }
+    this.nuevo.rol = this.nuevo.rol || 'obrero';
 
     this.mensaje = '';
     this.error = '';
 
-    this.trabajadorService.crearTrabajador(this.nuevo).subscribe({
+    this.usuarioService.crearUsuario(this.nuevo).subscribe({
       next: () => {
-        this.mensaje = 'Trabajador creado correctamente';
+        this.mensaje = 'Obrero creado correctamente';
         this.cerrarModal();
         this.cargarTrabajadores();
       },
@@ -154,14 +157,16 @@ export class Trabajadores implements OnInit {
 
   /* EDITAR */
 
-  editarTrabajador(trabajador: Trabajador) {
+  editarTrabajador(trabajador: Usuario) {
     this.trabajadorEditar = {
-      nombre: trabajador.nombre,
-      dni: trabajador.dni,
+      username: trabajador.username,
+      email: trabajador.email,
+      nombre_completo: trabajador.nombre_completo,
+      dni: trabajador.perfil?.dni || '',
+      telefono: trabajador.perfil?.telefono || '',
       rol: trabajador.rol,
-      telefono: trabajador.telefono,
-      estado: trabajador.estado,
     };
+    this.idEliminar = trabajador.id;
     this.mostrarEditar = true;
   }
 
@@ -170,7 +175,7 @@ export class Trabajadores implements OnInit {
   }
 
   actualizarTrabajador() {
-    if (!this.trabajadorEditar.nombre || !this.trabajadorEditar.dni || !this.trabajadorEditar.rol) {
+    if (!this.trabajadorEditar.nombre_completo || !this.trabajadorEditar.dni) {
       this.error = 'Completa todos los campos obligatorios';
       return;
     }
@@ -178,12 +183,9 @@ export class Trabajadores implements OnInit {
     this.mensaje = '';
     this.error = '';
 
-    const original = this.trabajadores.find(t => t.dni === this.trabajadorEditar.dni);
-    if (!original) return;
-
-    this.trabajadorService.editarTrabajador(original.id, this.trabajadorEditar).subscribe({
+    this.usuarioService.editarUsuario(this.idEliminar, this.trabajadorEditar).subscribe({
       next: () => {
-        this.mensaje = 'Trabajador actualizado correctamente';
+        this.mensaje = 'Obrero actualizado correctamente';
         this.cerrarEditar();
         this.cargarTrabajadores();
       },
@@ -209,9 +211,9 @@ export class Trabajadores implements OnInit {
     this.mensaje = '';
     this.error = '';
 
-    this.trabajadorService.eliminarTrabajador(this.idEliminar).subscribe({
+    this.usuarioService.eliminarUsuario(this.idEliminar).subscribe({
       next: () => {
-        this.mensaje = 'Trabajador eliminado correctamente';
+        this.mensaje = 'Obrero eliminado correctamente';
         this.cancelarEliminar();
         this.cargarTrabajadores();
       },

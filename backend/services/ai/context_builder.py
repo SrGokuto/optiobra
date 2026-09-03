@@ -6,7 +6,7 @@ from typing import Any
 
 from django.db.models import Avg, Count, Q
 
-from api.models import Proyecto, AvanceObra, Material, HistorialMaterial
+from api.models import Proyecto, Material, HistorialMaterial, Tarea
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +46,16 @@ class ContextBuilder:
         return {
             "id": proyecto.id,
             "name": proyecto.nombre,
+            "description": proyecto.descripcion or "",
             "location": proyecto.ubicacion,
+            "address": proyecto.direccion or "",
+            "responsible": proyecto.responsable or "",
+            "budget": str(proyecto.presupuesto) if proyecto.presupuesto is not None else "",
             "status": proyecto.estado,
             "current_progress": proyecto.porcentaje_avance,
             "planned_progress": self._calculate_planned_progress(proyecto),
             "start_date": proyecto.fecha_inicio.isoformat() if proyecto.fecha_inicio else "",
+            "planned_finish": proyecto.fecha_fin_estimada.isoformat() if proyecto.fecha_fin_estimada else "",
             "estimated_finish": proyecto.fecha_fin.isoformat() if proyecto.fecha_fin else "",
             "last_update": proyecto.actualizado_en.isoformat() if proyecto.actualizado_en else "",
         }
@@ -67,23 +72,28 @@ class ContextBuilder:
         return min(100, max(0, int((elapsed_days / total_days) * 100)))
 
     def _build_activities(self, proyecto: Proyecto) -> list[dict[str, Any]]:
-        """Build activities list from AvanceObra."""
-        avances = AvanceObra.objects.filter(
+        """Build activities list from Tarea (actividades del proyecto)."""
+        tareas = Tarea.objects.filter(
             proyecto=proyecto
-        ).order_by("fecha")[:50]
+        ).select_related('obrero', 'obrero__usuariosupabase').order_by('fecha_limite', 'creado_en')[:50]
 
         activities = []
-        for i, avance in enumerate(avances):
-            prev_progress = avances[i - 1].porcentaje if i > 0 else 0
+        for tarea in tareas:
             activities.append({
-                "date": avance.fecha.isoformat(),
-                "activity": avance.actividad,
-                "description": avance.descripcion or "",
-                "responsible": avance.responsable,
-                "progress_before": prev_progress,
-                "progress_after": avance.porcentaje,
+                "date": tarea.fecha_limite.isoformat() if tarea.fecha_limite else tarea.creado_en.date().isoformat(),
+                "activity": tarea.titulo,
+                "description": tarea.descripcion or "",
+                "responsible": self._obrero_nombre(tarea),
+                "status": tarea.estado,
+                "priority": tarea.prioridad,
             })
         return activities
+
+    def _obrero_nombre(self, tarea: Tarea) -> str:
+        try:
+            return tarea.obrero.usuariosupabase.nombre_completo or tarea.obrero.get_full_name() or tarea.obrero.username
+        except Exception:
+            return tarea.obrero.username or ''
 
     def _build_materials(self) -> list[dict[str, Any]]:
         """Build materials list with consumption calculations."""
@@ -128,15 +138,15 @@ class ContextBuilder:
         activities: list[dict[str, Any]],
         materials: list[dict[str, Any]],
     ) -> dict[str, Any]:
-        avg_progress = AvanceObra.objects.filter(
-            proyecto=proyecto
-        ).aggregate(avg=Avg("porcentaje"))["avg"] or 0
+        tareas_total = len(activities)
+        tareas_completadas = sum(1 for a in activities if a.get("status") == "completada")
 
         return {
-            "activities_count": len(activities),
+            "activities_count": tareas_total,
+            "completed_tasks": tareas_completadas,
             "material_changes": len(materials),
             "critical_materials": sum(1 for m in materials if m.get("critical")),
-            "average_progress": round(avg_progress, 1),
+            "average_progress": round((tareas_completadas / tareas_total) * 100) if tareas_total else 0,
             "total_progress": proyecto.porcentaje_avance,
         }
 

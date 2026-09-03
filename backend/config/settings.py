@@ -95,7 +95,7 @@ DATABASES = {
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": os.getenv("DB_HOST"),
-        "PORT": int(os.getenv("DB_PORT")),
+        "PORT": int(os.getenv("DB_PORT", "3306")),
         "OPTIONS": {
             "charset": "utf8mb4",
             "ssl": db_ssl_ctx,
@@ -143,6 +143,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# En Pterodactyl el filesystem raíz puede ser read-only: usar rutas del volumen
+# de datos (/home/container) para archivos generados en runtime.
+STATIC_ROOT = '/home/container/static'
+MEDIA_ROOT = '/home/container/media'
+MEDIA_URL = '/media/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
@@ -166,9 +172,13 @@ REST_FRAMEWORK = {
 }
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+_cors_origins = [
+    o.strip() for o in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if o.strip()
+]
+CORS_ALLOW_ALL_ORIGINS = '*' in _cors_origins
+CORS_ALLOWED_ORIGINS = [o for o in _cors_origins if o != '*']
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = not CORS_ALLOW_ALL_ORIGINS
 
 # Supabase Configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL', '')
@@ -176,6 +186,10 @@ SUPABASE_KEY = os.getenv('SUPABASE_KEY', '')
 SUPABASE_JWT_SECRET = os.getenv('SUPABASE_JWT_SECRET', '')
 SUPABASE_ECC_X = os.getenv('SUPABASE_ECC_X', '')
 SUPABASE_ECC_Y = os.getenv('SUPABASE_ECC_Y', '')
+
+# Motor de inteligencia (servicio FastAPI en intelligence/)
+INTELLIGENCE_URL = os.getenv('INTELLIGENCE_URL', 'http://localhost:8000')
+INTELLIGENCE_TIMEOUT = int(os.getenv('INTELLIGENCE_TIMEOUT', '30'))
 
 # Tests unitarios usan SQLite en memoria (no requiere MariaDB local).
 if 'test' in sys.argv:

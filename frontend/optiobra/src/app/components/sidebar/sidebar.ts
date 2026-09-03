@@ -24,15 +24,23 @@ export class SidebarComponent {
   cerrandoSesion = false;
 
   menuItems = [
-    { ruta: '/dashboard', icono: 'bi bi-speedometer2', label: 'Dashboard' },
-    { ruta: '/proyectos', icono: 'bi bi-folder2-open', label: 'Proyectos' },
-    { ruta: '/materiales', icono: 'bi bi-box-seam', label: 'Materiales' },
-    { ruta: '/avance-obra', icono: 'bi bi-graph-up-arrow', label: 'Avance de obra' },
-    { ruta: '/trabajadores', icono: 'bi bi-person-workspace', label: 'Trabajadores' },
-    { ruta: '/reportes', icono: 'bi bi-bar-chart-line', label: 'Reportes' },
-    { ruta: '/usuarios', icono: 'bi bi-people', label: 'Usuarios' },
-    { ruta: '/configuracion', icono: 'bi bi-gear', label: 'Configuración' },
+    { ruta: '/dashboard', icono: 'bi bi-speedometer2', label: 'Dashboard', roles: null },
+    { ruta: '/proyectos', icono: 'bi bi-folder2-open', label: 'Proyectos', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/materiales', icono: 'bi bi-box-seam', label: 'Materiales', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/trabajadores', icono: 'bi bi-person-workspace', label: 'Obreros', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/tareas', icono: 'bi bi-check2-square', label: 'Tareas', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/calendario', icono: 'bi bi-calendar3', label: 'Calendario', roles: ['obrero', 'arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/reportes', icono: 'bi bi-bar-chart-line', label: 'Reportes', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/ia', icono: 'bi bi-robot', label: 'Inteligencia IA', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/usuarios', icono: 'bi bi-people', label: 'Usuarios', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/configuracion', icono: 'bi bi-gear', label: 'Configuración', roles: ['arquitecto', 'maestro_obra', 'supervisor', 'ingeniero', 'admin'] },
+    { ruta: '/perfil', icono: 'bi bi-person-circle', label: 'Mi perfil', roles: null },
   ];
+
+  get menuVisibles() {
+    const rol = this.authService.getRol();
+    return this.menuItems.filter((item) => !item.roles || item.roles.includes(rol));
+  }
 
   onToggle(): void {
     this.toggle.emit();

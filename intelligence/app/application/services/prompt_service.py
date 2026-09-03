@@ -93,6 +93,54 @@ class PromptService:
             logger.warning("Template not found: %s", relative_path)
             return None
 
+    def build_assistant(self, messages: list[dict[str, str]]) -> str:
+        """Assemble the prompt for the project assistant chat."""
+        blocks = [self._load_template("system/system.md")]
+        blocks.append(self._load_template("system/safety.md"))
+        blocks.append(self._load_template("roles/project_assistant.md"))
+        blocks.append(self._load_template("tasks/assistant.md"))
+        for rule in ["general.md", "style.md"]:
+            blocks.append(self._load_template(f"rules/{rule}"))
+
+        lines = ["## Conversacion", ""]
+        for msg in messages:
+            speaker = "Usuario" if msg.get("rol") == "usuario" else "Asistente"
+            lines.append(f"{speaker}: {msg.get('contenido', '')}")
+            lines.append("")
+        blocks.append("\n".join(lines))
+
+        blocks.append(self._load_template("output/assistant.md"))
+        return "\n\n".join(b for b in blocks if b)
+
+    def build_estimate(
+        self,
+        mensajes: list[dict[str, Any]],
+        materiales: list[dict[str, Any]],
+    ) -> str:
+        """Assemble the prompt for material quantity estimation."""
+        blocks = [self._load_template("system/system.md")]
+        blocks.append(self._load_template("system/safety.md"))
+        blocks.append(self._load_template("roles/project_assistant.md"))
+        blocks.append(self._load_template("tasks/estimate.md"))
+        for rule in ["general.md", "style.md"]:
+            blocks.append(self._load_template(f"rules/{rule}"))
+
+        lines = ["## Conversacion", ""]
+        for msg in mensajes:
+            speaker = "Usuario" if msg.get("rol") == "usuario" else "Asistente"
+            lines.append(f"{speaker}: {msg.get('contenido', '')}")
+            lines.append("")
+
+        lines.append("## Materiales a estimar")
+        for m in materiales:
+            nombre = m.get("nombre", "")
+            unidad = m.get("unidad", "")
+            lines.append(f"- {nombre}" + (f" ({unidad})" if unidad else ""))
+        blocks.append("\n".join(lines))
+
+        blocks.append(self._load_template("output/estimate.md"))
+        return "\n\n".join(b for b in blocks if b)
+
     def _format_context(self, context: dict[str, Any]) -> str:
         """Serialize context as a structured block for the prompt."""
         lines = ["## Contexto del Proyecto", ""]
@@ -113,14 +161,29 @@ class PromptService:
             for a in activities:
                 date = a.get("date", "")
                 name = a.get("activity", "")
-                desc = a.get("description", "")
+                desc = (a.get("description") or "").strip()
                 resp = a.get("responsible", "")
-                before = a.get("progress_before", 0)
-                after = a.get("progress_after", 0)
-                lines.append(
-                    f"- {date}: {name} - {desc} (Responsable: {resp}, "
-                    f"Avance: {before}% -> {after}%)"
-                )
+                status = a.get("status", "")
+                priority = a.get("priority", "")
+
+                header = name or "(sin titulo)"
+                if date:
+                    header = f"{date}: {header}"
+
+                detalle = []
+                if desc:
+                    detalle.append(desc)
+                if resp:
+                    detalle.append(f"Responsable: {resp}")
+                if status:
+                    detalle.append(f"Estado: {status}")
+                if priority:
+                    detalle.append(f"Prioridad: {priority}")
+
+                line = f"- {header}"
+                if detalle:
+                    line += f" - {' | '.join(detalle)}"
+                lines.append(line)
             lines.append("")
 
         materials = context.get("materials", [])
@@ -159,23 +222,6 @@ class PromptService:
             lines.append("### Cronologia")
             for t in timeline:
                 lines.append(f"- {t.get('date', '')}: {t.get('event', '')}")
-            lines.append("")
-
-        analysis = context.get("analysis", {})
-        if analysis:
-            lines.append("### Analisis Previamente Calculado")
-            for name, data in analysis.items():
-                lines.append(f"\n#### {name}")
-                findings = data.get("findings", {})
-                if findings:
-                    lines.append("Hallazgos:")
-                    for fk, fv in findings.items():
-                        lines.append(f"  - {fk}: {fv}")
-                recommendations = data.get("recommendations", [])
-                if recommendations:
-                    lines.append("Recomendaciones:")
-                    for rec in recommendations:
-                        lines.append(f"  - {rec}")
             lines.append("")
 
         return "\n".join(lines)

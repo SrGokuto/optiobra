@@ -1,0 +1,170 @@
+{
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "name": "OptiObra Backend",
+    "author": "OptiObra Team",
+    "description": "API Backend Django con MySQL Server incluido y soporte de tuneles de Cloudflare (cloudflared). Se expone via tunnel sin abrir puertos.",
+    "features": [],
+    "docker_images": {
+        "srgokuto/optiobra-backend:latest": "srgokuto/optiobra-backend:latest"
+    },
+    "file_denylist": [],
+    "startup": "bash /app/start_backend_ptero.sh",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"OptiObra backend is up and running\", \"backend\": \"Starting gunicorn\"}",
+        "logs": "{\r\n\"custom\": false,\r\n\"location\": \"logs/latest.log\"\r\n}",
+        "stop": "^^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/bash\r\n# OptiObra Backend Installation Script\r\n\r\n# Create directories\r\nmkdir -p \/home\/container\/logs\r\nmkdir -p \/home\/container\/media\r\nmkdir -p \/home\/container\/static\r\n\r\n# Set permissions\r\nchown -R 1000:1000 \/home\/container\/logs\r\nchown -R 1000:1000 \/home\/container\/media\r\nchown -R 1000:1000 \/home\/container\/static\r\n\r\necho \"Installation completed.\"\r\n",
+            "container": "ubuntu:24.04",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Database Host",
+            "description": "Host del servidor MySQL interno del contenedor. Deja 127.0.0.1 para usar la base de datos incluida.",
+            "env_variable": "DB_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Name",
+            "description": "Nombre de la base de datos MySQL interna.",
+            "env_variable": "DB_NAME",
+            "default_value": "optiobra",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database User",
+            "description": "Usuario de la base de datos MySQL interna.",
+            "env_variable": "DB_USER",
+            "default_value": "optiobra_user",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Password",
+            "description": "Contrasena de la base de datos MySQL interna.",
+            "env_variable": "DB_PASSWORD",
+            "default_value": "123456",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Port",
+            "description": "Puerto del servidor MySQL interno.",
+            "env_variable": "DB_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Django Secret Key",
+            "description": "Clave secreta de Django. Cambiala en produccion.",
+            "env_variable": "SECRET_KEY",
+            "default_value": "django-insecure-change-me-in-production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Mode",
+            "description": "Modo debug de Django. Desactivalo en produccion.",
+            "env_variable": "DEBUG",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+        },
+        {
+            "name": "Allowed Hosts",
+            "description": "Hosts permitidos separados por comas. Incluye el hostname del tunel de Cloudflare (ej: api-optiobra.inferna.dev).",
+            "env_variable": "ALLOWED_HOSTS",
+            "default_value": "api-optiobra.inferna.dev",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Cloudflare Tunnel Token",
+            "description": "Token del tunel de Cloudflare (cloudflared). Dejalo vacio para deshabilitar el tunel. Configura el ingress en el panel de Cloudflare apuntando a http://localhost:8000.",
+            "env_variable": "CLOUDFLARE_TUNNEL_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "nullable|string|max:1000",
+            "field_type": "text"
+        },
+        {
+            "name": "CORS Origins",
+            "description": "Origenes permitidos para CORS separados por comas (ej: https://optiobra.inferna.dev).",
+            "env_variable": "CORS_ALLOWED_ORIGINS",
+            "default_value": "https://optiobra.inferna.dev",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase URL",
+            "description": "URL de tu proyecto Supabase.",
+            "env_variable": "SUPABASE_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase Key",
+            "description": "Clave anonima de Supabase.",
+            "env_variable": "SUPABASE_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Supabase JWT Secret",
+            "description": "Secreto JWT de Supabase.",
+            "env_variable": "SUPABASE_JWT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+        },
+        {
+            "name": "Database Root Password",
+            "description": "Contrasena del usuario root de MySQL (servidor interno del contenedor).",
+            "env_variable": "DB_ROOT_PASSWORD",
+            "default_value": "rootpassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+        }
+    ]
+}

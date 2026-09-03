@@ -49,9 +49,11 @@ def create_app() -> FastAPI:
 
     from app.api.routes.health import router as health_router
     from app.api.routes.reports import router as reports_router
+    from app.api.routes.assistant import router as assistant_router
 
     application.include_router(health_router, prefix=settings.API_V1_PREFIX)
     application.include_router(reports_router, prefix=settings.API_V1_PREFIX)
+    application.include_router(assistant_router, prefix=settings.API_V1_PREFIX)
 
     return application
 

@@ -35,8 +35,11 @@ class ContextService:
             project, activities, materials, raw.get("statistics", {})
         )
 
-        alerts = self._generate_alerts(project, materials, activities)
-        alerts.extend(self._convert_raw_alerts(raw.get("alerts", [])))
+        alerts = self._convert_raw_alerts(raw.get("alerts", []))
+        if not alerts:
+            # Si el backend no envio alertas, las genera localmente para no
+            # duplicar las que ya vienen calculadas en el contexto.
+            alerts = self._generate_alerts(project, materials, activities)
 
         timeline = self._build_timeline(activities, materials)
         timeline.extend(self._convert_raw_timeline(raw.get("timeline", [])))
@@ -87,6 +90,8 @@ class ContextService:
                 "activity": a.get("activity", ""),
                 "description": a.get("description", ""),
                 "responsible": a.get("responsible", ""),
+                "status": a.get("status", ""),
+                "priority": a.get("priority", ""),
                 "progress_before": a.get("progress_before", 0),
                 "progress_after": a.get("progress_after", 0),
             })

@@ -1,0 +1,20 @@
+[mysqld]
+# Listen only on localhost (Pterodactyl server reaches it via 127.0.0.1)
+bind-address = 127.0.0.1
+port = 3306
+socket = /home/container/mysql/mysql.sock
+
+# Lightweight tuning for small game/server allocations
+innodb_buffer_pool_size = 64M
+innodb_log_file_size = 16M
+max_connections = 100
+key_buffer_size = 16M
+tmp_table_size = 32M
+max_heap_table_size = 32M
+skip-name-resolve = ON
+
+[mysql]
+socket = /home/container/mysql/mysql.sock
+
+[client]
+socket = /home/container/mysql/mysql.sock

@@ -43,6 +43,7 @@ export class Materiales implements OnInit {
   materialEnEdicion: Material | null = null;
 
   formulario: MaterialPayload = this.crearFormularioVacio();
+  precioFormateado = '0';
 
   readonly estados = ESTADOS_MATERIAL;
   readonly unidades = UNIDADES;
@@ -65,6 +66,10 @@ export class Materiales implements OnInit {
 
     this.cargarCategorias();
     this.cargarMateriales();
+  }
+
+  get esObrero(): boolean {
+    return this.usuario?.rol === 'obrero';
   }
 
   toggleMenu(): void {
@@ -133,6 +138,7 @@ export class Materiales implements OnInit {
   abrirFormularioCrear(): void {
     this.materialEnEdicion = null;
     this.formulario = this.crearFormularioVacio();
+    this.precioFormateado = '0';
     this.mostrarFormulario = true;
     this.mensaje = '';
     this.error = '';
@@ -151,6 +157,8 @@ export class Materiales implements OnInit {
       descripcion: material.descripcion || '',
       proveedor: material.proveedor || '',
     };
+    const precioNum = Number(material.precio);
+    this.precioFormateado = Number.isNaN(precioNum) ? '0' : precioNum.toLocaleString('es-CO');
     this.mostrarFormulario = true;
     this.mensaje = '';
     this.error = '';
@@ -236,8 +244,23 @@ export class Materiales implements OnInit {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(valor);
+  }
+
+  formatearPrecioInput(valor: string): string {
+    const limpio = valor.replace(/[^0-9]/g, '');
+    if (!limpio) return '0';
+    const num = parseInt(limpio, 10);
+    return num.toLocaleString('es-CO');
+  }
+
+  onPrecioInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const valorLimpio = input.value.replace(/[^0-9]/g, '');
+    this.formulario.precio = valorLimpio || '0';
+    this.precioFormateado = valorLimpio ? parseInt(valorLimpio, 10).toLocaleString('es-CO') : '0';
+    input.value = this.precioFormateado;
   }
 
   private crearFormularioVacio(): MaterialPayload {

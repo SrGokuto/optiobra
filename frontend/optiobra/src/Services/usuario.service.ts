@@ -25,6 +25,10 @@ export class UsuarioService {
     return this.http.get<Usuario>(`${this.apiUrl}/${id}/`);
   }
 
+  getPerfilActual(): Observable<Usuario> {
+    return this.http.get<Usuario>(`${this.apiUrl}/perfil/`);
+  }
+
   crearUsuario(usuario: UsuarioPayload): Observable<Usuario> {
     return this.http.post<Usuario>(`${this.apiUrl}/`, usuario);
   }

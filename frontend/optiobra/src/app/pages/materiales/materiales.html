@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    ☰
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -13,7 +13,7 @@
         <h2>Materiales</h2>
         <p>Gestiona los materiales de tus proyectos</p>
       </div>
-      <button class="btn-nuevo" (click)="abrirFormularioCrear()">
+      <button *ngIf="!esObrero" class="btn-nuevo" (click)="abrirFormularioCrear()">
         + Nuevo material
       </button>
     </div>
@@ -37,76 +37,85 @@
     </div>
 
     @if (mostrarFormulario) {
-      <section class="formulario">
-        <h3>{{ materialEnEdicion ? 'Editar Material' : 'Nuevo Material' }}</h3>
+      <div class="modal-backdrop" (click)="cerrarFormulario()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>{{ materialEnEdicion ? 'Editar material' : 'Nuevo material' }}</h3>
+            <button class="cerrar" (click)="cerrarFormulario()">
+              <i class="bi bi-x"></i>
+            </button>
+          </div>
 
-        <div class="form-grid">
-          <label>
-            Nombre
-            <input type="text" [(ngModel)]="formulario.nombre" placeholder="Nombre del material">
-          </label>
+          <div class="modal-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="formulario.nombre" placeholder="Nombre del material">
+              </div>
 
-          <label>
-            Código
-            <input type="text" [(ngModel)]="formulario.codigo" placeholder="Código único">
-          </label>
+              <div class="form-group">
+                <label>Código</label>
+                <input type="text" [(ngModel)]="formulario.codigo" placeholder="Código único">
+              </div>
 
-          <label>
-            Categoría
-            <select [(ngModel)]="formulario.categoria">
-              <option [value]="0">Seleccionar categoría</option>
-              @for (cat of categorias; track cat.id) {
-                <option [value]="cat.id">{{ cat.nombre }}</option>
-              }
-            </select>
-          </label>
+              <div class="form-group">
+                <label>Categoría</label>
+                <select [(ngModel)]="formulario.categoria">
+                  <option [value]="0">Seleccionar categoría</option>
+                  @for (cat of categorias; track cat.id) {
+                    <option [value]="cat.id">{{ cat.nombre }}</option>
+                  }
+                </select>
+              </div>
 
-          <label>
-            Precio
-            <input type="number" [(ngModel)]="formulario.precio" placeholder="Precio">
-          </label>
+              <div class="form-group">
+                <label>Precio</label>
+                <input type="text" [value]="precioFormateado" (input)="onPrecioInput($event)" placeholder="Precio">
+              </div>
 
-          <label>
-            Cantidad
-            <input type="number" [(ngModel)]="formulario.cantidad" placeholder="Cantidad">
-          </label>
+              <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" [(ngModel)]="formulario.cantidad" placeholder="Cantidad">
+              </div>
 
-          <label>
-            Unidad de medida
-            <select [(ngModel)]="formulario.unidad_medida">
-              @for (unidad of unidades; track unidad) {
-                <option [value]="unidad">{{ unidad }}</option>
-              }
-            </select>
-          </label>
+              <div class="form-group">
+                <label>Unidad de medida</label>
+                <select [(ngModel)]="formulario.unidad_medida">
+                  @for (unidad of unidades; track unidad) {
+                    <option [value]="unidad">{{ unidad }}</option>
+                  }
+                </select>
+              </div>
 
-          <label>
-            Estado
-            <select [(ngModel)]="formulario.estado">
-              @for (estado of estados; track estado) {
-                <option [value]="estado">{{ estado }}</option>
-              }
-            </select>
-          </label>
+              <div class="form-group">
+                <label>Estado</label>
+                <select [(ngModel)]="formulario.estado">
+                  @for (estado of estados; track estado) {
+                    <option [value]="estado">{{ estado }}</option>
+                  }
+                </select>
+              </div>
 
-          <label>
-            Proveedor
-            <input type="text" [(ngModel)]="formulario.proveedor" placeholder="Proveedor">
-          </label>
+              <div class="form-group">
+                <label>Proveedor</label>
+                <input type="text" [(ngModel)]="formulario.proveedor" placeholder="Proveedor">
+              </div>
 
-          <label class="full-width">
-            Descripción
-            <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción del material"></textarea>
-          </label>
+              <div class="form-group full-width">
+                <label>Descripción</label>
+                <textarea [(ngModel)]="formulario.descripcion" placeholder="Descripción del material"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn-secondary" (click)="cerrarFormulario()">Cancelar</button>
+            <button class="btn-primary" [disabled]="guardando" (click)="guardarMaterial()">
+              {{ guardando ? 'Guardando...' : 'Guardar' }}
+            </button>
+          </div>
         </div>
-
-        <div class="form-actions">
-          <button class="btn-guardar" [disabled]="guardando" (click)="guardarMaterial()">
-            {{ guardando ? 'Guardando...' : 'Guardar' }}
-          </button>
-          <button class="btn-cancelar" (click)="cerrarFormulario()">Cancelar</button>
-        </div>
-      </section>
+      </div>
     }
 
     <div class="tabla-container">
@@ -122,11 +131,12 @@
             <tr>
               <th>ID</th>
               <th>Nombre</th>
+              <th>Código</th>
               <th>Categoría</th>
               <th>Unidad</th>
               <th>Cantidad</th>
               <th>Precio</th>
-              <th>Proveedor</th>
+              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -142,8 +152,13 @@
               <td>{{ formatearPrecio(material.precio) }}</td>
               <td>{{ material.estado }}</td>
               <td class="acciones">
-                <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
-                <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+                <ng-container *ngIf="!esObrero; else soloLectura">
+                  <button class="editar" (click)="abrirFormularioEdicion(material)">Editar</button>
+                  <button class="eliminar" (click)="eliminarMaterial(material)">Eliminar</button>
+                </ng-container>
+                <ng-template #soloLectura>
+                  <span class="solo-lectura">Solo lectura</span>
+                </ng-template>
               </td>
             </tr>
             }

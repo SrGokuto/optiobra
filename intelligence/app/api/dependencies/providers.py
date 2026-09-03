@@ -80,3 +80,20 @@ def get_report_service() -> ReportService:
         markdown_service=get_markdown_service(),
     )
     return ReportService(generate_executive=generate_executive)
+
+
+def get_assistant_service():
+    from app.application.services.assistant_service import AssistantService
+    from app.application.use_cases.generate_assistant_response import GenerateAssistantResponse
+    from app.application.use_cases.estimate_materials import EstimateMaterials
+
+    return AssistantService(
+        generate_chat=GenerateAssistantResponse(
+            prompt_service=get_prompt_service(),
+            llm_service=get_llm_service(),
+        ),
+        estimate_materials=EstimateMaterials(
+            prompt_service=get_prompt_service(),
+            llm_service=get_llm_service(),
+        ),
+    )

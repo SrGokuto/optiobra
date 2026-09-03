@@ -3,7 +3,7 @@
   <app-sidebar [abierto]="menuAbierto" (toggle)="toggleMenu()"></app-sidebar>
 
   <button *ngIf="!menuAbierto" class="menu-fijo" (click)="toggleMenu()">
-    ☰
+    <i class="bi bi-list"></i>
   </button>
 
   <main class="contenido" [class.menu-cerrado]="!menuAbierto">
@@ -13,26 +13,26 @@
       <!-- Encabezado -->
       <div class="header">
         <div class="header-info">
-          <h2>Trabajadores</h2>
+          <h2>Obreros</h2>
           <p>Gestiona el personal de tu empresa</p>
         </div>
         <button class="btn-primary" (click)="nuevoTrabajador()">
-          <span class="material-symbols-outlined"></span>
-          Nuevo trabajador
+          <i class="bi bi-person-plus"></i>
+          Nuevo obrero
         </button>
       </div>
 
       <!-- Barra de filtros -->
       <div class="toolbar">
         <div class="search-box">
-          <span class="material-symbols-outlined">🔍</span>
+          <i class="bi bi-search"></i>
           <input
             type="text"
-            placeholder="Buscar trabajadores..."
+            placeholder="Buscar obreros..."
             [(ngModel)]="textoBusqueda"
             (input)="filtrarTrabajadores()">
         </div>
-        <select [(ngModel)]="rolSeleccionado" (change)="filtrarTrabajadores()">
+        <select [(ngModel)]="rolSeleccionado" (change)="cargarTrabajadores()">
           <option value="">Todos los roles</option>
           <option *ngFor="let rol of roles" [value]="rol">{{ rol }}</option>
         </select>
@@ -66,22 +66,22 @@
                   <div class="trabajador">
                     <div class="avatar"></div>
                     <div class="datos">
-                      <strong>{{ trabajador.nombre }}</strong>
+                      <strong>{{ trabajador.nombre_completo || trabajador.username }}</strong>
                     </div>
                   </div>
                 </td>
 
-                <td>{{ trabajador.dni }}</td>
+                <td>{{ trabajador.perfil?.dni || '-' }}</td>
 
                 <td>
                   <span class="badge-rol">{{ trabajador.rol }}</span>
                 </td>
 
-                <td>{{ trabajador.telefono }}</td>
+                <td>{{ trabajador.perfil?.telefono || '-' }}</td>
 
                 <td>
-                  <span class="estado" [ngClass]="trabajador.estado.toLowerCase()">
-                    {{ trabajador.estado }}
+                  <span class="estado" [ngClass]="trabajador.activo ? 'activo' : 'inactivo'">
+                    {{ trabajador.activo ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
 
@@ -91,13 +91,13 @@
                       class="btn-icon editar"
                       (click)="editarTrabajador(trabajador)"
                       title="Editar">
-                      <span class="material-symbols-outlined">✏️</span>
+                      <i class="bi bi-pencil"></i>
                     </button>
                     <button
                       class="btn-icon eliminar"
                       (click)="eliminarTrabajador(trabajador.id)"
                       title="Eliminar">
-                      <span class="material-symbols-outlined">⛔</span>
+                      <i class="bi bi-slash-circle"></i>
                     </button>
                   </div>
                 </td>
@@ -106,7 +106,7 @@
 
               <tr *ngIf="trabajadoresFiltrados.length === 0">
                 <td colspan="7" class="sin-registros">
-                  No hay trabajadores registrados.
+                  No hay obreros registrados.
                 </td>
               </tr>
 
@@ -123,12 +123,12 @@
             <strong>{{ (paginaActual - 1) * porPagina + 1 }} a {{ (paginaActual * porPagina) > trabajadoresFiltrados.length ? trabajadoresFiltrados.length : (paginaActual * porPagina) }}</strong>
             de
             <strong>{{ trabajadoresFiltrados.length }}</strong>
-            trabajadores
+            obreros
           </div>
 
           <div class="pagination">
             <button (click)="cambiarPagina(paginaActual - 1)" [class.disabled]="paginaActual === 1" aria-label="Anterior">
-              <span class="material-symbols-outlined"></span>
+              <i class="bi bi-chevron-left"></i>
             </button>
             <button
               *ngFor="let p of paginasVisible"
@@ -138,7 +138,7 @@
               {{ p }}
             </button>
             <button (click)="cambiarPagina(paginaActual + 1)" [class.disabled]="paginaActual === totalPaginas" aria-label="Siguiente">
-              <span class="material-symbols-outlined"></span>
+              <i class="bi bi-chevron-right"></i>
             </button>
           </div>
 
@@ -152,24 +152,28 @@
 
 </div>
 
-<!-- MODAL NUEVO TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarModal">
-  <div class="modal">
+<!-- MODAL NUEVO OBRERO -->
+<div class="modal-backdrop" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Nuevo trabajador</h3>
+      <h3>Nuevo obrero</h3>
       <button class="cerrar" (click)="cerrarModal()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group">
           <label>Nombre completo</label>
-          <input type="text" [(ngModel)]="nuevo.nombre" placeholder="Ingrese el nombre">
+          <input type="text" [(ngModel)]="nuevo.nombre_completo" placeholder="Ingrese el nombre">
         </div>
         <div class="form-group">
           <label>DNI</label>
           <input type="text" [(ngModel)]="nuevo.dni" placeholder="Ingrese el DNI">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="nuevo.email" placeholder="Ingrese el email">
         </div>
         <div class="form-group">
           <label>Rol</label>
@@ -183,39 +187,40 @@
           <input type="text" [(ngModel)]="nuevo.telefono" placeholder="Ingrese el teléfono">
         </div>
         <div class="form-group">
-          <label>Estado</label>
-          <select [(ngModel)]="nuevo.estado">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
+          <label>Contraseña</label>
+          <input type="password" [(ngModel)]="nuevo.password" placeholder="Ingrese una contraseña">
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-      <button class="btn-primary" (click)="guardarTrabajador()">Guardar trabajador</button>
+      <button class="btn-primary" (click)="guardarTrabajador()">Guardar obrero</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL EDITAR TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarEditar">
-  <div class="modal">
+<!-- MODAL EDITAR OBRERO -->
+<div class="modal-backdrop" *ngIf="mostrarEditar" (click)="cerrarEditar()">
+  <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Editar trabajador</h3>
+      <h3>Editar obrero</h3>
       <button class="cerrar" (click)="cerrarEditar()">
-        <span class="material-symbols-outlined">close</span>
+        <i class="bi bi-x"></i>
       </button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group">
           <label>Nombre completo</label>
-          <input type="text" [(ngModel)]="trabajadorEditar.nombre">
+          <input type="text" [(ngModel)]="trabajadorEditar.nombre_completo">
         </div>
         <div class="form-group">
           <label>DNI</label>
           <input type="text" [(ngModel)]="trabajadorEditar.dni">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="trabajadorEditar.email">
         </div>
         <div class="form-group">
           <label>Rol</label>
@@ -227,13 +232,6 @@
           <label>Teléfono</label>
           <input type="text" [(ngModel)]="trabajadorEditar.telefono">
         </div>
-        <div class="form-group">
-          <label>Estado</label>
-          <select [(ngModel)]="trabajadorEditar.estado">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -243,15 +241,15 @@
   </div>
 </div>
 
-<!-- MODAL ELIMINAR TRABAJADOR -->
-<div class="modal-backdrop" *ngIf="mostrarEliminar">
-  <div class="modal-confirmacion">
+<!-- MODAL ELIMINAR OBRERO -->
+<div class="modal-backdrop" *ngIf="mostrarEliminar" (click)="cancelarEliminar()">
+  <div class="modal-confirmacion" (click)="$event.stopPropagation()">
     <div class="icono-warning">
-      <span class="material-symbols-outlined">warning</span>
+      <i class="bi bi-exclamation-triangle"></i>
     </div>
-    <h3>Eliminar trabajador</h3>
+    <h3>Eliminar obrero</h3>
     <p>
-      ¿Está seguro de que desea eliminar este trabajador?
+      ¿Está seguro de que desea eliminar este obrero?
       Esta acción no se puede deshacer.
     </p>
     <div class="modal-footer">

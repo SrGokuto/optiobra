@@ -8,7 +8,7 @@ RESET
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* DASHBOARD */
@@ -46,12 +46,12 @@ RESET
 }
 
 .menu-cerrado {
-  padding-top: 200px;
-  width: 500%;
+  padding-top: 70px;
+  width: auto;
 }
 
 .page {
-  width: 200%;
+  width: 100%;
   max-width: 2750px;
 }
 
@@ -83,7 +83,7 @@ RESET
 }
 
 .btn-primary {
-  background: #ff8c00;
+  background: #F29F05;
   color: #fff;
   border: none;
   padding: 11px 20px;
@@ -98,7 +98,7 @@ RESET
   white-space: nowrap;
 
   &:hover {
-    background: #ea7f00;
+    background: #d88e04;
     transform: translateY(-1px);
   }
 
@@ -125,7 +125,7 @@ RESET
   flex: 1;
   min-width: 0;
 
-  .material-symbols-outlined {
+  .bi {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -173,10 +173,10 @@ RESET
   flex-shrink: 0;
   transition: .2s;
 
-  &:focus {
-    border-color: #ff8c00;
-    background: #fff;
-  }
+    &:focus {
+      border-color: #F29F05;
+      background: #fff;
+    }
 }
 
 /* CARD TABLA */
@@ -452,7 +452,7 @@ tbody {
 }
 
 .modal-header {
-  background: #0d274d;
+  background: #0d1b2a;
   color: #fff;
   padding: 18px 22px;
   display: flex;
@@ -752,18 +752,12 @@ tbody {
   line-height: 1;
 }
 
-/* Material Symbols font for icons */
+/* Bootstrap Icons base size */
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
+.bi {
   font-size: 16px;
   line-height: 1;
   display: inline-block;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 .btn-icon {
@@ -824,7 +818,7 @@ tbody {
   border-color: #e6eef7;
 }
 
-.pagination button.disabled .material-symbols-outlined {
+.pagination button.disabled .bi {
   color: #94a3b8;
 }
 

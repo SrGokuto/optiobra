@@ -33,7 +33,7 @@ export interface ReporteStockBajo {
 export interface ReporteProyectos {
   total_proyectos: number;
   promedio_avance_general: number;
-  proyectos: { id: number; nombre: string; ubicacion: string; estado: string; porcentaje_avance: number; total_avances: number; fecha_inicio: string; fecha_fin: string }[];
+  proyectos: { id: number; nombre: string; ubicacion: string; estado: string; porcentaje_avance: number; total_tareas: number; fecha_inicio: string; fecha_fin: string }[];
 }
 
 export interface ReporteTrabajadores {

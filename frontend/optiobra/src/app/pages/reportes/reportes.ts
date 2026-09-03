@@ -26,7 +26,9 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   menuAbierto = true;
   cargando = false;
-  error = '';
+error = '';
+
+  mostrarExito = false;
 
   tipoReporte: string = '';
   proyecto: string = '';
@@ -316,7 +318,7 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
       fechaInicio: this.fechaInicio,
       fechaFin: this.fechaFin
     });
-    alert('Reporte generado correctamente.');
+    this.mostrarExito = true;
   }
 
   exportarPDF(): void {
@@ -412,7 +414,7 @@ export class ReportesComponent implements OnInit, AfterViewInit, OnDestroy {
       Ubicacion: p.ubicacion || '-',
       Estado: p.estado,
       'Avance (%)': p.porcentaje_avance,
-      'Total avances': p.total_avances,
+      'Total tareas': p.total_tareas,
       'Fecha inicio': p.fecha_inicio || '-',
       'Fecha fin': p.fecha_fin || '-',
     }));

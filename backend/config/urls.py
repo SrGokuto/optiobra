@@ -19,8 +19,9 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from api.views import (
     MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet,
-    AvanceObraViewSet, TrabajadorViewSet, DashboardViewSet,
-    UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet
+    DashboardViewSet,
+    UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet, TareaViewSet,
+    AsistenteIAViewSet,
 )
 
 # Crear router para ViewSets
@@ -28,13 +29,13 @@ router = DefaultRouter()
 router.register(r'materiales', MaterialViewSet, basename='material')
 router.register(r'categorias', CategoriaViewSet, basename='categoria')
 router.register(r'proyectos', ProyectoViewSet, basename='proyecto')
-router.register(r'avances', AvanceObraViewSet, basename='avance')
-router.register(r'trabajadores', TrabajadorViewSet, basename='trabajador')
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 router.register(r'auth', AuthViewSet, basename='auth')
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 router.register(r'configuracion', ConfiguracionViewSet, basename='configuracion')
 router.register(r'reportes', ReporteViewSet, basename='reporte')
+router.register(r'tareas', TareaViewSet, basename='tarea')
+router.register(r'ia/asistentes', AsistenteIAViewSet, basename='asistente-ia')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

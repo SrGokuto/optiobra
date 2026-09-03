@@ -44,6 +44,10 @@
   cursor: pointer;
 }
 
+.menu-btn .bi {
+  font-size: 28px;
+}
+
 .menu-btn:hover {
   background: none;
 }
@@ -177,6 +181,19 @@
 
 .usuario div {
   overflow: hidden;
+  min-width: 0;
+  flex: 1;
+}
+
+.perfil-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+}
+
+.perfil-link:hover h4 {
+  color: #F29F05;
 }
 
 .usuario h4 {

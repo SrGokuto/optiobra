@@ -6,6 +6,7 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from decimal import Decimal
+from unittest.mock import patch
 
 from .models import Material, Categoria, HistorialMaterial, UsuarioSupabase
 
@@ -335,6 +336,38 @@ class AuthAPITestCase(APITestCase):
         response = self.client.post('/api/auth/register/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_refresh_sin_token(self):
+        """Probar refresh sin refresh_token"""
+        response = self.client.post('/api/auth/refresh/', {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @patch('api.views.auth_service.refresh_token')
+    def test_refresh_exitoso(self, mock_refresh):
+        """Probar refresh exitoso con refresh_token válido"""
+        mock_refresh.return_value = {
+            'error': False,
+            'mensaje': 'Sesión renovada exitosamente',
+            'access_token': 'nuevo-access-token',
+            'refresh_token': 'nuevo-refresh-token',
+            'supabase_uid': '12345',
+        }
+        data = {'refresh_token': 'refresh-token-valido'}
+        response = self.client.post('/api/auth/refresh/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['access_token'], 'nuevo-access-token')
+        self.assertEqual(response.data['refresh_token'], 'nuevo-refresh-token')
+
+    @patch('api.views.auth_service.refresh_token')
+    def test_refresh_fallido(self, mock_refresh):
+        """Probar refresh con refresh_token inválido o expirado"""
+        mock_refresh.return_value = {
+            'error': True,
+            'mensaje': 'No se pudo renovar la sesión',
+        }
+        data = {'refresh_token': 'refresh-token-invalido'}
+        response = self.client.post('/api/auth/refresh/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class HistorialMaterialTestCase(TestCase):
     """Pruebas para el historial de materiales"""
@@ -462,6 +495,24 @@ class ConfiguracionAPITestCase(APITestCase):
         response = self.client.put('/api/configuracion/empresa/', data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['nombre_empresa'], 'OptiObra Constructora S.A.S.')
+
+    def test_put_empresa_parcial_no_sobrescribe_campos_no_enviados(self):
+        """PUT parcial solo actualiza los campos enviados"""
+        data = {'nombre_empresa': 'Nueva Constructora S.A.S.'}
+        response = self.client.put('/api/configuracion/empresa/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nombre_empresa'], 'Nueva Constructora S.A.S.')
+        self.assertEqual(response.data['nit_runc'], '900.000.000-1')
+        self.assertEqual(response.data['moneda_principal'], 'COP')
+
+    def test_put_empresa_con_campos_vacios_no_sobrescribe(self):
+        """Campos vacíos o nulos no actualizan los valores existentes"""
+        self.client.put('/api/configuracion/empresa/', {'nombre_empresa': 'Empresa Original'}, format='json')
+        data = {'nombre_empresa': '', 'nit_runc': None}
+        response = self.client.put('/api/configuracion/empresa/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['nombre_empresa'], 'Empresa Original')
+        self.assertEqual(response.data['nit_runc'], '900.000.000-1')
 
     def test_actualizar_configuracion_sistema(self):
         """Probar PUT /api/configuracion/sistema/"""

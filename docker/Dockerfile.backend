@@ -1,0 +1,70 @@
+# Stage 1: Build Python dependencies
+FROM python:3.12-slim-bookworm AS python-builder
+
+WORKDIR /build
+
+COPY backend/requirements.txt ./backend/requirements.txt
+
+RUN pip install --no-cache-dir --prefix=/install -r backend/requirements.txt
+
+
+# Stage 2: Final image (Debian + Python + MySQL Server interno)
+FROM python:3.12-slim-bookworm
+
+LABEL maintainer="OptiObra Team"
+LABEL description="OptiObra - API Backend Django con MySQL Server incluido y soporte de tuneles Cloudflare (cloudflared)"
+LABEL version="1.1.0"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Instalar MySQL Server 8.0 (servidor interno, solo escucha en 127.0.0.1)
+# y descargar cloudflared para exponer la API sin abrir puertos (Cloudflare Tunnel).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    gnupg \
+    ca-certificates \
+    lsb-release \
+    apt-transport-https \
+    && wget -qO - https://repo.mysql.com/RPM-GPG-KEY-mysql-2025 | gpg --dearmor -o /usr/share/keyrings/mysql-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/mysql-archive-keyring.gpg] http://repo.mysql.com/apt/debian bookworm mysql-8.0" > /etc/apt/sources.list.d/mysql.list \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mysql-server \
+    && rm -rf /var/lib/apt/lists/* /etc/apt/sources.list.d/mysql.list \
+    && wget -qO /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+    && chmod +x /usr/local/bin/cloudflared \
+    && rm -rf /var/lib/mysql /var/lib/apt/lists/*
+
+# Copy Python dependencies from builder
+COPY --from=python-builder /install /usr/local
+
+# Copy backend code
+COPY backend/ /app/backend/
+
+# Copy MySQL tuning config
+COPY docker/mysql/optiobra.cnf /etc/mysql/conf.d/optiobra.cnf
+
+# Copy startup script
+COPY docker/start_backend_ptero.sh /app/start_backend_ptero.sh
+RUN chmod +x /app/start_backend_ptero.sh
+
+# Create directories for logs, media, static and the persistent MySQL datadir
+# (en Pterodactyl el root puede ser read-only: usar /home/container)
+RUN mkdir -p \
+    /home/container/logs \
+    /home/container/mysql \
+    /home/container/static \
+    /home/container/media \
+    && chmod 777 /home/container/mysql
+
+# Expose ports (8000 API, 3306 solo interno)
+EXPOSE 8000 3306
+
+# Health check (la API responde en /api/)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -sf http://localhost:8000/api/ || exit 1
+
+# Start script (compatible con Pterodactyl startup command)
+CMD ["/app/start_backend_ptero.sh"]

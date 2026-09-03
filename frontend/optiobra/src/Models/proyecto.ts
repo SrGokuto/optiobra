@@ -8,7 +8,8 @@ export interface Proyecto {
   estado: 'pendiente' | 'en_proceso' | 'finalizado' | 'cancelado';
   avance: number;
   porcentaje_avance: number;
-  avances_count: number;
+  tareas_count: number;
+  tareas_completadas: number;
   fecha_inicio: string;
   fecha_fin: string;
   fecha_fin_estimada?: string;
@@ -26,8 +27,6 @@ export interface ProyectoPayload {
   direccion?: string | null;
   responsable?: string | null;
   estado: Proyecto['estado'];
-  avance: number;
-  porcentaje_avance: number;
   fecha_inicio: string | null;
   fecha_fin: string | null;
   fecha_fin_estimada?: string | null;
