@@ -337,9 +337,9 @@ export class Calendario implements OnInit {
     return prioridad;
   }
 
-  fechaFormateada(fecha?: string): string {
+  fechaFormateada(fecha?: string | Date): string {
     if (!fecha) return 'Sin fecha';
-    const d = this.parseFecha(fecha);
+    const d = fecha instanceof Date ? fecha : this.parseFecha(fecha);
     if (!d) return 'Sin fecha';
     return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
   }

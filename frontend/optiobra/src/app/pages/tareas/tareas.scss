@@ -455,6 +455,16 @@ tbody {
       transform: scale(1.06);
     }
   }
+
+  &.editar {
+    background: #fff7ed;
+    color: #ea580c;
+
+    &:hover {
+      background: #ffedd5;
+      transform: scale(1.06);
+    }
+  }
 }
 
 /* SIN REGISTROS */

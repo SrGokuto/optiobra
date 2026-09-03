@@ -143,7 +143,7 @@
               <div *ngFor="let dia of diasVista" class="fila-dia">
                 <div class="dia-vista">
                   <div class="dia-numero">
-                    <span class="dia-nombre">{{ fechaFormateada(dia.fecha.toISOString()) }}</span>
+                    <span class="dia-nombre">{{ fechaFormateada(dia.fecha) }}</span>
                   </div>
                   <div class="tareas-dia">
                     @for (tarea of dia.tareas; track tarea.id) {

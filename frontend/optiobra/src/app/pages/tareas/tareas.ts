@@ -33,6 +33,7 @@ export class Tareas implements OnInit {
   estadoSeleccionado = '';
   proyectoSeleccionado = '';
   mostrarNuevaModal = false;
+  mostrarEditarModal = false;
   mostrarModal = false;
   guardando = false;
 
@@ -47,6 +48,8 @@ export class Tareas implements OnInit {
     prioridad: 'media',
     fecha_limite: null,
   };
+
+  tareaEditada: TareaPayload = this.crearFormularioTarea();
 
   paginaActual = 1;
   porPagina = 5;
@@ -210,6 +213,70 @@ export class Tareas implements OnInit {
     this.mostrarNuevaModal = false;
   }
 
+  abrirEditarTarea(tarea: Tarea) {
+    this.tareaEditada = {
+      titulo: tarea.titulo,
+      descripcion: tarea.descripcion || '',
+      proyecto: tarea.proyecto,
+      obrero: tarea.obrero,
+      estado: tarea.estado,
+      prioridad: tarea.prioridad,
+      fecha_limite: tarea.fecha_limite || null,
+    };
+    this.error = '';
+    this.mensaje = '';
+    this.tareaSeleccionada = tarea;
+    this.mostrarEditarModal = true;
+  }
+
+  cerrarEditarTarea() {
+    this.mostrarEditarModal = false;
+    this.tareaSeleccionada = null;
+  }
+
+  actualizarTarea() {
+    this.error = '';
+    this.mensaje = '';
+
+    if (!this.tareaSeleccionada) return;
+    if (!this.tareaEditada.titulo?.trim()) {
+      this.error = 'El título es obligatorio';
+      return;
+    }
+    if (!this.tareaEditada.proyecto) {
+      this.error = 'Selecciona un proyecto';
+      return;
+    }
+    if (!this.tareaEditada.obrero) {
+      this.error = 'Selecciona un obrero';
+      return;
+    }
+
+    this.guardando = true;
+    const cambios: TareaPayload = {
+      titulo: this.tareaEditada.titulo.trim(),
+      descripcion: this.tareaEditada.descripcion || '',
+      proyecto: Number(this.tareaEditada.proyecto),
+      obrero: Number(this.tareaEditada.obrero),
+      estado: this.tareaEditada.estado,
+      prioridad: this.tareaEditada.prioridad,
+      fecha_limite: this.tareaEditada.fecha_limite || null,
+    };
+
+    this.tareaService.actualizarTarea(this.tareaSeleccionada.id, cambios).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.mensaje = 'Tarea actualizada correctamente';
+        this.cerrarEditarTarea();
+        this.cargarTareas();
+      },
+      error: (err) => {
+        this.guardando = false;
+        this.error = AuthService.extraerMensajeError(err);
+      },
+    });
+  }
+
   guardarTarea() {
     this.error = '';
     this.mensaje = '';
@@ -312,7 +379,9 @@ export class Tareas implements OnInit {
 
   fechaFormateada(fecha?: string): string {
     if (!fecha) return 'Sin fecha';
-    const d = new Date(fecha);
+    const [year, month, day] = fecha.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) return 'Sin fecha';
+    const d = new Date(year, month - 1, day);
     return d.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 
@@ -330,5 +399,17 @@ export class Tareas implements OnInit {
 
   get tareasCompletadas(): number {
     return this.tareasFiltradas.filter(t => t.estado === 'completada').length;
+  }
+
+  private crearFormularioTarea(): TareaPayload {
+    return {
+      titulo: '',
+      descripcion: '',
+      proyecto: 0,
+      obrero: 0,
+      estado: 'pendiente',
+      prioridad: 'media',
+      fecha_limite: null,
+    };
   }
 }

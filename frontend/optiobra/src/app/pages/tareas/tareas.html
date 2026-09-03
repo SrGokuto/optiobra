@@ -169,6 +169,13 @@
                       title="Ver detalle">
                       <i class="bi bi-eye"></i>
                     </button>
+                    <button
+                      *ngIf="!esObrero"
+                      class="btn-icon editar"
+                      (click)="abrirEditarTarea(tarea)"
+                      title="Editar tarea">
+                      <i class="bi bi-pencil"></i>
+                    </button>
                   </div>
                 </td>
 
@@ -339,6 +346,76 @@
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR TAREA -->
+<div class="modal-backdrop" *ngIf="mostrarEditarModal" (click)="cerrarEditarTarea()">
+  <div class="modal modal-form" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar tarea</h3>
+      <button class="cerrar" (click)="cerrarEditarTarea()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="campo full">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="tareaEditada.titulo" placeholder="Ej: Vaciar cimentación">
+        </div>
+
+        <div class="campo full">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="tareaEditada.descripcion" rows="3" placeholder="Detalles de la tarea..."></textarea>
+        </div>
+
+        <div class="campo">
+          <label>Proyecto *</label>
+          <select [(ngModel)]="tareaEditada.proyecto">
+            <option [value]="0">Selecciona un proyecto</option>
+            <option *ngFor="let p of proyectos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Obrero *</label>
+          <select [(ngModel)]="tareaEditada.obrero">
+            <option [value]="0">Selecciona un obrero</option>
+            <option *ngFor="let t of trabajadores" [value]="t.id">{{ t.nombre_completo || t.username }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Prioridad</label>
+          <select [(ngModel)]="tareaEditada.prioridad">
+            <option *ngFor="let p of prioridades" [value]="p">{{ p | titlecase }}</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Fecha límite</label>
+          <input type="date" [(ngModel)]="tareaEditada.fecha_limite">
+        </div>
+
+        <div class="campo">
+          <label>Estado</label>
+          <select [(ngModel)]="tareaEditada.estado">
+            <option *ngFor="let e of estados" [value]="e">{{ e | titlecase }}</option>
+          </select>
+        </div>
+      </div>
+
+      @if (error) {
+        <p class="error-text form-error">{{ error }}</p>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarEditarTarea()">Cancelar</button>
+      <button class="btn-primario" (click)="actualizarTarea()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+      </button>
     </div>
   </div>
 </div>

@@ -239,12 +239,13 @@ export class Proyectos implements OnInit {
   }
 
   formatearPresupuesto(presupuesto: string | number | null | undefined): string {
-    if (!presupuesto) return '-';
+    if (presupuesto === null || presupuesto === undefined || presupuesto === '') return '-';
     const valor = typeof presupuesto === 'number' ? presupuesto : Number(presupuesto);
     if (Number.isNaN(valor)) return typeof presupuesto === 'string' ? presupuesto : '-';
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
+      minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(valor);
   }
