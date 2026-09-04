@@ -4,7 +4,7 @@ from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
     Proyecto, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea,
-    ConversacionIA, MensajeIA,
+    ConversacionIA, MensajeIA, Alerta,
 )
 
 
@@ -319,6 +319,12 @@ class ConfiguracionEmpresaSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['creado_en', 'actualizado_en']
 
+    def get_obrero_nombre(self, obj):
+        try:
+            return obj.obrero.usuariosupabase.nombre_completo or obj.obrero.get_full_name() or obj.obrero.username
+        except Exception:
+            return obj.obrero.username or ''
+
     def validate_nombre_empresa(self, value):
         if not value or len(value.strip()) == 0:
             raise serializers.ValidationError("El nombre de la empresa no puede estar vacío")
@@ -362,9 +368,9 @@ class ReporteSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'titulo', 'tipo_reporte', 'formato', 'parametros',
             'solicitado_por', 'solicitado_por_nombre', 'fecha_generacion',
-            'estado', 'resumen_datos'
+            'estado', 'resumen_datos', 'contenido', 'proyecto'
         ]
-        read_only_fields = ['id', 'solicitado_por', 'solicitado_por_nombre', 'fecha_generacion', 'estado', 'resumen_datos']
+        read_only_fields = ['id', 'solicitado_por', 'solicitado_por_nombre', 'fecha_generacion', 'estado', 'resumen_datos', 'contenido', 'proyecto']
 
 
 class GenerarReporteSerializer(serializers.Serializer):
@@ -389,11 +395,15 @@ class TareaSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['creado_en', 'actualizado_en']
 
-    def get_obrero_nombre(self, obj):
-        try:
-            return obj.obrero.usuariosupabase.nombre_completo or obj.obrero.get_full_name() or obj.obrero.username
-        except Exception:
-            return obj.obrero.username or ''
+
+class AlertaSerializer(serializers.ModelSerializer):
+    tarea_titulo = serializers.CharField(source='tarea.titulo', read_only=True)
+    proyecto_nombre = serializers.CharField(source='tarea.proyecto.nombre', read_only=True)
+
+    class Meta:
+        model = Alerta
+        fields = ['id', 'tarea', 'tarea_titulo', 'proyecto_nombre', 'tipo', 'mensaje', 'leida', 'creado_en']
+        read_only_fields = fields
 
 
 class MensajeIASerializer(serializers.ModelSerializer):

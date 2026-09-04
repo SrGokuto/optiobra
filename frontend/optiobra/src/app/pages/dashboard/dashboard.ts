@@ -5,6 +5,8 @@ import { UsuarioAuth } from '../../../Models/usuario';
 import { SidebarComponent } from '../../components/sidebar/sidebar';
 import { DashboardService } from '../../../Services/dashboard.service';
 import { DashboardEstadisticas } from '../../../Models/dashboard';
+import { Alerta } from '../../../Models/alerta';
+import { AlertaService } from '../../../Services/alerta.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,10 +21,12 @@ export class Dashboard implements OnInit {
   estadisticas: DashboardEstadisticas | null = null;
   cargando = false;
   error = '';
+  alertas: Alerta[] = [];
 
   constructor(
     private authService: AuthService,
     private dashboardService: DashboardService,
+    private alertaService: AlertaService,
   ) {}
 
   ngOnInit(): void {
@@ -61,10 +65,39 @@ export class Dashboard implements OnInit {
       next: (data) => {
         this.estadisticas = data;
         this.cargando = false;
+        if (data.rol === 'admin') {
+          this.cargarAlertas();
+        }
       },
       error: () => {
         this.error = 'No se pudieron cargar las estadísticas';
         this.cargando = false;
+      },
+    });
+  }
+
+  get alertasPendientes(): Alerta[] {
+    return this.alertas.filter((alerta) => !alerta.leida);
+  }
+
+  cargarAlertas(): void {
+    this.alertaService.listar().subscribe({
+      next: (alertas) => {
+        this.alertas = alertas;
+      },
+      error: () => {
+        this.alertas = [];
+      },
+    });
+  }
+
+  marcarAlertaLeida(alerta: Alerta): void {
+    this.alertaService.marcarLeida(alerta.id).subscribe({
+      next: (actualizada) => {
+        alerta.leida = actualizada.leida;
+      },
+      error: () => {
+        this.error = 'No se pudo marcar la alerta como leída';
       },
     });
   }

@@ -230,4 +230,26 @@ export class AsistenteProyectosComponent implements OnInit {
       el.scrollTop = el.scrollHeight;
     }
   }
+
+  imprimirChat(): void {
+    if (!this.conversacionActiva) return;
+    const ventana = window.open('', '_blank', 'width=900,height=700');
+    if (!ventana) return;
+    ventana.onload = () => {
+      ventana.focus();
+      ventana.print();
+    };
+    const mensajes = this.mensajes
+      .map((mensaje) => `<article class="mensaje"><strong>${mensaje.rol === 'usuario' ? 'Usuario' : 'Asistente IA'}</strong><div>${this.render(mensaje.contenido)}</div><small>${new Date(mensaje.creado_en).toLocaleString('es-CO')}</small></article>`)
+      .join('');
+    ventana.document.write(`<!doctype html><html><head><title>Chat IA - OptiObra</title><style>
+      body{font-family:Arial,sans-serif;color:#1f2937;margin:40px;line-height:1.5}
+      header{border-bottom:3px solid #f29f05;padding-bottom:18px;margin-bottom:24px;display:flex;align-items:center;gap:18px}
+      header img{width:90px;height:auto}h1{color:#0d1b2a;margin:0;font-size:24px}.meta,small{color:#6b7280;font-size:13px}
+      .mensaje{border:1px solid #d1d5db;border-radius:8px;padding:14px;margin:12px 0}.mensaje strong{color:#0d1b2a;display:block;margin-bottom:6px}
+      table{border-collapse:collapse;width:100%}th,td{border:1px solid #d1d5db;padding:8px;text-align:left}th{background:#fef3c7}
+      @media print{body{margin:18mm}}
+    </style></head><body><header><img src="${window.location.origin}/assets/Logo.png" alt="OptiObra"><div><h1>OPTIOBRA - CHAT IA</h1><div class="meta">${this.conversacionActiva.titulo || 'Conversación'} | Generado: ${new Date().toLocaleString('es-CO')}</div></div></header>${mensajes}</body></html>`);
+    ventana.document.close();
+  }
 }

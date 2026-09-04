@@ -73,7 +73,12 @@
             <h4>{{ conversacionActiva.titulo || 'Conversación' }}</h4>
             <small>{{ conversacionActiva.total_mensajes }} mensajes</small>
           </div>
-          <span class="chip-ia"><i class="bi bi-robot"></i> Asistente IA</span>
+          <div class="chat-head-acciones">
+            <button class="btn-imprimir" (click)="imprimirChat()" title="Imprimir chat IA">
+              <i class="bi bi-printer"></i> Imprimir chat
+            </button>
+            <span class="chip-ia"><i class="bi bi-robot"></i> Asistente IA</span>
+          </div>
         </div>
 
         <div class="chat-acciones">

@@ -41,6 +41,7 @@ export class Proyectos implements OnInit {
   proyectoEnEdicion: Proyecto | null = null;
 
   formulario: ProyectoPayload = this.crearFormularioVacio();
+  presupuestoTexto = '';
 
   readonly estadosVisuales: { valor: Proyecto['estado']; etiqueta: string }[] = [
     { valor: 'pendiente', etiqueta: ESTADOS_PROYECTO_ETIQUETAS['pendiente'] },
@@ -111,6 +112,7 @@ export class Proyectos implements OnInit {
   abrirFormularioCrear(): void {
     this.proyectoEnEdicion = null;
     this.formulario = this.crearFormularioVacio();
+    this.presupuestoTexto = '';
     this.mostrarFormulario = true;
     this.mensaje = '';
     this.error = '';
@@ -128,8 +130,13 @@ export class Proyectos implements OnInit {
       fecha_inicio: proyecto.fecha_inicio || null,
       fecha_fin: proyecto.fecha_fin || null,
       fecha_fin_estimada: proyecto.fecha_fin_estimada || null,
-      presupuesto: proyecto.presupuesto ? Number(proyecto.presupuesto) : null,
+      presupuesto: proyecto.presupuesto !== undefined && proyecto.presupuesto !== null
+        ? Number(proyecto.presupuesto)
+        : null,
     };
+    this.presupuestoTexto = proyecto.presupuesto !== undefined && proyecto.presupuesto !== null
+      ? this.formatearNumero(proyecto.presupuesto)
+      : '';
     this.mostrarFormulario = true;
     this.mensaje = '';
     this.error = '';
@@ -139,6 +146,7 @@ export class Proyectos implements OnInit {
     this.mostrarFormulario = false;
     this.proyectoEnEdicion = null;
     this.formulario = this.crearFormularioVacio();
+    this.presupuestoTexto = '';
   }
 
   guardarProyecto(): void {
@@ -150,7 +158,7 @@ export class Proyectos implements OnInit {
       fecha_inicio: this.formulario.fecha_inicio || null,
       fecha_fin: this.formulario.fecha_fin || null,
       fecha_fin_estimada: this.formulario.fecha_fin_estimada || null,
-      presupuesto: this.formulario.presupuesto ? Number(this.formulario.presupuesto) : null,
+      presupuesto: this.presupuestoTexto ? Number(this.presupuestoTexto.replace(/\./g, '')) : null,
     };
 
     if (this.proyectoEnEdicion) {
@@ -248,6 +256,16 @@ export class Proyectos implements OnInit {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(valor);
+  }
+
+  actualizarPresupuesto(valor: string): void {
+    const digitos = valor.replace(/\D/g, '');
+    this.presupuestoTexto = digitos ? this.formatearNumero(digitos) : '';
+    this.formulario.presupuesto = digitos ? Number(digitos) : null;
+  }
+
+  private formatearNumero(valor: string | number): string {
+    return Number(valor).toLocaleString('es-CO', { maximumFractionDigits: 0 });
   }
 
   private crearFormularioVacio(): ProyectoPayload {

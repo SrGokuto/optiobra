@@ -78,6 +78,9 @@
                 <span class="chip"><i class="bi bi-cpu"></i> {{ resultado.model }}</span>
               }
               <span class="chip"><i class="bi bi-clock"></i> {{ formatearDuracion(resultado.duration_ms) }}</span>
+              <button class="chip chip-accion" (click)="imprimirReporte()" title="Imprimir reporte IA">
+                <i class="bi bi-printer"></i> Imprimir
+              </button>
             </div>
           </div>
 

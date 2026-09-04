@@ -230,6 +230,30 @@
   color: #6b7280;
 }
 
+.chat-head-acciones {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-imprimir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #0d1b2a;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-imprimir:hover {
+  border-color: #f29f05;
+}
+
 .chip-ia {
   display: inline-flex;
   align-items: center;

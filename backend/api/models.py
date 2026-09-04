@@ -203,6 +203,7 @@ class Reporte(models.Model):
         ('proyectos_avances', 'Avances de Proyectos'),
         ('costos_inventario', 'Costos e Valorización'),
         ('trabajadores', 'Personal y Trabajadores'),
+        ('ia_ejecutivo', 'Reporte Ejecutivo IA'),
     ]
 
     FORMATO_CHOICES = [
@@ -225,6 +226,14 @@ class Reporte(models.Model):
     fecha_generacion = models.DateTimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='completado')
     resumen_datos = models.JSONField(null=True, blank=True)
+    contenido = models.TextField(null=True, blank=True)
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reportes_ia',
+    )
 
     class Meta:
         verbose_name_plural = "Reportes Generados"
@@ -266,6 +275,28 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
+class Alerta(models.Model):
+    """Alerta persistente para usuarios administradores."""
+    TIPO_TAREA_VENCIDA = 'tarea_vencida'
+
+    admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='alertas')
+    tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='alertas')
+    tipo = models.CharField(max_length=50, default=TIPO_TAREA_VENCIDA)
+    mensaje = models.TextField()
+    leida = models.BooleanField(default=False)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = 'Alertas'
+        ordering = ['-creado_en']
+        constraints = [
+            models.UniqueConstraint(fields=['admin', 'tarea', 'tipo'], name='alerta_admin_tarea_tipo_unica'),
+        ]
+
+    def __str__(self):
+        return self.mensaje
 
 
 def recalcular_avance_proyecto(proyecto) -> None:

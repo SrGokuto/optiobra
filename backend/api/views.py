@@ -14,13 +14,14 @@ from .models import (
     Proyecto, PerfilUsuario,
     ConfiguracionEmpresa, ConfiguracionSistema, Reporte, Tarea,
     ConversacionIA, MensajeIA,
+    Alerta,
 )
 from .serializers import (
     MaterialSerializer, CategoriaSerializer, HistorialMaterialSerializer,
     ProyectoSerializer,
     PerfilUsuarioSerializer, UsuarioDetalleSerializer, UsuarioCreateUpdateSerializer,
     ConfiguracionEmpresaSerializer, ConfiguracionSistemaSerializer, ConfiguracionGeneralSerializer,
-    ReporteSerializer, GenerarReporteSerializer, TareaSerializer,
+    ReporteSerializer, GenerarReporteSerializer, TareaSerializer, AlertaSerializer,
     ConversacionIASerializer, MensajeIASerializer,
 )
 from .roles import (
@@ -30,6 +31,7 @@ from .roles import (
     ROLES_ADMIN,
 )
 from .services import SupabaseAuthService
+from .alertas import generar_alertas_tareas_vencidas
 
 logger = logging.getLogger(__name__)
 auth_service = SupabaseAuthService()
@@ -386,6 +388,20 @@ class ProyectoViewSet(viewsets.ModelViewSet):
         try:
             context = context_builder.build_project_context(proyecto.id)
             result = client.generate_executive_report_sync(context)
+            if result.get('success') and result.get('report'):
+                Reporte.objects.create(
+                    titulo=f'Reporte IA - {proyecto.nombre}',
+                    tipo_reporte='ia_ejecutivo',
+                    formato='json',
+                    parametros={'proyecto_id': proyecto.id},
+                    solicitado_por=request.user,
+                    resumen_datos={
+                        'modelo': result.get('model', ''),
+                        'duracion_ms': result.get('duration_ms', 0),
+                    },
+                    contenido=result['report'],
+                    proyecto=proyecto,
+                )
             return Response(result)
         except Exception as e:
             logger.error("Error generando estimaciones para proyecto %d: %s", pk, str(e))
@@ -408,6 +424,10 @@ class TareaViewSet(viewsets.ModelViewSet):
     search_fields = ['titulo', 'descripcion', 'obrero__username', 'obrero__usuariosupabase__nombre_completo', 'proyecto__nombre']
     ordering_fields = ['titulo', 'estado', 'prioridad', 'fecha_limite', 'creado_en']
     ordering = ['-creado_en']
+
+    def list(self, request, *args, **kwargs):
+        generar_alertas_tareas_vencidas()
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -456,6 +476,23 @@ class TareaViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(tarea)
         return Response(serializer.data)
+
+
+class AlertaViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Alerta.objects.select_related('tarea', 'tarea__proyecto', 'admin').all()
+    serializer_class = AlertaSerializer
+    permission_classes = [EsAdmin]
+
+    def get_queryset(self):
+        generar_alertas_tareas_vencidas()
+        return super().get_queryset().filter(admin=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def marcar_leida(self, request, pk=None):
+        alerta = self.get_object()
+        alerta.leida = True
+        alerta.save(update_fields=['leida'])
+        return Response(self.get_serializer(alerta).data)
 
 
 class AuthViewSet(viewsets.ViewSet):

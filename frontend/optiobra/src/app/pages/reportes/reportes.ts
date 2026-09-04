@@ -340,9 +340,10 @@ error = '';
     this.mostrarExito = true;
   }
 
-  exportarPDF(): void {
+  async exportarPDF(): Promise<void> {
     const doc = new jsPDF();
     const yFinal = (): number => (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+    const logoDataUrl = await this.cargarLogoDataUrl();
 
     doc.setFillColor(13, 27, 42);
     doc.rect(0, 0, 210, 30, 'F');
@@ -350,6 +351,9 @@ error = '';
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text('OPTIOBRA', 14, 14);
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'PNG', 174, 4, 22, 22);
+    }
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.text('Reporte General del Sistema', 14, 22);
@@ -433,7 +437,7 @@ error = '';
     libro.created = new Date();
 
     const portada = libro.addWorksheet('Portada');
-    portada.columns = [{ width: 34 }, { width: 70 }];
+    portada.columns = [{ width: 34 }, { width: 70 }, { width: 18 }];
     portada.mergeCells('A1:B1');
     portada.getCell('A1').value = 'OPTIOBRA - REPORTES';
     portada.getCell('A1').font = { bold: true, size: 20, color: { argb: 'FFFFFFFF' } };
@@ -468,7 +472,7 @@ error = '';
     if (logoResponse.ok) {
       const logoBuffer = await logoResponse.arrayBuffer();
       const logoId = libro.addImage({ buffer: logoBuffer, extension: 'png' });
-      portada.addImage(logoId, { tl: { col: 1, row: 3 }, ext: { width: 110, height: 90 } });
+      portada.addImage(logoId, { tl: { col: 2, row: 0 }, ext: { width: 100, height: 70 } });
     }
 
     this.agregarHojaExcel(libro, 'Resumen', [
@@ -528,6 +532,18 @@ error = '';
   private nombreProyectoSeleccionado(): string {
     if (!this.proyecto) return 'Todos';
     return this.proyectos.find((p) => String(p.id) === String(this.proyecto))?.nombre || this.proyecto;
+  }
+
+  private async cargarLogoDataUrl(): Promise<string | null> {
+    const respuesta = await fetch('assets/Logo.png');
+    if (!respuesta.ok) return null;
+    const blob = await respuesta.blob();
+    return new Promise((resolve) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(typeof lector.result === 'string' ? lector.result : null);
+      lector.onerror = () => resolve(null);
+      lector.readAsDataURL(blob);
+    });
   }
 
 }

@@ -98,4 +98,24 @@ export class IaComponent implements OnInit {
     }
     return `${(ms / 1000).toFixed(2)} s`;
   }
+
+  imprimirReporte(): void {
+    if (!this.reporteHtml || !this.proyectoId) return;
+    const proyecto = this.proyectos.find((item) => item.id === this.proyectoId);
+    const ventana = window.open('', '_blank', 'width=900,height=700');
+    if (!ventana) return;
+    ventana.onload = () => {
+      ventana.focus();
+      ventana.print();
+    };
+    ventana.document.write(`<!doctype html><html><head><title>Reporte IA - OptiObra</title><style>
+      body{font-family:Arial,sans-serif;color:#1f2937;margin:40px;line-height:1.5}
+      header{border-bottom:3px solid #f29f05;padding-bottom:18px;margin-bottom:24px;display:flex;align-items:center;gap:18px}
+      header img{width:90px;height:auto} h1{color:#0d1b2a;margin:0;font-size:24px} h2{color:#0d1b2a}
+      .meta{color:#6b7280;font-size:13px}.reporte h1,.reporte h2,.reporte h3{color:#0d1b2a}
+      table{border-collapse:collapse;width:100%}th,td{border:1px solid #d1d5db;padding:8px;text-align:left}th{background:#fef3c7}
+      @media print{body{margin:18mm}}
+    </style></head><body><header><img src="${window.location.origin}/assets/Logo.png" alt="OptiObra"><div><h1>OPTIOBRA - REPORTE IA</h1><div class="meta">Proyecto: ${proyecto?.nombre || 'Sin proyecto'} | Generado: ${new Date().toLocaleString('es-CO')}</div></div></header><main class="reporte">${this.reporteHtml}</main></body></html>`);
+    ventana.document.close();
+  }
 }

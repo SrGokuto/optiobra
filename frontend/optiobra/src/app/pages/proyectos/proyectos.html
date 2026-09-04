@@ -83,7 +83,12 @@
 
               <div class="form-group">
                 <label>Presupuesto</label>
-                <input type="number" [(ngModel)]="formulario.presupuesto" placeholder="Presupuesto">
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  [ngModel]="presupuestoTexto"
+                  (ngModelChange)="actualizarPresupuesto($event)"
+                  placeholder="Ej: 2.000">
               </div>
 
               <div class="form-group">

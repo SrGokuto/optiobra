@@ -21,7 +21,7 @@ from api.views import (
     MaterialViewSet, CategoriaViewSet, AuthViewSet, ProyectoViewSet,
     DashboardViewSet,
     UsuarioViewSet, ConfiguracionViewSet, ReporteViewSet, TareaViewSet,
-    AsistenteIAViewSet,
+    AsistenteIAViewSet, AlertaViewSet,
 )
 
 # Crear router para ViewSets
@@ -36,6 +36,7 @@ router.register(r'configuracion', ConfiguracionViewSet, basename='configuracion'
 router.register(r'reportes', ReporteViewSet, basename='reporte')
 router.register(r'tareas', TareaViewSet, basename='tarea')
 router.register(r'ia/asistentes', AsistenteIAViewSet, basename='asistente-ia')
+router.register(r'alertas', AlertaViewSet, basename='alerta')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     Material, Categoria, HistorialMaterial, UsuarioSupabase,
-    PerfilUsuario, ConfiguracionEmpresa, ConfiguracionSistema, Reporte
+    PerfilUsuario, ConfiguracionEmpresa, ConfiguracionSistema, Reporte,
+    ConversacionIA, MensajeIA, Alerta,
 )
 
 
@@ -104,6 +105,47 @@ class ConfiguracionSistemaAdmin(admin.ModelAdmin):
 class ReporteAdmin(admin.ModelAdmin):
     list_display = ('titulo', 'tipo_reporte', 'formato', 'solicitado_por', 'fecha_generacion', 'estado')
     list_filter = ('tipo_reporte', 'formato', 'estado', 'fecha_generacion')
-    search_fields = ('titulo', 'solicitado_por__username')
-    readonly_fields = ('fecha_generacion',)
+    search_fields = ('titulo', 'solicitado_por__username', 'proyecto__nombre')
+    readonly_fields = ('fecha_generacion', 'contenido', 'resumen_datos')
+
+
+@admin.register(ConversacionIA)
+class ConversacionIAAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'usuario', 'tipo', 'creado_en', 'actualizado_en')
+    list_filter = ('tipo', 'creado_en', 'actualizado_en')
+    search_fields = ('titulo', 'usuario__username', 'usuario__email', 'descripcion_proyecto')
+    readonly_fields = ('creado_en', 'actualizado_en', 'materiales', 'materiales_sugeridos')
+
+
+@admin.register(MensajeIA)
+class MensajeIAAdmin(admin.ModelAdmin):
+    list_display = ('conversacion', 'rol', 'creado_en', 'vista_previa')
+    list_filter = ('rol', 'creado_en')
+    search_fields = ('contenido', 'conversacion__titulo', 'conversacion__usuario__username')
+    readonly_fields = ('conversacion', 'rol', 'contenido', 'creado_en')
+
+    def vista_previa(self, obj):
+        return obj.contenido[:80]
+
+    vista_previa.short_description = 'Contenido'
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Alerta)
+class AlertaAdmin(admin.ModelAdmin):
+    list_display = ('mensaje', 'admin', 'tarea', 'leida', 'creado_en')
+    list_filter = ('tipo', 'leida', 'creado_en')
+    search_fields = ('mensaje', 'admin__username', 'tarea__titulo', 'tarea__proyecto__nombre')
+    readonly_fields = ('admin', 'tarea', 'tipo', 'mensaje', 'creado_en')
+
+    def has_add_permission(self, request):
+        return False
 
